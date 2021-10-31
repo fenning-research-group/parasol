@@ -1,4 +1,4 @@
-# import pyvisa
+import pyvisa
 import time
 import yaml
 import os
@@ -15,6 +15,9 @@ class Relay:
         self.RESPONSE_TIME = constants[
             "response_time"
         ]  # seconds for command to complete
+        self.SETTLING_TIME = constants[
+            "settling_time"
+        ]  # seconds for relay changeover to settle (voltage stabilization)
         self.relay_commands = {
             1: (65, 1),
             2: (65, 2),
@@ -42,7 +45,7 @@ class Relay:
             24: (70, 24),
         }
 
-        self.connect(constants["address"]) #TODO actually connect
+        self.connect(constants["address"])  # TODO actually connect
         self.lock = Lock()
 
     def connect(self, address: str):

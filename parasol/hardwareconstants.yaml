@@ -1,9 +1,11 @@
 relay:
   address: 'ASRL/dev/cu.usbserial-AQ01FVSH::INSTR'
-  response_time: 1 #seconds for command to process
+  response_time: 0.1 #seconds for command to process
+  setting_time: 5 #seconds for relay changeover to settle (voltage stabilization)
 
-scanner:
+yokogawa:
   address: 'GPIB1::1::INSTR'
+  response_time: 0.001 #seconds for command to process
 
 controller:
   num_modules: 24 #max number of modules that can be measured at once

@@ -23,15 +23,14 @@ from threading import Lock
 
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.load(f, Loader=yaml.FullLoader)["scanner"]
+    constants = yaml.load(f, Loader=yaml.FullLoader)["yokogawa"]
 
 
 class Scanner:
     def __init__(self) -> None:
         self.lock = Lock()
         self.connect(constants["address"]) #TODO actually connect
-        pass
-
+        self.RESPONSE_TIME = constants["response_time"]
 
         # Turn measurment on: Init settings for source V, measure I
     def srcV_measI(self):
@@ -133,13 +132,13 @@ class Scanner:
             self.do_jv_sweep(name,vstart=vmax,vend=vmin,steps=steps,area = area, direction='rev', preview=preview)
             self.rev_i = self.i[::-1]
             self.rev_j = self.j[::-1]
-            time.sleep(1e-3)
+            time.sleep(self.RESPONSE_TIME)
         if forward:
             self.srcV_measI()
             self.do_jv_sweep(name,vstart=vmin,vend=vmax,steps=steps,area = area, direction='fwd', preview=preview)
             self.fwd_i = self.i
             self.fwd_j = self.j
-            time.sleep(1e-3)
+            time.sleep(self.RESPONSE_TIME)
 
         #Option: here we caluclate MPP & set voltage to MPP for aging.
         """
@@ -287,9 +286,9 @@ class Scanner:
         del new_data_df
 
 
-   def do_jv_sweep(self,vstart,vend,steps):
+    def do_jv_sweep(self,vstart,vend,steps):
         self.srcV_measI()
-        time.sleep(1e-3)
+        time.sleep(self.RESPONSE_TIME)
 
         self.fwd_i = np.zeros(steps)
         self.rev_i = np.zeros(steps)
@@ -311,7 +310,7 @@ class Scanner:
             # reverse:
             self.do_jv_sweep(vstart=vmax, vend=vmin, steps=steps)
             self.rev_i = self.i[::-1]
-            time.sleep(1e-3)
+            time.sleep(self.RESPONSE_TIME)
 
             # forward:
             self.do_jv_sweep(vstart=vmin, vend=vmax, steps=steps)

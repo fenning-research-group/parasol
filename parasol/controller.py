@@ -151,9 +151,11 @@ class Controller:
         fpath = os.path.join(d["_savedir"], f"{d['name']}_{d['scan_count']}.csv")
 
         self.relay.on(id)
-        v, fwd_i , rev_i= self.scanner.scan(vmin=d["vmin"], vmax=d["vmin"], steps=d["steps"])
+        v, fwd_i, rev_i = self.scanner.scan(
+            vmin=d["vmin"], vmax=d["vmin"], steps=d["steps"]
+        )
         fwd_j = fwd_i / d["area"]
-        fwd_p = fwd_v * fwd_j
+        fwd_p = v * fwd_j
 
         rev_j = rev_i / d["area"]
         rev_p = v * rev_j
@@ -171,7 +173,6 @@ class Controller:
                     "FWD Current (mA)",
                     "FWD Current Density (mA/cm2)",
                     "FWD Power Density (mW/cm2)",
-
                     "REV Current (mA)",
                     "REV Current Density (mA/cm2)",
                     "REV Power Density (mW/cm2)",
