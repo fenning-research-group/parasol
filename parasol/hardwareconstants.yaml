@@ -1,0 +1,9 @@
+relay:
+  address: 'GPIB0::20::INST'
+  response_time: 1 #seconds for command to process
+
+scanner:
+  address: ''
+
+controller:
+  num_modules: 24 #max number of modules that can be measured at once
