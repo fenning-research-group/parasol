@@ -20,29 +20,29 @@ class Relay:
             2: (65, 2),
             3: (65, 3),
             4: (65, 4),
-            5: (65, 5),
-            6: (65, 6),
-            7: (65, 7),
-            8: (65, 8),
-            9: (65, 9),
-            10: (65, 10),
-            11: (65, 11),
-            12: (65, 12),
-            13: (65, 13),
-            14: (65, 14),
-            15: (65, 15),
-            16: (65, 16),
-            17: (65, 17),
-            18: (65, 18),
-            19: (65, 19),
-            20: (65, 20),
-            21: (65, 21),
-            22: (65, 22),
-            23: (65, 23),
-            24: (65, 24),
+            5: (66, 5),
+            6: (66, 6),
+            7: (66, 7),
+            8: (66, 8),
+            9: (67, 9),
+            10: (67, 10),
+            11: (67, 11),
+            12: (67, 12),
+            13: (68, 13),
+            14: (68, 14),
+            15: (68, 15),
+            16: (68, 16),
+            17: (69, 17),
+            18: (69, 18),
+            19: (69, 19),
+            20: (69, 20),
+            21: (70, 21),
+            22: (70, 22),
+            23: (70, 23),
+            24: (70, 24),
         }
 
-        # self.connect(constants["address"]) #TODO actually connect
+        self.connect(constants["address"]) #TODO actually connect
         self.lock = Lock()
 
     def connect(self, address: str):
@@ -56,12 +56,12 @@ class Relay:
         cmd0, cmd1 = self.relay_commands[id]
         with self.lock:  # this is important - only allows one thread to access the hardware at a time
             print(f"Turning on relay {id}")
-            # self.inst.write_raw((cmd0).to_bytes(1, "big"))
-            # self.inst.write_raw((cmd1).to_bytes(1, "big"))
+            self.inst.write_raw((cmd0).to_bytes(1, "big"))
+            self.inst.write_raw((cmd1).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
 
     def all_off(self):
         with self.lock:
             print(f"Turning off all relays")
-            # self.inst.write_raw((72).to_bytes(1, "big"))
+            self.inst.write_raw((71).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)

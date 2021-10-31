@@ -147,28 +147,37 @@ class Controller:
 
         date_str = datetime.now().strftime("%Y-%m-%d")
         time_str = datetime.now().strftime("%H:%M:%S")
+        epoch_str = time.time()
         fpath = os.path.join(d["_savedir"], f"{d['name']}_{d['scan_count']}.csv")
 
         self.relay.on(id)
-        v, i = self.scanner.scan(vmin=d["vmin"], vmax=d["vmin"], steps=d["steps"])
-        j = i / d["area"]
-        p = v * j
+        v, fwd_i , rev_i= self.scanner.scan(vmin=d["vmin"], vmax=d["vmin"], steps=d["steps"])
+        fwd_j = fwd_i / d["area"]
+        fwd_p = fwd_v * fwd_j
+
+        rev_j = rev_i / d["area"]
+        rev_p = v * rev_j
 
         with open(fpath, "w", newline="") as f:
             writer = csv.writer(f, delimiter=",")
             writer.writerow(["Date", date_str])
             writer.writerow(["Time", time_str])
+            writer.writerow(["epoch_time", epoch_str])
             writer.writerow(["Relay ID", id])
             writer.writerow(["Area (cm2)", d["area"]])
             writer.writerow(
                 [
                     "Voltage (V)",
-                    "Current Density (mA/cm2)",
-                    "Current (mA)",
-                    "Power Density (mW/cm2)",
+                    "FWD Current (mA)",
+                    "FWD Current Density (mA/cm2)",
+                    "FWD Power Density (mW/cm2)",
+
+                    "REV Current (mA)",
+                    "REV Current Density (mA/cm2)",
+                    "REV Power Density (mW/cm2)",
                 ]
             )
-            for line in zip(v, j, i, p):
+            for line in zip(v, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
                 writer.writerow(line)
 
         d["scan_count"] += 1

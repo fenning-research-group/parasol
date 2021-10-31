@@ -1,9 +1,9 @@
 relay:
-  address: 'GPIB0::20::INST'
+  address: 'ASRL/dev/cu.usbserial-AQ01FVSH::INSTR'
   response_time: 1 #seconds for command to process
 
 scanner:
-  address: ''
+  address: 'GPIB1::1::INSTR'
 
 controller:
   num_modules: 24 #max number of modules that can be measured at once
