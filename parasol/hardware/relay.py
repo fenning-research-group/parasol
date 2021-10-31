@@ -57,6 +57,7 @@ class Relay:
         with self.lock:  # this is important - only allows one thread to access the hardware at a time
             print(f"Turning on relay {id}")
             self.inst.write_raw((cmd0).to_bytes(1, "big"))
+            time.sleep(self.RESPONSE_TIME)
             self.inst.write_raw((cmd1).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
 
