@@ -32,6 +32,13 @@ class Scanner:
         self.connect(constants["address"]) #TODO actually connect
         self.RESPONSE_TIME = constants["response_time"]
 
+
+	# Connect to yoko
+	def connect(self, yoko_address):
+		rm = pyvisa.ResourceManager()
+		self.yoko = rm.open_resource(yoko_address)
+		self.yoko.timeout = 1000000 
+
         # Turn measurment on: Init settings for source V, measure I
     def srcV_measI(self):
         self.yoko.write('*RST') # Reset Factory
