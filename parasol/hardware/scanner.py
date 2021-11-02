@@ -33,11 +33,11 @@ class Scanner:
         self.RESPONSE_TIME = constants["response_time"]
 
 
-	# Connect to yoko
-	def connect(self, yoko_address):
-		rm = pyvisa.ResourceManager()
-		self.yoko = rm.open_resource(yoko_address)
-		self.yoko.timeout = 1000000 
+    # Connect to yoko
+    def connect(self, yoko_address):
+        rm = pyvisa.ResourceManager()
+        self.yoko = rm.open_resource(yoko_address)
+        self.yoko.timeout = 1000000 
 
         # Turn measurment on: Init settings for source V, measure I
     def srcV_measI(self):
@@ -330,27 +330,3 @@ class Scanner:
 
         # time.sleep(3)  # simulate the time it takes to scan
         return v, fwd_i, rev_i
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
