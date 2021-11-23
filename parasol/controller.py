@@ -152,7 +152,7 @@ class Controller:
 
         self.relay.on(id)
         v, fwd_i, rev_i = self.scanner.scan(
-            vmin=d["vmin"], vmax=d["vmin"], steps=d["steps"]
+            vmin=d["vmin"], vmax=d["vmax"], steps=d["steps"]
         )
         fwd_j = fwd_i / d["area"]
         fwd_p = v * fwd_j

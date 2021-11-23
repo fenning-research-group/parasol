@@ -145,9 +145,9 @@ class Scanner:
 
     def scan(self, vmin, vmax, steps):
         with self.lock:  # this is important - only allows one thread to access the hardware at a time
-            _, rev_i = self.do_jv_sweep(
+            _, rev_i = self._single_iv_sweep(
                 vstart=vmax, vend=vmin, steps=steps
             )  # reverse scan first (Voc -> Jsc)
-            v, fwd_i = self.do_jv_sweep(vstart=vmin, vend=vmax, steps=steps)
+            v, fwd_i = self._single_iv_sweep(vstart=vmin, vend=vmax, steps=steps)
 
         return v, fwd_i, rev_i
