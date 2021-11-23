@@ -1,4 +1,4 @@
-import pyvisa
+import serial
 import time
 import yaml
 import os
@@ -49,8 +49,7 @@ class Relay:
         self.lock = Lock()
 
     def connect(self, address: str):
-        self.rm = pyvisa.ResourceManager()
-        self.inst = self.rm.open_resource(address)
+        self.inst = serial.Serial(address)
 
     def on(self, id: int):
         if id not in self.relay_commands:
@@ -59,13 +58,13 @@ class Relay:
         cmd0, cmd1 = self.relay_commands[id]
         with self.lock:  # this is important - only allows one thread to access the hardware at a time
             print(f"Turning on relay {id}")
-            self.inst.write_raw((cmd0).to_bytes(1, "big"))
+            self.inst.write((cmd0).to_bytes(1, "big"))
             time.sleep(self.RESPONSE_TIME)
-            self.inst.write_raw((cmd1).to_bytes(1, "big"))
+            self.inst.write((cmd1).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
 
     def all_off(self):
         with self.lock:
             print(f"Turning off all relays")
-            self.inst.write_raw((71).to_bytes(1, "big"))
+            self.inst.write((71).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)

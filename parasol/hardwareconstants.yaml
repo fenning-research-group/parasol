@@ -1,7 +1,7 @@
 relay:
-  address: 'ASRL/dev/cu.usbserial-AQ01FVSH::INSTR'
+  address: 'COM3'
   response_time: 0.1 #seconds for command to process
-  setting_time: 5 #seconds for relay changeover to settle (voltage stabilization)
+  settling_time: 5 #seconds for relay changeover to settle (voltage stabilization)
 
 yokogawa:
   address: 'GPIB1::1::INSTR'

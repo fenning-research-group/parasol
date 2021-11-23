@@ -18,7 +18,7 @@ setup(
     author_email="rek010@eng.ucsd.edu, dcakan@eng.ucsd.edu",
     download_url="https://github.com/fenning-research-group/parasol",
     license="MIT",
-    install_requires=["numpy", "pyvisa", "asyncio", "pyyaml"],
+    install_requires=["numpy", "pyvisa", "asyncio", "pyyaml", "pandas", "pyserial", "matplotlib"],
     packages=find_packages(),
     package_data={"hardware": ["*.yaml"]},
     include_package_data=True,

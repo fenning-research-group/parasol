@@ -31,7 +31,7 @@ class Scanner:
         self.lock = Lock()
         self.connect(constants["address"]) #TODO actually connect
         self.RESPONSE_TIME = constants["response_time"]
-
+        self.delay = 0.1
 
     # Connect to yoko
     def connect(self, yoko_address):
@@ -136,13 +136,13 @@ class Scanner:
         # load JV settings
         if reverse:
             self.srcV_measI()
-            self.do_jv_sweep(name,vstart=vmax,vend=vmin,steps=steps,area = area, direction='rev', preview=preview)
+            self.do_jv_sweep(vstart=vmax,vend=vmin,steps=steps,area = area, direction='rev', preview=preview)
             self.rev_i = self.i[::-1]
             self.rev_j = self.j[::-1]
             time.sleep(self.RESPONSE_TIME)
         if forward:
             self.srcV_measI()
-            self.do_jv_sweep(name,vstart=vmin,vend=vmax,steps=steps,area = area, direction='fwd', preview=preview)
+            self.do_jv_sweep(vstart=vmin,vend=vmax,steps=steps,area = area, direction='fwd', preview=preview)
             self.fwd_i = self.i
             self.fwd_j = self.j
             time.sleep(self.RESPONSE_TIME)
@@ -309,7 +309,7 @@ class Scanner:
         # turn off output/measurement
         self.output_off() 
 
-    def scan(self, vmin=-0.1, vmax=1, steps=500)):
+    def scan(self, vmin=-0.1, vmax=1, steps=500):
         self.v = np.linspace(vmin, vmax, steps)
 
         with self.lock:  # this is important - only allows one thread to access the hardware at a time
@@ -324,7 +324,7 @@ class Scanner:
             self.fwd_i = self.i
 
             v = self.v
-            fwd_i = self.rev_i
+            fwd_i = self.fwd_i
             rev_i = self.rev_i
 
 
