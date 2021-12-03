@@ -86,12 +86,12 @@ class Easttester:
     # turns on output
     def output_on(self,channel):
         s.write(("CH"+str(channel)+":SW ON\n").encode())
-
+        time.sleep(self.delay)
 
     # turns off output
     def output_off(self,channel):
         s.write(("CH"+str(channel)+":SW OFF\n").encode())
-
+        time.sleep(self.delay)
 
     # set voltage
     def set_voltage(self, channel, voltage):
