@@ -17,66 +17,62 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
 # used for MPP tracking
 class Easttester:
 
-    # initialize
+
+    # initialize and set bounds for measurement (see srcV_measI for bounds)
     def __init__(self):
         self.connect()
         self.delay = 0.3
-        self.v_min = 0
-        self.v_max = 1
-        self.i_min = 0
+        self.v_min = 0.1 
+        self.v_max = 5 
         self.i_max = 10
+
 
     # connect
     def connect(self):
+
+        # connect using serial, use highest transferrate and shortest timeout
         s = serial.Serial('COM5', baudrate = 115200, timeout = 0.005)
 
 
     # setup source voltage and measure I
     def srcV_measI(self, channel):
 
-        # set to external operation
+        # set to external operation, constant voltage, and continuous operation
         s.write(("LOAD:TRIGger EXT").encode())
         time.sleep(self.delay)
+        s.write(("CH"+str(channel)+":MODE CV\n").encode())
+        time.sleep(self.delay)
+        s.write(("TRAN"+str(channel)+":MODE COUT\n").encode())
+        time.sleep(self.delay)
         
-        # set ranges for voltage and current (either low or high)
+        # set ranges for voltage, as well as max and min
+        # "NAME" : RANGE (MAX/SHUTOFF)
+        # "LOW": 0.1 -> 19.999 (21.000)
+        # "HIGH": 0.1 -> 150.000 (155.000)
         s.write(("LOAD:VRAN LOW").encode())
         time.sleep(self.delay)
+        s.write(("VOLT"+str(channel)+":VMIN %f\n" % (self.v_min)).encode())
+        time.sleep(self.delay)
+        s.write(("VOLT"+str(channel)+":VMAX %f\n" % (self.v_max)).encode())
+        time.sleep(self.delay)
+        
+
+        # set range for current, as well as max current (no min feature)
+        # "NAME" : RANGE (MAX/SHUTOFF)
+        # "LOW": 0 -> 3.000 (3.3)
+        # "HIGH": 0 -> 20.000 (22.0)
         s.write(("LOAD:CRAN LOW").encode())
         time.sleep(self.delay)
-
-        # set max/min V 
-        s.write(("LOAD:VLOW %f\n" % (self.v_min)).encode())
-        time.sleep(self.delay)
-        s.write(("LOAD:VHIGH %f\n" % (self.v_max)).encode())
+        s.write(("CURR"+str(channel)+":IMAX %f\n" % (self.i_max)).encode())
         time.sleep(self.delay)
 
-        # set max/min A
-        s.write(("LOAD:CLOW %f\n" % (self.i_min)).encode())
-        time.sleep(self.delay)
-        s.write(("LOAD:CHIGH %f\n" % (self.i_max)).encode())
+
+        # set max power output
+        # "NAME" : RANGE (MAX/SHUTOFF)
+        # ALL: 0 --> 200 (220)
+        s.write(("POWE"+str(channel)+":PMAX %f\n" % (self.v_max*self.i_max)).encode())
         time.sleep(self.delay)
 
-        # set max/min W
-        s.write(("LOAD:PLOW %f\n" % (self.i_min*self.v_min)).encode())
-        time.sleep(self.delay)
-        s.write(("LOAD:PHIGH %f\n" % (self.i_min*self.v_max)).encode())
-        time.sleep(self.delay)
-
-        # set turnoff setpoints (1.1* high)
-        s.write(("CH"+str(channel)+":MODE CV\n").encode())
-        time.sleep(self.delay)
-        s.write(("VOLT"+str(channel)+":VMAX %f\n" % (self.v_max*1.1)).encode())
-        time.sleep(self.delay)
-        s.write(("CURR"+str(channel)+":IMAX %f\n" % (self.i_max*1.1)).encode())
-        time.sleep(self.delay)
-        s.write(("POWE"+str(channel)+":PMAX %f\n" % (self.v_max*self.i_max*1.1)).encode())
-        time.sleep(self.delay)
-
-        # set mode to CV with continuous voltage (not pulse)
-        s.write(("CH"+str(channel)+":MODE CV\n").encode())
-        time.sleep(self.delay)
-        s.write(("TRAN"+str(channel)+":MODE:COUT\n").encode())
-        time.sleep(self.delay)
 
         # close channel
         s.write(("CH"+str(channel)+":SW OFF\n").encode())
@@ -88,10 +84,12 @@ class Easttester:
         s.write(("CH"+str(channel)+":SW ON\n").encode())
         time.sleep(self.delay)
 
+
     # turns off output
     def output_off(self,channel):
         s.write(("CH"+str(channel)+":SW OFF\n").encode())
         time.sleep(self.delay)
+
 
     # set voltage
     def set_voltage(self, channel, voltage):
@@ -99,7 +97,7 @@ class Easttester:
         time.sleep(self.delay)
 
 
-    # measure current & average a few
+    # measure current several times and average
     def measure_current(self,channel,voltage,iterations):
 
         # set voltage
@@ -163,28 +161,28 @@ class Easttester:
             voltages.append(voltage)
             currents.append(current)
             powers.append(voltage*current)
-            time.append(time.time())
+            times.append(time.time())
 
             # determine if power increased or decreased, if the latter, change perturb direction
             if(powers[-2]>=powers[-1]):
                 voltage_step *= -1
     
             # move by step if within bounds, else move back towards
-            if(voltage >= self.v_max):
+            if(voltage + voltage_step >= self.v_max):
                 voltage -= abs(voltage_step)
-            elif(voltage <= self.v_min):
+            elif(voltage + voltage_step <= self.v_min):
                 voltage += abs(voltage_step)
             else:
                 voltage += voltage_step
 
-        # turn off output
+        # turn off output --> not sure this is needed/wanted. We want V to stay on but not neccsiary measurement
         self.output_off(channel)
 
         # return data as arrays
         v = np.asarray(voltages)
         i = np.asarray(currents)
         p = np.asarray(powers)
-        t = np.asarray(time)
+        t = np.asarray(times)
         return t, v, i, p
 
 

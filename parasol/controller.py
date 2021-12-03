@@ -79,6 +79,7 @@ class Controller:
 
         # create self.modules[] info for running
         # ideally et_channel can be combined with the relay board information so that we can get that autopopulated
+        # also, we will need to implement the finding MPP of string, combine in series (i assume), and calc mpp to start tracking with
         self.modules[id] = {
             "name": name,
             "area": area,
@@ -225,7 +226,7 @@ class Controller:
 
 
     # not sure how best to organize it but we have worker1 which scans JV
-    # we then want to create worker2 that does MPP using Vmpp from JV (if JV was last thing done) or last MPP scan
+    # we then want to create worker2 that does MPP using Vmpp from JVs (if JVs was last thing done) or last MPP scan
     # for now i think we prioritize JV scans and do MPPT in downtime.
 
 
