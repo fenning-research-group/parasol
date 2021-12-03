@@ -11,13 +11,10 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
 
 
 class Relay:
+    # intialize relay commands
     def __init__(self):
-        self.RESPONSE_TIME = constants[
-            "response_time"
-        ]  # seconds for command to complete
-        self.SETTLING_TIME = constants[
-            "settling_time"
-        ]  # seconds for relay changeover to settle (voltage stabilization)
+        self.RESPONSE_TIME = constants["response_time"]  # seconds for command to complete
+        self.SETTLING_TIME = constants["settling_time"]  # seconds for relay changeover to settle (voltage stabilization)
         self.relay_commands = {
             1: (65, 1),
             2: (65, 2),
@@ -48,9 +45,11 @@ class Relay:
         self.connect(constants["address"])  # TODO actually connect
         self.lock = Lock()
 
+    # connect to relay board through GPIB
     def connect(self, address: str):
         self.inst = serial.Serial(address)
 
+    # open given relay
     def on(self, id: int):
         if id not in self.relay_commands:
             raise ValueError(f"Invalid relay id")
@@ -63,6 +62,7 @@ class Relay:
             self.inst.write((cmd1).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
 
+    # shut all relays
     def all_off(self):
         with self.lock:
             print(f"Turning off all relays")
