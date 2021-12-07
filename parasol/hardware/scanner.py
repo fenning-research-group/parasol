@@ -145,7 +145,7 @@ class Scanner:
         return v, i
 
     # scans forward and reverse waves, return v, and fwd_i / reverse_i
-    def scan(self, vmin, vmax, steps):
+    def scan_jv(self, vmin, vmax, steps):
         # use self.lock to ensure only 1 thread is talking to harware
         with self.lock:
             # run reverse scan

@@ -42,7 +42,61 @@ class Relay:
             24: (70, 24),
         }
 
-        self.connect(constants["address"])  # TODO actually connect
+        self.et_channels = {
+            1: 1,
+            2: 1,
+            3: 1,
+            4: 1,
+            5: 2,
+            6: 2,
+            7: 2,
+            8: 2,
+            9: 1,
+            10: 1,
+            11: 1,
+            12: 1,
+            13: 2,
+            14: 2,
+            15: 2,
+            16: 2,
+            17: 1,
+            18: 1,
+            19: 1,
+            20: 1,
+            21: 2,
+            22: 2,
+            23: 2,
+            24: 2,
+        }
+
+        self.et_strings = {
+            1: 1,
+            2: 1,
+            3: 1,
+            4: 1,
+            5: 2,
+            6: 2,
+            7: 2,
+            8: 2,
+            9: 3,
+            10: 3,
+            11: 3,
+            12: 3,
+            13: 4,
+            14: 4,
+            15: 4,
+            16: 4,
+            17: 5,
+            18: 5,
+            19: 5,
+            20: 5,
+            21: 6,
+            22: 6,
+            23: 6,
+            24: 6,
+        }
+
+        self.connect(constants["address"])
         self.lock = Lock()
 
     # connect to relay board through GPIB

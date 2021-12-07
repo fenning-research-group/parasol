@@ -9,3 +9,11 @@ yokogawa:
 
 controller:
   num_modules: 24 #max number of modules that can be measured at once
+
+easttester:
+  et_delay: 0.3 #delay between commands
+  et_v_min: 0.1 #min voltage
+  et_v_max: 20 # max voltage
+  et_i_max: 10 #max current
+  et_avg_num: 5 #number of currents to avg for reading
+  et_voltage_step: 0.05 #voltage step in tracking
