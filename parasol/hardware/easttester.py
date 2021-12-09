@@ -1,11 +1,9 @@
-# Import
 import yaml
 import os
-import numpy as np
-
-from serial.tools import list_ports
+import re
 import serial
 import time
+from threading import Lock
 
 
 # Set yaml name, load yokogawa info
@@ -14,105 +12,116 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["easttester"]
 
 
-# used for MPP tracking
+def et_lock(f):
+    """Locks Easttester"""
+
+    def inner(self, *args, **kwargs):
+        with self.lock:
+            f(self, *args, **kwargs)
+
+    return inner
+
+
 class EastTester:
+    """used for MPP tracking"""
 
-    # initialize and set bounds for measurement (see srcV_measI for bounds)
-    def __init__(self):
-        self.connect()
-        self.et_delay = constants["et_delay"]
-        self.et_v_min = constants["et_v_min"]
-        self.et_v_max = constants["et_v_max"]
-        self.et_i_max = constants["et_i_max"]
-        self.et_avg_num = constants5["et_avg_num"]
-        self.et_voltage_step = constants["et_voltage_step"]
+    def __init__(self, port):
+        """initialize and set bounds for measurement (see srcV_measI for bounds)"""
+        self.connect(port=port)
+        self.et_delay = constants["response_time"]
+        self.et_v_min = constants["v_min"]
+        self.et_v_max = constants["v_max"]
+        self.et_i_max = constants["i_max"]
+        self.et_avg_num = constants["avg_num"]
+        self.et_voltage_step = constants["voltage_step"]
 
+        # Set both channels to source voltage and measure current when initialized
+        self.srcV_measI(1)
+        self.srcV_measI(2)
 
-    # connect
-    def connect(self):
+    def connect(self, port):
+        """Connect to Easttester"""
+        # Connect using serial, use highest transferrate and shortest timeout
+        self.et = serial.Serial(port, baudrate=115200, timeout=0.005)
 
-        # connect using serial, use highest transferrate and shortest timeout
-        s = serial.Serial('COM5', baudrate = 115200, timeout = 0.005) # generally 1 or 5
-
-
-    # setup source voltage and measure I
+    @et_lock
     def srcV_measI(self, channel):
+        """Setup source voltage and measure I"""
+        # Set to external operation, constant voltage, and continuous operation
+        self.et.write(("LOAD:TRIGger EXT").encode())
+        time.sleep(self.et_delay)
+        self.et.write(("CH" + str(channel) + ":MODE CV\n").encode())
+        time.sleep(self.et_delay)
+        self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())
+        time.sleep(self.et_delay)
 
-        # set to external operation, constant voltage, and continuous operation
-        s.write(("LOAD:TRIGger EXT").encode())
-        time.sleep(self.et_delay)
-        s.write(("CH"+str(channel)+":MODE CV\n").encode())
-        time.sleep(self.et_delay)
-        s.write(("TRAN"+str(channel)+":MODE COUT\n").encode())
-        time.sleep(self.et_delay)
-        
-        # set ranges for voltage, as well as max and min
+        # Set ranges for voltage, as well as max and min
         # "NAME" : RANGE (MAX/SHUTOFF)
         # "LOW": 0.1 -> 19.999 (21.000)
         # "HIGH": 0.1 -> 150.000 (155.000)
-        s.write(("LOAD:VRAN LOW").encode())
+        self.et.write(("LOAD:VRAN LOW").encode())
         time.sleep(self.et_delay)
-        s.write(("VOLT"+str(channel)+":VMIN %f\n" % (self.et_v_min)).encode())
+        self.et.write(("VOLT" + str(channel) + ":VMIN %f\n" % (self.et_v_min)).encode())
         time.sleep(self.et_delay)
-        s.write(("VOLT"+str(channel)+":VMAX %f\n" % (self.et_v_max)).encode())
+        self.et.write(("VOLT" + str(channel) + ":VMAX %f\n" % (self.et_v_max)).encode())
         time.sleep(self.et_delay)
-        
 
-        # set range for current, as well as max current (no min feature)
+        # Set range for current, as well as max current (no min feature)
         # "NAME" : RANGE (MAX/SHUTOFF)
         # "LOW": 0 -> 3.000 (3.3)
         # "HIGH": 0 -> 20.000 (22.0)
-        s.write(("LOAD:CRAN LOW").encode())
+        self.et.write(("LOAD:CRAN LOW").encode())
         time.sleep(self.et_delay)
-        s.write(("CURR"+str(channel)+":IMAX %f\n" % (self.et_i_max)).encode())
+        self.et.write(("CURR" + str(channel) + ":IMAX %f\n" % (self.et_i_max)).encode())
         time.sleep(self.et_delay)
 
-
-        # set max power output
+        # Set max power output
         # "NAME" : RANGE (MAX/SHUTOFF)
         # ALL: 0 --> 200 (220)
-        s.write(("POWE"+str(channel)+":PMAX %f\n" % (self.et_v_max*self.et_i_max)).encode())
+        self.et.write(
+            (
+                "POWE" + str(channel) + ":PMAX %f\n" % (self.et_v_max * self.et_i_max)
+            ).encode()
+        )
         time.sleep(self.et_delay)
 
-
-        # close channel
-        s.write(("CH"+str(channel)+":SW OFF\n").encode())
+        # Close channel
+        self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
         time.sleep(self.et_delay)
 
-
-    # turns on output
-    def output_on(self,channel):
-        s.write(("CH"+str(channel)+":SW ON\n").encode())
+    @et_lock
+    def output_on(self, channel):
+        """Turns on output"""
+        self.et.write(("CH" + str(channel) + ":SW ON\n").encode())
         time.sleep(self.et_delay)
 
-
-    # turns off output
-    def output_off(self,channel):
-        s.write(("CH"+str(channel)+":SW OFF\n").encode())
+    @et_lock
+    def output_off(self, channel):
+        """Turns off output"""
+        self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
         time.sleep(self.et_delay)
 
-
-    # set voltage
+    @et_lock
     def set_voltage(self, channel, voltage):
-        s.write(("VOLT"+str(channel)+":CV %f\n" % (voltage)).encode())
+        """Sets voltage"""
+        self.et.write(("VOLT" + str(channel) + ":CV %f\n" % (voltage)).encode())
         time.sleep(self.et_delay)
 
-
-    # measure current several times and average
-    def measure_current(self,channel):
-
-        # read current iterations # of times and average
+    @et_lock
+    def measure_current(self, channel):
+        """Measure current several times and average"""
         i = 0
         curr_tot = 0
 
+        # The easttester is not very accurate, so we need to average several times
         while i < self.et_avg_num:
 
-            s.write(("MEAS"+str(channel)+":CURR?\n").encode())
+            self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             time.sleep(self.et_delay)
-        
-            curr = s.readlines()[-1]
-            curr = curr.decode("utf-8") 
-            curr = re.findall('\d*\.?\d+', curr)
+
+            curr = self.et.readlines()[-1]
+            curr = curr.decode("utf-8")
+            curr = re.findall("\d*\.?\d+", curr)
             curr = float(curr[0])
             curr_tot += curr
             i += 1
@@ -120,73 +129,3 @@ class EastTester:
         curr_tot /= self.et_avg_num
 
         return curr_tot
-
-
-    # could add back in v min and v max so that it is array dependent. 
-    # track MPP, return numpy arrays of t, v, i, p
-    def track_mpp(self,channel,voltage)
-
-         # use self.lock to ensure only 1 thread is talking to harware
-        with self.lock:
-
-            #change settings of tester
-            self.srcV_measI()
-
-            # create blank lists
-            voltages = []
-            currents = []
-            powers = []
-            time = []
-
-            # turn on output
-            self.output_on(channel)
-
-            # set initial voltage, measure current, save to lists
-            self.set_voltage(channel,voltage)
-            current = self.measure_current(channel)
-            voltages.append(voltage)
-            currents.append(current)
-            powers.append(voltage*current)
-            time.append(time.time())
-
-            # perturb voltage
-            voltage_step = self.et_voltage_step
-            voltage += voltage_step
-
-            # scan until break
-            tracking = True
-            while tracking:
-                
-                # set v, measure i, save to lists
-                self.set_voltage(channel,voltage)
-                current = self.measure_current(channel)
-                voltages.append(voltage)
-                currents.append(current)
-                powers.append(voltage*current)
-                times.append(time.time())
-
-                # determine if power increased or decreased, if the latter, change perturb direction
-                if(powers[-2]>=powers[-1]):
-                    voltage_step *= -1
-        
-                # move by step if within bounds, else move back towards
-                if(voltage + voltage_step >= self.et_v_max):
-                    voltage -= abs(voltage_step)
-                elif(voltage + voltage_step <= self.et_v_min):
-                    voltage += abs(voltage_step)
-                else:
-                    voltage += voltage_step
-
-            # turn off output --> not sure this is needed/wanted. We want V to stay on but not neccsiary measurement
-            self.output_off(channel)
-
-            # return data as arrays
-            v = np.asarray(voltages)
-            i = np.asarray(currents)
-            p = np.asarray(powers)
-            t = np.asarray(times)
-
-        return t, v, i, p
-
-
-

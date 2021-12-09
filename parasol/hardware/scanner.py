@@ -1,20 +1,10 @@
-# Old Imports (to be deleted)
-# import pyvisa
-# import time
-# import pandas as pd
-# import serial
-# import matplotlib.pyplot as plt
-# from matplotlib import style
-# import math
-# import csv
-
-# Import Modules
 import yaml
 import os
 import pyvisa
 import numpy as np
 import matplotlib as mpl
 from threading import Lock
+
 mpl.rcParams.update(mpl.rcParamsDefault)
 
 # Set yaml name, load yokogawa info
@@ -22,27 +12,38 @@ MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["yokogawa"]
 
-# Yokogawa Scanning Class
-class Scanner:
 
-    # Initialize function
+def yok_lock(f):
+    """Lock Yokogawa"""
+
+    def inner(self, *args, **kwargs):
+        with self.lock:
+            f(self, *args, **kwargs)
+
+    return inner
+
+
+class Scanner:
+    """Used for JV scanning"""
+
     def __init__(self) -> None:
+        """Initialize Yokogawa"""
         self.lock = Lock()
         self.connect(constants["address"])  # TODO actually connect
         self.RESPONSE_TIME = constants["response_time"]
         self.delay = 0.05
-
-        self.srcV_measI()
         self._sourcing_current = False
+        self.srcV_measI()
 
-    # Connect to yoko
     def connect(self, yoko_address):
+        """Connect to Yokogawa"""
         rm = pyvisa.ResourceManager()
         self.yoko = rm.open_resource(yoko_address)
         self.yoko.timeout = 10  # 10 seconds
 
-    # Turn measurment on: Init settings for source V, measure I
+    @yok_lock
     def srcV_measI(self):
+        """Turn measurment on: Init settings for source V, measure I"""
         self.yoko.write("*RST")  # Reset Factory
         self.yoko.write(":SOUR:FUNC VOLT")  # Source function Voltage
         self.yoko.write(":SOUR:VOLT:RANG 1V")  # Source range setting 1 V
@@ -60,8 +61,9 @@ class Scanner:
         self.yoko.write(tempdelay)  # Measure delay set in __init__
         self._sourcing_current = False
 
-    # Turn measurment on: Init settings for source I, measure V
+    @yok_lock
     def srcI_measV(self):
+        """Turn measurment on: Init settings for source I, measure V"""
         self.yoko.write("*RST")  # Reset Factory
         self.yoko.write(":SOUR:FUNC CURR")  # Source function Current
         self.yoko.write(":SOUR:CURR:RANG 1A")  # Source range setting 0 A
@@ -79,35 +81,40 @@ class Scanner:
         self.yoko.write(tempdelay)  # Measure delay as set above
         self._sourcing_current = True
 
-    # Turn output on
+    @yok_lock
     def output_on(self):
+        """Turn output on"""
         self.yoko.write(":OUTP:STAT ON")
 
-    # Turn output off
+    @yok_lock
     def output_off(self):
+        """Turn output off"""
         self.yoko.write(":OUTP:STAT OFF")
 
-    # initializes, apllies trigger, fetches value & returns as string
+    @yok_lock
     def _trig_read(self) -> str:
+        """Initializes, apllies trigger, fetches value & returns as string"""
         return self.yoko.query(":INIT;*TRG;:FETC?")
 
-    # set voltage
+    @yok_lock
     def set_voltage(self, v):
+        """Set voltage"""
         if self._sourcing_current:
             self.srcV_measI()
         tempstr = ":SOUR:VOLT:LEV " + str(v) + "V"
         self.yoko.write(tempstr)
 
-    # set current
+    @yok_lock
     def set_current(self, i):
+        """Set current"""
         if not self._sourcing_current:
             self.srcI_measV()
         tempstr = ":SOUR:CURR:LEV " + str(i) + "A"
         self.yoko.write(tempstr)
 
-    # measure Voc
+    @yok_lock
     def voc(self) -> float:
-        """measures the open circuit voltage (V)"""
+        """Measures the open circuit voltage (V)"""
         self.set_current(0)
         self.output_on()
         voc = float(self._trig_read())
@@ -115,8 +122,9 @@ class Scanner:
 
         return voc
 
-    # measure Isc
+    @yok_lock
     def isc(self) -> float:
+        """Measures the short circuit current (A)"""
         self.set_voltage(0)
         self.output_on()
         isc = float(self._trig_read)
@@ -124,33 +132,34 @@ class Scanner:
 
         return isc
 
-    # run IV scan from vstart to vend with steps # of steps
+    @yok_lock
     def _single_iv_sweep(self, vstart, vend, steps):
-        self.srcV_measI() 
-        self.set_voltage(vstart)
+        """Runs a single IV sweep"""
 
+        # Make empty numpy arrays for data
         v = np.linspace(vstart, vend, steps)
         i = np.zeros(v.shape)
 
+        # Turn on output, set voltage, measure current, turn off output
         self.output_on()
         for idx, v_point in enumerate(v):
             self.set_voltage(v_point)
             i[idx] = float(self._trig_read())
         self.output_off()
 
-        # new x211130 --> should ensure if we have a reverse scan that we are inverting the current wave
-        if abs(vmin) > abs(vmax):
-            i=[::-1]
+        # Flip reverse scan order so that it aligns with voltage
+        if abs(vstart) > abs(vend):
+            i = i[::-1]
 
         return v, i
 
-    # scans forward and reverse waves, return v, and fwd_i / reverse_i
+    @yok_lock
     def scan_jv(self, vmin, vmax, steps):
-        # use self.lock to ensure only 1 thread is talking to harware
-        with self.lock:
-            # run reverse scan
-            _, rev_i = self._single_iv_sweep(vstart=vmax, vend=vmin, steps=steps) 
-            # run forward scan
-            v, fwd_i = self._single_iv_sweep(vstart=vmin, vend=vmax, steps=steps)
+        """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
+
+        # Run reverse scan
+        _, rev_i = self._single_iv_sweep(vstart=vmax, vend=vmin, steps=steps)
+        # Run forward scan
+        v, fwd_i = self._single_iv_sweep(vstart=vmin, vend=vmax, steps=steps)
 
         return v, fwd_i, rev_i

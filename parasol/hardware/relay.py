@@ -2,7 +2,6 @@ import serial
 import time
 import yaml
 import os
-
 from threading import Lock
 
 MODULE_DIR = os.path.dirname(__file__)
@@ -10,11 +9,25 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["relay"]
 
 
+def relay_lock(f):
+    """Lock Relay"""
+
+    def inner(self, *args, **kwargs):
+        with self.lock:
+            f(self, *args, **kwargs)
+
+    return inner
+
+
 class Relay:
-    # intialize relay commands
     def __init__(self):
-        self.RESPONSE_TIME = constants["response_time"]  # seconds for command to complete
-        self.SETTLING_TIME = constants["settling_time"]  # seconds for relay changeover to settle (voltage stabilization)
+        """Intialize relay"""
+        self.RESPONSE_TIME = constants[
+            "response_time"
+        ]  # seconds for command to complete
+        self.SETTLING_TIME = constants[
+            "settling_time"
+        ]  # seconds for relay changeover to settle (voltage stabilization)
         self.relay_commands = {
             1: (65, 1),
             2: (65, 2),
@@ -41,84 +54,28 @@ class Relay:
             23: (70, 23),
             24: (70, 24),
         }
-
-        self.et_channels = {
-            1: 1,
-            2: 1,
-            3: 1,
-            4: 1,
-            5: 2,
-            6: 2,
-            7: 2,
-            8: 2,
-            9: 1,
-            10: 1,
-            11: 1,
-            12: 1,
-            13: 2,
-            14: 2,
-            15: 2,
-            16: 2,
-            17: 1,
-            18: 1,
-            19: 1,
-            20: 1,
-            21: 2,
-            22: 2,
-            23: 2,
-            24: 2,
-        }
-
-        self.et_strings = {
-            1: 1,
-            2: 1,
-            3: 1,
-            4: 1,
-            5: 2,
-            6: 2,
-            7: 2,
-            8: 2,
-            9: 3,
-            10: 3,
-            11: 3,
-            12: 3,
-            13: 4,
-            14: 4,
-            15: 4,
-            16: 4,
-            17: 5,
-            18: 5,
-            19: 5,
-            20: 5,
-            21: 6,
-            22: 6,
-            23: 6,
-            24: 6,
-        }
-
         self.connect(constants["address"])
-        self.lock = Lock()
 
-    # connect to relay board through GPIB
     def connect(self, address: str):
+        """Connect to relay board through GPIB"""
         self.inst = serial.Serial(address)
 
-    # open given relay
+    @relay_lock
     def on(self, id: int):
+        """Open given relay"""
         if id not in self.relay_commands:
             raise ValueError(f"Invalid relay id")
 
         cmd0, cmd1 = self.relay_commands[id]
-        with self.lock:  # this is important - only allows one thread to access the hardware at a time
-            print(f"Turning on relay {id}")
-            self.inst.write((cmd0).to_bytes(1, "big"))
-            time.sleep(self.RESPONSE_TIME)
-            self.inst.write((cmd1).to_bytes(1, "big"))
+        print(f"Turning on relay {id}")
+        self.inst.write((cmd0).to_bytes(1, "big"))
+        time.sleep(self.RESPONSE_TIME)
+        self.inst.write((cmd1).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
 
-    # shut all relays
+    @relay_lock
     def all_off(self):
-        with self.lock:
-            print(f"Turning off all relays")
-            self.inst.write((71).to_bytes(1, "big"))
+        """Close all relays"""
+        print(f"Turning off all relays")
+        self.inst.write((71).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)

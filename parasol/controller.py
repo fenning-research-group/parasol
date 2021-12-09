@@ -1,11 +1,7 @@
-# import numpy as np
-# import logging
-# from threading import Lock
-
-# Import Modules
 import time
 import asyncio
-from threading import Thread
+import numpy as np
+from threading import Thread, Lock
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures._base import CancelledError
 import yaml
@@ -15,24 +11,7 @@ from datetime import datetime
 import time
 from .hardware.relay import Relay
 from .hardware.scanner import Scanner
-
-
-"""
-NOTES ON HOW THE PROGRAM WORKS
-
-# Init statement
-c = parasol.Controller(rootdir = "filepath_to_save_in")
-
-# Add Module to quelist
-c.load_module(self, id, name, area, interval, vmin, vmax, steps)
-
-# Remove Module from quelist
-c.unload_module(self, id):
-"""
-
-
-# max number modules 
-NUM_MODULES = 24
+from .hardware.easttester import EastTester
 
 
 # Set yaml name, load controller info
@@ -41,86 +20,150 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
 
 
-# Create controller class for schedueler
 class Controller:
+    """Create controller class to manage eastester, relay, and yokogawa"""
 
-    # initialize controller
     def __init__(self, rootdir):
-        self.RESPONSE_TIME = constants["response_time"]
+        """Initialize controller"""
+        self.NUM_MODULES = constants["num_modules"]
         self.running = False
         self.rootdir = rootdir
         if not os.path.exists(rootdir):
             os.mkdir(rootdir)
 
+        # Connect to Relay, Scanner, and 3 EastTesters
         self.relay = Relay()
         self.scanner = Scanner()
-        self.easttester = EastTester()
-
-        self.modules = {}
-        # probably want to change max_workers
-        self.threadpool = ThreadPoolExecutor(max_workers=2)
-        self.start()
-
-
-
-    # Create new 'module' class for each test 
-    def load_module(self, id, name, area, interval, vmin, vmax, steps):
-
-        # add module id, state if already there or if id is incorrect
-        if id in self.modules:
-            raise ValueError(f"Module {id} already loaded!")
-        if id not in self.relay.relay_commands:
-            raise ValueError(f"{id} not valid relay id!")
-
-        # add to timer and loop
-        future = asyncio.run_coroutine_threadsafe(self.timer(id=id), self.loop)
-        future.add_done_callback(future_callback)
-
-        # create self.modules[] info for running
-        # ideally et_channel can be combined with the relay board information so that we can get that autopopulated
-        # also, we will need to implement the finding MPP of string, combine in series (i assume), and calc mpp to start tracking with
-        self.modules[id] = {
-            "name": name,
-            "area": area,
-            "interval": interval,
-            "vmin": vmin,
-            "vmax": vmax,
-            "steps": steps,
-            "jv_scan_count": 0,
-            "_future": future,
-            "_savedir": self._make_module_subdir(name),
-            "mpp_scan_count": 0,
-            "v_mpp": None,
+        self.easttester = {
+            "12": EastTester(port="COM5"),
+            "34": EastTester(port="COM5"),
+            "56": EastTester(port="COM5"),
         }
 
+        # Maps string ID to ET port (which of the 3 ET) and channel
+        self.et_channels = {
+            1: ("12", 1),
+            2: ("12", 2),
+            3: ("34", 1),
+            4: ("34", 2),
+            5: ("56", 1),
+            6: ("56", 2),
+        }
+        # Maps string ID to module channels
+        self.module_channels = {
+            1: [1, 2, 3, 4],
+            2: [5, 6, 7, 8],
+            3: [9, 10, 11, 12],
+            4: [13, 14, 15, 16],
+            5: [17, 18, 19, 20],
+            6: [21, 22, 23, 24],
+        }
+        self.strings = {}
 
+        # For now set the min and max voltage here
+        self.et_mpp_vmin = 0.1
+        self.et_mpp_vmax = 1.2 * self.NUM_MODULES
 
-    # Delete 'module' class / remove module from testing que
-    def unload_module(self, id):
-        if id not in self.modules:
-            raise ValueError(f"Module {id} not loaded!")
-        self.modules[id]["_future"].cancel()
-        del self.modules[id]
-        while id in self.queue._queue:
-            self.queue._queue.remove(id)
+        # Decide how many workers we will allow and start the queue
+        self.threadpool = ThreadPoolExecutor(max_workers=6)
+        self.start()
 
+    def load_string(
+        self,
+        id,
+        name,
+        n_modules,
+        area,
+        jv_interval,
+        jv_vmin,
+        jv_vmax,
+        jv_steps,
+        mpp_interval,
+    ):
+        """Master command used to load a string of modules"""
+        # Ensure id is not already in use and can be used
+        if id in self.strings:
+            raise ValueError(f"String {id} already loaded!")
+        if id not in self.et_channels:
+            raise ValueError(f"{id} not valid string id!")
 
-    # makes folders to hold data --> called by load_module()
-    def _make_module_subdir(self, name):
+        # Setup jv and mpp timers in main loop
+        jv_future = asyncio.run_coroutine_threadsafe(self.jv_timer(id=id), self.loop)
+        jv_future.add_done_callback(future_callback)
+        mpp_future = asyncio.run_coroutine_threadsafe(self.mpp_timer(id=id), self.loop)
+        mpp_future.add_done_callback(future_callback)
+
+        # Setup string dict with important information for running the program
+        modulechannels = self.module_channels[id][:n_modules]
+        self.strings[id] = {
+            "name": name,
+            "area": area,
+            "module_channels": modulechannels,
+            "jv": {
+                "interval": jv_interval,
+                "vmin": jv_vmin,
+                "vmax": jv_vmax,
+                "steps": jv_steps,
+                "scan_count": 0,
+                "_future": jv_future,
+                "v": [None for i in range(n_modules)],
+                "j_fwd": [None for i in range(n_modules)],
+                "j_rev": [None for i in range(n_modules)],
+                "vmpp": [None for i in range(n_modules)],
+            },
+            "mpp": {
+                "interval": mpp_interval,
+                "last_powers": [None, None],
+                "last_voltages": [None, None],
+                "_future": mpp_future,
+                "vmpp": None,
+            },
+            "_savedir": self._make_module_subdir(name, id, modulechannels),
+            "lock": Lock(),
+        }
+
+        # Create the base MPP file with header and no data (we will append to it)
+        self.create_mpp_file(id)
+
+    def unload_string(self, id):
+        """Master command used to unload a string of modules"""
+        if id not in self.strings:
+            raise ValueError(f"String {id} not loaded!")
+        self.strings[id]["jv"]["_future"].cancel()
+        self.strings[id]["mpp"]["_future"].cancel()
+        del self.strings[id]
+        while id in self.jv_queue._queue:
+            self.jv_queue._queue.remove(id)
+        while id in self.mpp_queue._queue:
+            self.mpp_queue._queue.remove(id)
+
+    def _make_module_subdir(self, name, id, modulechannels):
+        """Make subdirectory for saving"""
+
+        # Make base file path for saving
         idx = 0
-        fpath = os.path.join(self.rootdir, name)
-        while os.path.exists(fpath):
+        basefpath = os.path.join(self.rootdir, name, id)
+        while os.path.exists(basefpath):
             idx += 1
-            fpath = os.path.join(self.rootdir, f"{name}_{idx}")
+            basefpath = os.path.join(self.rootdir, f"{name}_{idx}")
+        os.mkdir(basefpath)
 
-        os.mkdir(fpath)
-        return fpath
+        # Make subdirectory for MMP
+        mppfpath = os.path.join(basefpath, "MPP_{id}")
+        os.mkdir(mppfpath)
 
+        # Make subdirectory for each module
+        for modulechannel in modulechannels:
+            modulepath = os.path.join(basefpath, f"JV_{id}_{modulechannel}")
+            os.mkdir(modulepath)
 
-    # manages JV scanning --> called by start()
+        return basefpath
+
     async def jv_worker(self, loop):
+        """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
+
         while self.running:
-            id = await self.queue.get()
+            id = await self.jv_queue.get()
             scan_future = asyncio.gather(
                 loop.run_in_executor(
                     self.threadpool,
@@ -131,15 +174,14 @@ class Controller:
             scan_future.add_done_callback(future_callback)
             print(f"Scanning {id}")
             await scan_future
-            self.queue.task_done()
+            self.jv_queue.task_done()
             print(f"Done Scanning {id}")
 
+    async def mpp_worker(self, loop):
+        """Uses EastTester to conudct a MPP scan by calling track_mpp"""
 
-    # manages MPP tracking for ET #1 --> called by start()
-    async def mpp_worker_12(self, loop):
-        # maybe here we could edit for priority 
         while self.running:
-            id = await self.queue.get()
+            id = await self.mpp_queue.get()
             scan_future = asyncio.gather(
                 loop.run_in_executor(
                     self.threadpool,
@@ -150,234 +192,237 @@ class Controller:
             scan_future.add_done_callback(future_callback)
             print(f"Tracking {id}")
             await scan_future
-            self.queue.task_done()
+            self.mpp_queue.task_done()
             print(f"Done Tracking {id}")
 
-
-    # manages MPP tracking for ET #2 --> called by start()
-    async def mpp_worker_34(self, loop):
+    async def jv_timer(self, id):
+        """Manages timing for JV worker"""
+        await asyncio.sleep(1)
         while self.running:
-            id = await self.queue.get()
-            scan_future = asyncio.gather(
-                loop.run_in_executor(
-                    self.threadpool,
-                    self.track_mpp,
-                    id,
-                )
-            )
-            scan_future.add_done_callback(future_callback)
-            print(f"Tracking {id}")
-            await scan_future
-            self.queue.task_done()
-            print(f"Done Tracking {id}")
+            self.jv_queue.put_nowait(id)
+            await asyncio.sleep(self.strings[id]["jv"]["interval"])
 
-
-    # manages MPP tracking for ET #3 --> called by start()
-    async def mpp_worker_56(self, loop):
+    async def mpp_timer(self, id):
+        """Manages scanning for MPP worker"""
+        await asyncio.sleep(1)
         while self.running:
-            id = await self.queue.get()
-            scan_future = asyncio.gather(
-                loop.run_in_executor(
-                    self.threadpool,
-                    self.track_mpp,
-                    id,
-                )
-            )
-            scan_future.add_done_callback(future_callback)
-            print(f"Tracking {id}")
-            await scan_future
-            self.queue.task_done()
-            print(f"Done Tracking {id}")
+            self.mpp_queue.put_nowait(id)
+            await asyncio.sleep(self.strings[id]["mpp"]["interval"])
 
-
-    # manages timing --> called by load_module()
-    async def timer(self, id):
-        # wait to let the module dict populate
-        await asyncio.sleep(1) 
-        while self.running:
-            self.queue.put_nowait(id)
-            await asyncio.sleep(self.modules[id]["interval"])
-
-
-    # setup background event loop for schedueling tasks --> called by start()
     def __make_background_event_loop(self):
+        """Setup background event loop for schedueling tasks"""
+
         def exception_handler(loop, context):
             print("Exception raised in Controller loop")
 
         self.loop = asyncio.new_event_loop()
         self.loop.set_exception_handler(exception_handler)
         asyncio.set_event_loop(self.loop)
-        self.queue = asyncio.Queue()
+        self.jv_queue = asyncio.Queue()
+        self.mpp_queue = asyncio.Queue()
         self.loop.run_forever()
 
-
-    # start schedueler --> called by __init__()
     def start(self):
+        """Create workers / start queue"""
         self.thread = Thread(target=self.__make_background_event_loop)
         self.thread.start()
         time.sleep(0.5)
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker_12(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker_34(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker_56(self.loop), self.loop)
+        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         self.running = True
 
-
-    # stop schedueler --> called by __del__()
     def stop(self):
+        """Delete workers / stop queue"""
         self.running = False
         ids = list(self.modules.keys())
         for id in ids:
-            self.unload_module(id)
+            self.unload_string(id)
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
-
-    # JV scan a module & save the info --> called by jv_worker()
     def scan_jv(self, id):
-    
-        # get list of modules
-        d = self.modules.get(id, None)
-        if d is None:
-            raise ValueError(f"No module loaded at index {id}!")
+        """Uses Yokogawa to conudct a JV scan"""
+
+        d = self.strings.get(id, None)
+
+        # Emsure MPP isn't running.
+        with d["lock"]:
+
+            # Turn off easttester output
+            et_key, ch = self.et_channels[id]
+            et = self.easttester[et_key]
+            et.output_off(ch)
+
+            for index, module in enumerate(d["module_channels"]):
+
+                # Get date/time and make filepath
+                date_str = datetime.now().strftime("%Y-%m-%d")
+                time_str = datetime.now().strftime("%H:%M:%S")
+                epoch_str = time.time()
+
+                # Save in base filepath:JV_stringID_moduleID:
+                jvfolder = os.path.join(d["_savedir"], "JV_{id}_{module}")
+                fpath = os.path.join(jvfolder, f"{d['name']}_{d['jv_scan_count']}.csv")
+
+                # Scan device foward + reverse, calculate current density and power for both
+                self.relay.on(module)
+                v, fwd_i, rev_i = self.scanner.scan_jv(
+                    vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
+                )
+                fwd_j = fwd_i / d["area"]
+                fwd_p = v * fwd_j
+                rev_j = rev_i / d["area"]
+                rev_p = v * rev_j
+
+                # Open file, write header/column names then fill
+                with open(fpath, "w", newline="") as f:
+                    writer = csv.writer(f, delimiter=",")
+                    writer.writerow(["Date", date_str])
+                    writer.writerow(["Time", time_str])
+                    writer.writerow(["epoch_time", epoch_str])
+                    writer.writerow(["String ID", id])
+                    writer.writerow(["Module ID", module])
+                    writer.writerow(["Area (cm2)", d["area"]])
+                    writer.writerow(
+                        [
+                            "Voltage (V)",
+                            "FWD Current (mA)",
+                            "FWD Current Density (mA/cm2)",
+                            "FWD Power Density (mW/cm2)",
+                            "REV Current (mA)",
+                            "REV Current Density (mA/cm2)",
+                            "REV Power Density (mW/cm2)",
+                        ]
+                    )
+                    for line in zip(v, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
+                        writer.writerow(line)
+
+                # save any useful raw data to the string dictionary
+                d["jv"]["v"][index] = v
+                d["jv"]["fwd_j"][index] = fwd_j
+                d["jv"]["rev_j"][index] = rev_j
+
+                # Calculate MPP, save to string dictionary
+                avg_p = (rev_p + fwd_p) / 2
+                v_maxloc = np.argmax(avg_p)
+                v_mpp = v[v_maxloc]
+                d["jv"]["vmpp"][index] = v_mpp
+
+            # increase jv scan count
+            d["jv"]["scan_count"] += 1
+
+    def create_mpp_file(self, id):
+        """Creates base file for MPP data"""
+
+        d = self.strings.get(id, None)
 
         # Get date/time and make filepath
         date_str = datetime.now().strftime("%Y-%m-%d")
         time_str = datetime.now().strftime("%H:%M:%S")
         epoch_str = time.time()
-        fpath = os.path.join(d["_savedir"], f"{d['name']}_JV_{d['jv_scan_count']}.csv")
 
-        # Scan device foward + reverse, calculate current density and power for both
-        self.relay.on(id)
-        v, fwd_i, rev_i = self.scanner.scan_jv(vmin=d["vmin"], vmax=d["vmax"], steps=d["steps"])
-        fwd_j = fwd_i / d["area"]
-        fwd_p = v * fwd_j
-        rev_j = rev_i / d["area"]
-        rev_p = v * rev_j
+        # Save in base filepath:MPP_stringID:
+        mppfolder = os.path.join(d["_savedir"], "MPP_{id}")
+        fpath = os.path.join(mppfolder, f"{d['name']}_1.csv")
 
-        # Open file, write header/column names then fill 
+        # Open file, write header/column names then fill
         with open(fpath, "w", newline="") as f:
             writer = csv.writer(f, delimiter=",")
             writer.writerow(["Date", date_str])
             writer.writerow(["Time", time_str])
             writer.writerow(["epoch_time", epoch_str])
-            writer.writerow(["Relay ID", id])
+            writer.writerow(["String ID", id])
+            writer.writerow(["Module ID", d["module_channels"]])
             writer.writerow(["Area (cm2)", d["area"]])
             writer.writerow(
                 [
+                    "Time (epoch)",
                     "Voltage (V)",
-                    "FWD Current (mA)",
-                    "FWD Current Density (mA/cm2)",
-                    "FWD Power Density (mW/cm2)",
-                    "REV Current (mA)",
-                    "REV Current Density (mA/cm2)",
-                    "REV Power Density (mW/cm2)",
+                    "Current (mA)",
+                    "Current Density (mA/cm2)",
+                    "Power Density (mW/cm2)",
                 ]
             )
-            for line in zip(v, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
-                writer.writerow(line)
 
-        # calculate MPP
-        if ["jv_scan_count"] == 0:
-            d["v_mpp"] = self.calc_mpp_from_jv(v,fwd_p,rev_p)
-
-        # increase scan count
-        d["jv_scan_count"] += 1
-
-
-
-    # Take JV scan and obtain vmpp --> wrote into seperate function so we can change later
-    def calc_mpp_from_jv(self,v,fwd_p,rev_p):
-        avg_p = (rev_p+fwd_p)/2
-        v_maxloc = np.argmax(avg_p)
-        v_mpp = v[v_maxloc]
-
-        return v_mpp
-
-
-    # eventually we can scale these by stats from JV scans to approx param from each
     def track_mpp(self, id):
+        """Uses Easttester to track MPP with a perturb and observe algorithm"""
 
-        # go through ids, make sure they are real, add up vmps and areas
-        vmpp_all = 0
-        area_all = 0
-        for id in ids:
+        d = self.strings.get(id, None)
 
-            # make sure it exists
-            d = self.modules.get(id, None)
-            if d is None:
-                raise ValueError(f"No module loaded at index {id}!")
+        # Dont run until we have done JV scan
+        if d["jv"]["vmpp"][-1] is None:
+            return
 
-            # grab MPP & areas
-            vmpp_all += d["v_mpp"]
-            area_all += d["area"]
+        # Ensure that JV isn't running
+        with d["lock"]:
 
+            # Get number of modules
+            num_modules_in_string = len(d["module_channels"])
 
-        # Get date/time
-        date_str = datetime.now().strftime("%Y-%m-%d")
-        time_str = datetime.now().strftime("%H:%M:%S")
-        epoch_str = time.time()
+            # Get last vmp, ideally from mpp tracking value, else from addition of jv mpps
+            vmpp = 0
+            if d["mpp"]["vmpp"] is not None:
+                vmpp = d["mpp"]["vmpp"]
+            else:
+                for value in range(d["jv"]["vmpp"]):
+                    vmpp += value
 
-        # MPPT string using area and vmpp from above
-        t, v1, i1 ,p1 = self.easttester.track_mpp(self.relay.et_channels[id],vmpp_all)
-
-        # cycle through IDs, save and update each file indivisually (should help with processing)
-        for id in ids:
-
-            # make sure it exists
-            d = self.modules.get(id, None)
-            if d is None:
-                raise ValueError(f"No module loaded at index {id}!")
-
-            # get info:
-            v = v1 / len(ids)
-            i = i1 * d["area"] / area_all
-            j = i / d["area"] 
-            p = j * v
-
-
-            # grab filepath
-            fpath = os.path.join(d["_savedir"], f"{d['name']}_MPP_{d['mpp_scan_count']}.csv")
-
-            # Open file, write header/column names then fill 
-            with open(fpath, "w", newline="") as f:
-                writer = csv.writer(f, delimiter=",")
-                writer.writerow(["Date", date_str])
-                writer.writerow(["Time", time_str])
-                writer.writerow(["epoch_time", epoch_str])
-                writer.writerow(["Relay IDs", ids])
-                writer.writerow(["Area (cm2)", d["area"]])
-                writer.writerow(
-                    [
-                        "Time (epoch)",
-                        "Voltage (V)",
-                        "Current (mA)",
-                        "Current Density (mA/cm2)",
-                        "Power Density (mW/cm2)",
-                    ]
+            # Get voltage step
+            if d["mpp"]["last_powers"][0] or d["mpp"]["last_powers"][1] is None:
+                voltage_step = self.et_voltage_step
+            elif d["mpp"]["last_powers"][1] >= d["mpp"]["last_powers"][0]:
+                voltage_step = (
+                    d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
                 )
+            elif d["mpp"]["last_powers"][1] < d["mpp"]["last_powers"][0]:
+                voltage_step = (
+                    d["mpp"]["last_voltages"][0] - d["mpp"]["last_voltages"][1]
+                )
+
+            # Get time, set voltage
+            t = time.time()
+            v = vmpp + voltage_step
+
+            # Ensure voltage is between the easttesters max and min values
+            if (v < self.et_mpp_vmin) or (v > self.et_mpp_vmax):
+                v = vmpp - 2 * voltage_step
+
+            # Turn on easttester output, set voltage, measure current, calculate desired parameters
+            et_key, ch = self.et_channels[id]
+            et = self.easttester[et_key]
+            et.output_on(ch)
+            et.set_voltage(ch, v)
+            i = et.measure_current(ch, v)
+            j = i / (d["area"] * num_modules_in_string)
+            p = v * j
+
+            # Update d[] by moving last value to first and append new values
+            d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
+            d["mpp"]["last_powers"][1] = p
+            d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
+            d["mpp"]["last_voltages"][0] = v
+
+            # Save in base filepath:MPP_stringID:
+            mppfolder = os.path.join(d["_savedir"], "MPP_{id}")
+            fpath = os.path.join(mppfolder, f"{d['name']}_1.csv")
+
+            # Open file, append values to columns
+            with open(fpath, "a", newline="") as f:
                 for line in zip(t, v, i, j, p):
-                    writer.writerow(line)
+                    csv.writer.writerow(line)
 
-            # increase scan count
-            d["mpp_scan_count"] += 1
-
-             # set MPP
-            d["v_mpp"] = v1[-1]/len(ids)
-
-
-
-    # calls self.stop() if program closes
     def __del__(self):
+        """Stops que and program on exit"""
         self.stop()
 
 
-# allows errors to be seen outside of the main event loop --> called by load_module() and jv_worker()
 def future_callback(future):
-    """
-    Callback function triggered when a future completes.
-    Allows errors to be seen outside event loop
-    """
+    """Callback function triggered when a future completes. Allows errors to be seen outside event loop"""
     try:
         if future.exception() is not None:
             print(f"Exception in future: {future.exception()}")

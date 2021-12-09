@@ -1,19 +1,19 @@
 relay:
   address: 'COM3'
-  response_time: 0.1 #seconds for command to process
-  settling_time: 5 #seconds for relay changeover to settle (voltage stabilization)
+  response_time: 0.1 # Seconds for command to process
+  settling_time: 5 # Seconds for relay changeover to settle (voltage stabilization)
 
 yokogawa:
   address: 'GPIB1::1::INSTR'
-  response_time: 0.001 #seconds for command to process
+  response_time: 0.001 # Seconds for command to process
 
 controller:
-  num_modules: 24 #max number of modules that can be measured at once
+  num_modules: 24 # Max number of modules that can be measured at once
 
 easttester:
-  et_delay: 0.3 #delay between commands
-  et_v_min: 0.1 #min voltage
-  et_v_max: 20 # max voltage
-  et_i_max: 10 #max current
-  et_avg_num: 5 #number of currents to avg for reading
-  et_voltage_step: 0.05 #voltage step in tracking
+  response_time: 0.3 # Delay between commands
+  v_min: 0.1 # Min voltage
+  v_max: 21 # Max voltage of 'low' range, 155 V for high range
+  i_max: 3.3 # Max current of 'low' range, 22 A for high range
+  avg_num: 5 # Number of currents to avg for reading
+  voltage_step: 0.01 # Voltage step in tracking
