@@ -12,6 +12,7 @@ import time
 from .hardware.relay import Relay
 from .hardware.scanner import Scanner
 from .hardware.easttester import EastTester
+from .analysis.initial_parasol_analysis import Parasol_String
 
 
 # Set yaml name, load controller info
@@ -131,6 +132,10 @@ class Controller:
     def unload_string(self, id):
         """Master command used to unload a string of modules"""
 
+        # get string saveloc
+        d = self.strings.get(id, None)
+        saveloc = d["_savedir"]
+
         # destroy all future tasks for the string
         if id not in self.strings:
             raise ValueError(f"String {id} not loaded!")
@@ -143,6 +148,9 @@ class Controller:
             self.jv_queue._queue.remove(id)
         while id in self.mpp_queue._queue:
             self.mpp_queue._queue.remove(id)
+
+        # analyze the saveloc
+        Parasol_String(saveloc)
 
     def _make_module_subdir(self, name, id, modulechannels):
         """Make subdirectory for saving"""

@@ -14,7 +14,7 @@ setup(
     description="Control of Fenning Research Group outdoor testbed",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Rishi Kumar, Deniz Cakan, Sean P. Dunfielkd",
+    author="Rishi Kumar, Deniz Cakan, Sean P. Dunfield",
     author_email="rek010@eng.ucsd.edu, dcakan@eng.ucsd.edu, sdunfield@eng.ucsd.edu",
     download_url="https://github.com/fenning-research-group/parasol",
     license="MIT",
