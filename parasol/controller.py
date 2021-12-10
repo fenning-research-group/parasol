@@ -149,12 +149,12 @@ class Controller:
         os.mkdir(basefpath)
 
         # Make subdirectory for MMP
-        mppfpath = os.path.join(basefpath, "MPP_{id}")
+        mppfpath = os.path.join(basefpath, "MPP")
         os.mkdir(mppfpath)
 
         # Make subdirectory for each module
         for modulechannel in modulechannels:
-            modulepath = os.path.join(basefpath, f"JV_{id}_{modulechannel}")
+            modulepath = os.path.join(basefpath, f"JV_{modulechannel}")
             os.mkdir(modulepath)
 
         return basefpath
@@ -266,8 +266,10 @@ class Controller:
                 epoch_str = time.time()
 
                 # Save in base filepath:JV_stringID_moduleID:
-                jvfolder = os.path.join(d["_savedir"], "JV_{id}_{module}")
-                fpath = os.path.join(jvfolder, f"{d['name']}_{d['jv_scan_count']}.csv")
+                jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
+                fpath = os.path.join(
+                    jvfolder, f"{d['name']}_{id}_{module}_JV_{d['jv_scan_count']}.csv"
+                )
 
                 # Scan device foward + reverse, calculate current density and power for both
                 self.relay.on(module)
@@ -282,12 +284,12 @@ class Controller:
                 # Open file, write header/column names then fill
                 with open(fpath, "w", newline="") as f:
                     writer = csv.writer(f, delimiter=",")
-                    writer.writerow(["Date", date_str])
-                    writer.writerow(["Time", time_str])
-                    writer.writerow(["epoch_time", epoch_str])
-                    writer.writerow(["String ID", id])
-                    writer.writerow(["Module ID", module])
-                    writer.writerow(["Area (cm2)", d["area"]])
+                    writer.writerow(["Date:", date_str])
+                    writer.writerow(["Time:", time_str])
+                    writer.writerow(["epoch_time:", epoch_str])
+                    writer.writerow(["String ID:", id])
+                    writer.writerow(["Module ID:", module])
+                    writer.writerow(["Area (cm2):", d["area"]])
                     writer.writerow(
                         [
                             "Voltage (V)",
@@ -327,18 +329,18 @@ class Controller:
         epoch_str = time.time()
 
         # Save in base filepath:MPP_stringID:
-        mppfolder = os.path.join(d["_savedir"], "MPP_{id}")
-        fpath = os.path.join(mppfolder, f"{d['name']}_1.csv")
+        mppfolder = os.path.join(d["_savedir"], "MPP")
+        fpath = os.path.join(mppfolder, f"{d['name']}_{id}_MPP_1.csv")
 
         # Open file, write header/column names then fill
         with open(fpath, "w", newline="") as f:
             writer = csv.writer(f, delimiter=",")
-            writer.writerow(["Date", date_str])
-            writer.writerow(["Time", time_str])
-            writer.writerow(["epoch_time", epoch_str])
-            writer.writerow(["String ID", id])
-            writer.writerow(["Module ID", d["module_channels"]])
-            writer.writerow(["Area (cm2)", d["area"]])
+            writer.writerow(["Date:", date_str])
+            writer.writerow(["Time:", time_str])
+            writer.writerow(["epoch_time:", epoch_str])
+            writer.writerow(["String ID:", id])
+            writer.writerow(["Module ID:", d["module_channels"]])
+            writer.writerow(["Area (cm2):", d["area"]])
             writer.writerow(
                 [
                     "Time (epoch)",
@@ -408,8 +410,8 @@ class Controller:
             d["mpp"]["last_voltages"][0] = v
 
             # Save in base filepath:MPP_stringID:
-            mppfolder = os.path.join(d["_savedir"], "MPP_{id}")
-            fpath = os.path.join(mppfolder, f"{d['name']}_1.csv")
+            mppfolder = os.path.join(d["_savedir"], "MPP")
+            fpath = os.path.join(mppfolder, f"{d['name']}_{id}_MPP_1.csv")
 
             # Open file, append values to columns
             with open(fpath, "a", newline="") as f:
