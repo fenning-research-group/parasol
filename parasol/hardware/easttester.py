@@ -27,6 +27,7 @@ class EastTester:
 
     def __init__(self, port):
         """initialize and set bounds for measurement (see srcV_measI for bounds)"""
+        self.lock = Lock()
         self.connect(port=port)
         self.et_delay = constants["response_time"]
         self.et_v_min = constants["v_min"]

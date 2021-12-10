@@ -29,7 +29,7 @@ class Scanner:
     def __init__(self) -> None:
         """Initialize Yokogawa"""
         self.lock = Lock()
-        self.connect(constants["address"])  # TODO actually connect
+        self.connect(constants["address"])
         self.RESPONSE_TIME = constants["response_time"]
         self.delay = 0.05
         self._sourcing_current = False

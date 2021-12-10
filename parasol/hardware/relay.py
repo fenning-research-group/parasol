@@ -22,6 +22,7 @@ def relay_lock(f):
 class Relay:
     def __init__(self):
         """Intialize relay"""
+        self.lock = Lock()
         self.RESPONSE_TIME = constants[
             "response_time"
         ]  # seconds for command to complete

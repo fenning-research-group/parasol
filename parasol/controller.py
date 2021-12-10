@@ -40,9 +40,9 @@ class Controller:
         self.relay = Relay()
         self.scanner = Scanner()
         self.easttester = {
-            "12": EastTester(port="COM5"),
-            "34": EastTester(port="COM5"),
-            "56": EastTester(port="COM5"),
+            "12": EastTester(port=constants["ET_1_PORT"]),
+            "34": EastTester(port=constants["ET_2_PORT"]),
+            "56": EastTester(port=constants["ET_3_PORT"]),
         }
 
         # Maps string ID to ET port (which of the 3 ET) and channel
