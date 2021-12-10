@@ -30,10 +30,9 @@ class EastTester:
         self.connect(port=port)
         self.et_delay = constants["response_time"]
         self.et_v_min = constants["v_min"]
-        self.et_v_max = constants["v_max"]
-        self.et_i_max = constants["i_max"]
+        self.et_v_max = constants["v_shutoff"]
+        self.et_i_max = constants["i_shutoff"]
         self.et_avg_num = constants["avg_num"]
-        self.et_voltage_step = constants["voltage_step"]
 
         # Set both channels to source voltage and measure current when initialized
         self.srcV_measI(1)

@@ -25,11 +25,15 @@ class Controller:
 
     def __init__(self, rootdir):
         """Initialize controller"""
-        self.NUM_MODULES = constants["num_modules"]
+
+        # Initialize running variable, create root directory
         self.running = False
         self.rootdir = rootdir
         if not os.path.exists(rootdir):
             os.mkdir(rootdir)
+
+        # grab voltage step used for perturb and observe algorithm
+        self.et_voltage_step = constants["et_voltage_step"]
 
         # Connect to Relay, Scanner, and 3 EastTesters
         self.relay = Relay()
@@ -60,10 +64,6 @@ class Controller:
         }
         self.strings = {}
 
-        # For now set the min and max voltage here
-        self.et_mpp_vmin = 0.1
-        self.et_mpp_vmax = 1.2 * self.NUM_MODULES
-
         # Decide how many workers we will allow and start the queue
         self.threadpool = ThreadPoolExecutor(max_workers=6)
         self.start()
@@ -81,6 +81,7 @@ class Controller:
         mpp_interval,
     ):
         """Master command used to load a string of modules"""
+
         # Ensure id is not already in use and can be used
         if id in self.strings:
             raise ValueError(f"String {id} already loaded!")
@@ -113,6 +114,8 @@ class Controller:
             },
             "mpp": {
                 "interval": mpp_interval,
+                "vmin": 0.1,
+                "vmax": jv_vmax * n_modules,
                 "last_powers": [None, None],
                 "last_voltages": [None, None],
                 "_future": mpp_future,
@@ -127,10 +130,14 @@ class Controller:
 
     def unload_string(self, id):
         """Master command used to unload a string of modules"""
+
+        # destroy all future tasks for the string
         if id not in self.strings:
             raise ValueError(f"String {id} not loaded!")
         self.strings[id]["jv"]["_future"].cancel()
         self.strings[id]["mpp"]["_future"].cancel()
+
+        # delete the stringid from the dict, remove from queue
         del self.strings[id]
         while id in self.jv_queue._queue:
             self.jv_queue._queue.remove(id)
@@ -162,6 +169,7 @@ class Controller:
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
 
+        # While the loop is running, add jv scans to queue
         while self.running:
             id = await self.jv_queue.get()
             scan_future = asyncio.gather(
@@ -172,6 +180,8 @@ class Controller:
                 )
             )
             scan_future.add_done_callback(future_callback)
+
+            # Scan the module and let user know
             print(f"Scanning {id}")
             await scan_future
             self.jv_queue.task_done()
@@ -180,6 +190,7 @@ class Controller:
     async def mpp_worker(self, loop):
         """Uses EastTester to conudct a MPP scan by calling track_mpp"""
 
+        # While the loop is running, add mpp scans to queue
         while self.running:
             id = await self.mpp_queue.get()
             scan_future = asyncio.gather(
@@ -190,6 +201,8 @@ class Controller:
                 )
             )
             scan_future.add_done_callback(future_callback)
+
+            # Scan the string and let the user know
             print(f"Tracking {id}")
             await scan_future
             self.mpp_queue.task_done()
@@ -227,7 +240,11 @@ class Controller:
         self.thread = Thread(target=self.__make_background_event_loop)
         self.thread.start()
         time.sleep(0.5)
+
+        # Create JV worker for yokogawa
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
+
+        # Create MPP workers for easttester (1 for each yoko channel)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
@@ -265,7 +282,7 @@ class Controller:
                 time_str = datetime.now().strftime("%H:%M:%S")
                 epoch_str = time.time()
 
-                # Save in base filepath:JV_stringID_moduleID:
+                # Save in base filepath: stringname: JV_modulechannel: stringname_stringid_modulechannel_JV_scannumber
                 jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
                 fpath = os.path.join(
                     jvfolder, f"{d['name']}_{id}_{module}_JV_{d['jv_scan_count']}.csv"
@@ -328,7 +345,7 @@ class Controller:
         time_str = datetime.now().strftime("%H:%M:%S")
         epoch_str = time.time()
 
-        # Save in base filepath:MPP_stringID:
+        # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
         mppfolder = os.path.join(d["_savedir"], "MPP")
         fpath = os.path.join(mppfolder, f"{d['name']}_{id}_MPP_1.csv")
 
@@ -363,10 +380,7 @@ class Controller:
         # Ensure that JV isn't running
         with d["lock"]:
 
-            # Get number of modules
-            num_modules_in_string = len(d["module_channels"])
-
-            # Get last vmp, ideally from mpp tracking value, else from addition of jv mpps
+            # Get last vmp, ideally from mpp tracking value, else from addition of jv vmpps
             vmpp = 0
             if d["mpp"]["vmpp"] is not None:
                 vmpp = d["mpp"]["vmpp"]
@@ -391,7 +405,7 @@ class Controller:
             v = vmpp + voltage_step
 
             # Ensure voltage is between the easttesters max and min values
-            if (v < self.et_mpp_vmin) or (v > self.et_mpp_vmax):
+            if (v < d["mpp"]["vmin"]) or (v > d["mpp"]["vmax"]):
                 v = vmpp - 2 * voltage_step
 
             # Turn on easttester output, set voltage, measure current, calculate desired parameters
@@ -400,7 +414,7 @@ class Controller:
             et.output_on(ch)
             et.set_voltage(ch, v)
             i = et.measure_current(ch, v)
-            j = i / (d["area"] * num_modules_in_string)
+            j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
 
             # Update d[] by moving last value to first and append new values
