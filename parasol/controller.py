@@ -125,8 +125,8 @@ class Controller:
             "lock": Lock(),
         }
 
-        self.strings[id]["_savedir"] = (
-            self._make_module_subdir(name, id, modulechannels),
+        self.strings[id]["_savedir"] = self._make_module_subdir(
+            name, id, modulechannels
         )
 
         # Create the base MPP file with header and no data (we will append to it)
