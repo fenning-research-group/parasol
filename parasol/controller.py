@@ -342,8 +342,8 @@ class Controller:
 
                 # save any useful raw data to the string dictionary
                 d["jv"]["v"][index] = v
-                d["jv"]["fwd_j"][index] = fwd_j
-                d["jv"]["rev_j"][index] = rev_j
+                d["jv"]["j_fwd"][index] = fwd_j
+                d["jv"]["j_rev"][index] = rev_j
 
                 # Calculate MPP, save to string dictionary
                 avg_p = (rev_p + fwd_p) / 2
