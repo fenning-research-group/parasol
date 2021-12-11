@@ -291,7 +291,7 @@ class Controller:
             et.output_off(ch)
 
             for index, module in enumerate(d["module_channels"]):
-
+                print(f"jvscan!3")
                 # Get date/time and make filepath
                 date_str = datetime.now().strftime("%Y-%m-%d")
                 time_str = datetime.now().strftime("%H:%M:%S")
@@ -350,6 +350,7 @@ class Controller:
 
             # increase jv scan count
             d["jv"]["scan_count"] += 1
+        print("jvscan!4")
 
     def create_mpp_file(self, id):
         """Creates base file for MPP data"""
