@@ -140,12 +140,16 @@ class Scanner:
         v = np.linspace(vstart, vend, steps)
         i = np.zeros(v.shape)
 
+        print("vi init")
         # Turn on output, set voltage, measure current, turn off output
         self.output_on()
+        print("outputon")
         for idx, v_point in enumerate(v):
             self.set_voltage(v_point)
             i[idx] = float(self._trig_read())
+        print("testrun")
         self.output_off()
+        print("outputoff")
 
         # Flip reverse scan order so that it aligns with voltage
         if abs(vstart) > abs(vend):
@@ -156,7 +160,6 @@ class Scanner:
     @yok_lock
     def scan_jv(self, vmin, vmax, steps):
         """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
-        print("trying to scan")
         # Run reverse scan
         _, rev_i = self._single_iv_sweep(vstart=vmax, vend=vmin, steps=steps)
         # Run forward scan
