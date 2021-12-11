@@ -157,7 +157,7 @@ class Controller:
 
         # Make base file path for saving
         idx = 0
-        basefpath = os.path.join(self.rootdir, name, id)
+        basefpath = os.path.join(self.rootdir, name, str(id))
         while os.path.exists(basefpath):
             idx += 1
             basefpath = os.path.join(self.rootdir, f"{name}_{idx}")
