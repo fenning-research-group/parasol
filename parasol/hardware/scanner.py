@@ -28,14 +28,12 @@ class Scanner:
 
     def __init__(self) -> None:
         """Initialize Yokogawa"""
-        print("started yoko")
         self.lock = Lock()
         self.connect(constants["address"])
         self.RESPONSE_TIME = constants["response_time"]
         self.delay = 0.05
         self._sourcing_current = False
         self.srcV_measI()
-        print("ended yoko init")
 
     def connect(self, yoko_address):
         """Connect to Yokogawa"""
@@ -158,7 +156,7 @@ class Scanner:
     @yok_lock
     def scan_jv(self, vmin, vmax, steps):
         """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
-
+        print("trying to scan")
         # Run reverse scan
         _, rev_i = self._single_iv_sweep(vstart=vmax, vend=vmin, steps=steps)
         # Run forward scan
