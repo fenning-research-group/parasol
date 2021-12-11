@@ -306,6 +306,7 @@ class Controller:
 
                 # Scan device foward + reverse, calculate current density and power for both
                 self.relay.on(module)
+                print(f"jvscan!4")
                 v, fwd_i, rev_i = self.scanner.scan_jv(
                     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
                 )
@@ -350,7 +351,7 @@ class Controller:
 
             # increase jv scan count
             d["jv"]["scan_count"] += 1
-        print("jvscan!4")
+        print("jvscan!5")
 
     def create_mpp_file(self, id):
         """Creates base file for MPP data"""
