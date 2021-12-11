@@ -3,6 +3,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import csv
 
 # File Structure:
 # WorkingDirectory:StringName:
@@ -119,12 +120,13 @@ class Parasol_String:
 
                 # get time information
                 with open(jv_file_path) as f:
-                    f.readline()  # date
-                    f.readline()  # time
-                    all_t.append((f.readline())[-1])  # epoch time
-                    f.readline()  # string
-                    f.readline()  # module
-                    f.readline()  # area
+                    reader = csv.reader(f)
+                    _ = next(reader)  # date
+                    _ = next(reader)  # time
+                    all_t.append(next(reader)[-1])  # epoch time
+                    _ = next(reader)  # string
+                    _ = next(reader)  # module
+                    _ = next(reader)  # area
 
                 # load rest of dataframe and split
                 df = pd.read_csv(jv_file_path, header=None, skiprows=6, index_col=0)
