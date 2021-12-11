@@ -63,15 +63,16 @@ class Parasol_String:
         for folder in folderpath:
 
             # initialize lists
-            files = []
+            # files = []
             scan_numbers = []
             paths_chronological = []
 
             # in each folder, get list of files that end with .csv
-            all_files = os.listdir(folder)
-            for file in all_files:
-                if file.find(".csv") != -1:
-                    files.append(file)
+            # all_files = os.listdir(folder)
+            # for file in all_files:
+            #     if file.find(".csv") != -1:
+            #         files.append(file)
+            files = os.listdir(folder)
 
             # for each folder, create list of scan numbers
             for file in files:
