@@ -121,7 +121,7 @@ class Parasol_String:
                 with open(jv_file_path) as f:
                     f.readline()  # date
                     f.readline()  # time
-                    all_t.append((f.readline()).split(":")[-1])  # epoch time
+                    all_t.append((f.readline())[-1])  # epoch time
                     f.readline()  # string
                     f.readline()  # module
                     f.readline()  # area
