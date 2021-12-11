@@ -135,21 +135,16 @@ class Scanner:
     # @yok_lock
     def _single_iv_sweep(self, vstart, vend, steps):
         """Runs a single IV sweep"""
-        print("started iv sweep")
         # Make empty numpy arrays for data
         v = np.linspace(vstart, vend, steps)
         i = np.zeros(v.shape)
 
-        print("vi init")
         # Turn on output, set voltage, measure current, turn off output
         self.output_on()
-        print("outputon")
         for idx, v_point in enumerate(v):
             self.set_voltage(v_point)
             i[idx] = float(self._trig_read())
-        print("testrun")
         self.output_off()
-        print("outputoff")
 
         # Flip reverse scan order so that it aligns with voltage
         if abs(vstart) > abs(vend):
