@@ -41,7 +41,7 @@ class Scanner:
         self.yoko = rm.open_resource(yoko_address)
         self.yoko.timeout = 10  # 10 seconds
 
-    @yok_lock
+    # @yok_lock
     def srcV_measI(self):
         """Turn measurment on: Init settings for source V, measure I"""
         self.yoko.write("*RST")  # Reset Factory
@@ -61,7 +61,7 @@ class Scanner:
         self.yoko.write(tempdelay)  # Measure delay set in __init__
         self._sourcing_current = False
 
-    @yok_lock
+    # @yok_lock
     def srcI_measV(self):
         """Turn measurment on: Init settings for source I, measure V"""
         self.yoko.write("*RST")  # Reset Factory
@@ -81,22 +81,22 @@ class Scanner:
         self.yoko.write(tempdelay)  # Measure delay as set above
         self._sourcing_current = True
 
-    @yok_lock
+    # @yok_lock
     def output_on(self):
         """Turn output on"""
         self.yoko.write(":OUTP:STAT ON")
 
-    @yok_lock
+    # @yok_lock
     def output_off(self):
         """Turn output off"""
         self.yoko.write(":OUTP:STAT OFF")
 
-    @yok_lock
+    # @yok_lock
     def _trig_read(self) -> str:
         """Initializes, apllies trigger, fetches value & returns as string"""
         return self.yoko.query(":INIT;*TRG;:FETC?")
 
-    @yok_lock
+    # @yok_lock
     def set_voltage(self, v):
         """Set voltage"""
         if self._sourcing_current:
@@ -104,7 +104,7 @@ class Scanner:
         tempstr = ":SOUR:VOLT:LEV " + str(v) + "V"
         self.yoko.write(tempstr)
 
-    @yok_lock
+    # @yok_lock
     def set_current(self, i):
         """Set current"""
         if not self._sourcing_current:
@@ -112,7 +112,7 @@ class Scanner:
         tempstr = ":SOUR:CURR:LEV " + str(i) + "A"
         self.yoko.write(tempstr)
 
-    @yok_lock
+    # @yok_lock
     def voc(self) -> float:
         """Measures the open circuit voltage (V)"""
         self.set_current(0)
@@ -122,7 +122,7 @@ class Scanner:
 
         return voc
 
-    @yok_lock
+    # @yok_lock
     def isc(self) -> float:
         """Measures the short circuit current (A)"""
         self.set_voltage(0)
@@ -132,10 +132,10 @@ class Scanner:
 
         return isc
 
-    @yok_lock
+    # @yok_lock
     def _single_iv_sweep(self, vstart, vend, steps):
         """Runs a single IV sweep"""
-
+        print("started iv sweep")
         # Make empty numpy arrays for data
         v = np.linspace(vstart, vend, steps)
         i = np.zeros(v.shape)
@@ -157,7 +157,7 @@ class Scanner:
 
         return v, i
 
-    @yok_lock
+    # @yok_lock
     def scan_jv(self, vmin, vmax, steps):
         """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
         # Run reverse scan
