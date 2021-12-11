@@ -443,7 +443,7 @@ class Controller:
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = p
             d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
-            d["mpp"]["last_voltages"][0] = v
+            d["mpp"]["last_voltages"][1] = v
 
             # Save in base filepath:MPP_stringID:
             mppfolder = os.path.join(d["_savedir"], "MPP")
