@@ -120,14 +120,13 @@ class EastTester:
             time.sleep(self.et_delay)
 
             curr = self.et.readlines()[-1]
-            print("1", curr)
             curr = curr.decode("utf-8")
             curr = re.findall("\d*\.?\d+", curr)
             curr = float(curr[0])
-            print("2", curr)
             curr_tot += curr
             i += 1
 
-        curr_tot /= self.et_avg_num
+        curr_tot = curr_tot / self.et_avg_num
+        print(curr_tot)
 
         return curr_tot
