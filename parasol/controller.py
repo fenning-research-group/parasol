@@ -310,10 +310,12 @@ class Controller:
                 v, fwd_i, rev_i = self.scanner.scan_jv(
                     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
                 )
+                print(f"jvscan!5")
                 fwd_j = fwd_i / d["area"]
                 fwd_p = v * fwd_j
                 rev_j = rev_i / d["area"]
                 rev_p = v * rev_j
+                print(f"jvscan!6")
 
                 # Open file, write header/column names then fill
                 with open(fpath, "w", newline="") as f:
@@ -351,7 +353,7 @@ class Controller:
 
             # increase jv scan count
             d["jv"]["scan_count"] += 1
-        print("jvscan!5")
+        print("jvscan!7")
 
     def create_mpp_file(self, id):
         """Creates base file for MPP data"""
