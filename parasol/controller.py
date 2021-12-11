@@ -405,7 +405,7 @@ class Controller:
             if d["mpp"]["vmpp"] is not None:
                 vmpp = d["mpp"]["vmpp"]
             else:
-                for value in range(d["jv"]["vmpp"]):
+                for value in d["jv"]["vmpp"]:
                     vmpp += value
 
             # Get voltage step
