@@ -49,7 +49,7 @@ class Parasol_String:
         # path to analyzed folder --> rootfolder:Analyzed
         analyzed_folder = os.path.join(self.stringpath, "Analyzed")
         if not os.path.exists(analyzed_folder):
-            os.makedirs(self.analyzed_folder)
+            os.makedirs(analyzed_folder)
 
         return mpp_folder, jv_folders, analyzed_folder
 

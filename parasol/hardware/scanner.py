@@ -28,12 +28,14 @@ class Scanner:
 
     def __init__(self) -> None:
         """Initialize Yokogawa"""
+        print("started yoko")
         self.lock = Lock()
         self.connect(constants["address"])
         self.RESPONSE_TIME = constants["response_time"]
         self.delay = 0.05
         self._sourcing_current = False
         self.srcV_measI()
+        print("ended yoko init")
 
     def connect(self, yoko_address):
         """Connect to Yokogawa"""
