@@ -433,7 +433,7 @@ class Controller:
             et = self.easttester[et_key]
             et.output_on(ch)
             et.set_voltage(ch, v)
-            i = et.measure_current(ch, v)
+            i = et.measure_current(ch)
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
 
