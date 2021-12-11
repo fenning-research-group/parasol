@@ -123,7 +123,7 @@ class Parasol_String:
                     reader = csv.reader(f)
                     _ = next(reader)  # date
                     _ = next(reader)  # time
-                    all_t.append(next(reader)[-1])  # epoch time
+                    all_t.append(float(next(reader)[-1]))  # epoch time
                     _ = next(reader)  # string
                     _ = next(reader)  # module
                     _ = next(reader)  # area
@@ -138,6 +138,7 @@ class Parasol_String:
 
             # make all data numpy arrays
             all_t = np.array(all_t)
+            print(all_t)
             all_t_elapsed = all_t - all_t[0]
             all_v = np.array(all_v)
             all_j_fwd = np.array(all_j_fwd)
