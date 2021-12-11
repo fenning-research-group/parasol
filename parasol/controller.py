@@ -413,14 +413,14 @@ class Controller:
                 d["mpp"]["last_powers"][1] is None
             ):
                 voltage_step = self.et_voltage_step
-            elif d["mpp"]["last_powers"][1] >= d["mpp"]["last_powers"][0]:
-                voltage_step = (
-                    d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
-                )
-            elif d["mpp"]["last_powers"][1] < d["mpp"]["last_powers"][0]:
-                voltage_step = (
-                    d["mpp"]["last_voltages"][0] - d["mpp"]["last_voltages"][1]
-                )
+            else:
+                if d["mpp"]["last_voltages"][1] > d["mpp"]["last_voltages"][0]:
+                    voltage_step = self.et_voltage_step
+                else:
+                    voltage_step = -self.et_voltage_step
+
+                if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
+                    voltage_step *= -1
 
             # Get time, set voltage
             t = time.time()
