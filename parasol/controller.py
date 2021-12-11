@@ -449,8 +449,7 @@ class Controller:
 
             # Open file, append values to columns
             with open(fpath, "a", newline="") as f:
-                for line in zip(t, v, i, j, p):
-                    csv.writer.writerow(line)
+                csv.writer.writerow([t, v, i, j, p])
 
     def __del__(self):
         """Stops que and program on exit"""

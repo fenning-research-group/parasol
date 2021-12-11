@@ -127,6 +127,5 @@ class EastTester:
             i += 1
 
         curr_tot = curr_tot / self.et_avg_num
-        print(curr_tot)
 
         return curr_tot
