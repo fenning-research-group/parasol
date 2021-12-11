@@ -301,7 +301,8 @@ class Controller:
                 # Save in base filepath: stringname: JV_modulechannel: stringname_stringid_modulechannel_JV_scannumber
                 jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
                 fpath = os.path.join(
-                    jvfolder, f"{d['name']}_{id}_{module}_JV_{d['jv_scan_count']}.csv"
+                    jvfolder,
+                    f"{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
                 )
 
                 # Scan device foward + reverse, calculate current density and power for both
