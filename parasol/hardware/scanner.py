@@ -18,7 +18,7 @@ def yok_lock(f):
 
     def inner(self, *args, **kwargs):
         with self.lock:
-            f(self, *args, **kwargs)
+            return f(self, *args, **kwargs)
 
     return inner
 
