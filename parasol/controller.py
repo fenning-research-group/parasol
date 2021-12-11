@@ -269,7 +269,7 @@ class Controller:
     def stop(self):
         """Delete workers / stop queue"""
         self.running = False
-        ids = list(self.modules.keys())
+        ids = list(self.strings.keys())
         for id in ids:
             self.unload_string(id)
         self.loop.call_soon_threadsafe(self.loop.stop)
