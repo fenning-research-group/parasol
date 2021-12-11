@@ -62,22 +62,25 @@ class Parasol_String:
         # cycle through folders
         for folder in folderpath:
 
+            # initialize lists
+            files = []
+            scan_numbers = []
+            paths_chronological = []
+
             # in each folder, get list of files that end with .csv
             all_files = os.listdir(folder)
-            files = []
             for file in all_files:
                 if file.find(".csv") != -1:
                     files.append(file)
 
             # for each folder, create list of scan numbers
-            scan_numbers = []
             for file in files:
                 scan_numbers.append(file.split("_")[-1]).split(".")[0]
 
             # sort files by scan number, create paths to files
             files_chronological = [x for _, x in sorted(zip(scan_numbers, files))]
             for file in files_chronological:
-                paths_chronological = os.path.join(folder, file)
+                paths_chronological.append(os.path.join(folder, file))
 
             # create dictionary basefolder : file_paths
             file_dict[folder] = paths_chronological

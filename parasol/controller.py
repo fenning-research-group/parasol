@@ -179,10 +179,8 @@ class Controller:
 
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
-        print("Starting JV worker")
         # While the loop is running, add jv scans to queue
         while self.running:
-            print("Jv worker running")
             id = await self.jv_queue.get()
 
             scan_future = asyncio.gather(
@@ -278,12 +276,10 @@ class Controller:
     def scan_jv(self, id):
         """Uses Yokogawa to conudct a JV scan"""
 
-        print("jvscan!")
         d = self.strings.get(id, None)
 
         # Emsure MPP isn't running.
         with d["lock"]:
-            print("jvscan!2")
 
             # Turn off easttester output
             et_key, ch = self.et_channels[id]
@@ -291,7 +287,6 @@ class Controller:
             et.output_off(ch)
 
             for index, module in enumerate(d["module_channels"]):
-                print(f"jvscan!3")
                 # Get date/time and make filepath
                 date_str = datetime.now().strftime("%Y-%m-%d")
                 time_str = datetime.now().strftime("%H:%M:%S")
@@ -306,16 +301,13 @@ class Controller:
 
                 # Scan device foward + reverse, calculate current density and power for both
                 self.relay.on(module)
-                print(f"jvscan!4")
                 v, fwd_i, rev_i = self.scanner.scan_jv(
                     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
                 )
-                print(f"jvscan!5")
                 fwd_j = fwd_i / d["area"]
                 fwd_p = v * fwd_j
                 rev_j = rev_i / d["area"]
                 rev_p = v * rev_j
-                print(f"jvscan!6")
 
                 # Open file, write header/column names then fill
                 with open(fpath, "w", newline="") as f:
@@ -353,7 +345,6 @@ class Controller:
 
             # increase jv scan count
             d["jv"]["scan_count"] += 1
-        print("jvscan!7")
 
     def create_mpp_file(self, id):
         """Creates base file for MPP data"""
