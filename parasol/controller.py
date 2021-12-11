@@ -180,6 +180,7 @@ class Controller:
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
         # While the loop is running, add jv scans to queue
+        print("JV worker started")
         while self.running:
             id = await self.jv_queue.get()
 
@@ -200,6 +201,7 @@ class Controller:
 
     async def mpp_worker(self, loop):
         """Uses EastTester to conudct a MPP scan by calling track_mpp"""
+        print("MPP worker started")
 
         # While the loop is running, add mpp scans to queue
         while self.running:
@@ -277,9 +279,11 @@ class Controller:
         """Uses Yokogawa to conudct a JV scan"""
 
         d = self.strings.get(id, None)
+        print("JV function called")
 
         # Emsure MPP isn't running.
         with d["lock"]:
+            print("Lock acquired")
 
             # Turn off easttester output
             et_key, ch = self.et_channels[id]
@@ -287,6 +291,8 @@ class Controller:
             et.output_off(ch)
 
             for index, module in enumerate(d["module_channels"]):
+
+                print(f"Scanning module")
                 # Get date/time and make filepath
                 date_str = datetime.now().strftime("%Y-%m-%d")
                 time_str = datetime.now().strftime("%H:%M:%S")
@@ -301,9 +307,11 @@ class Controller:
 
                 # Scan device foward + reverse, calculate current density and power for both
                 self.relay.on(module)
+                print("relay on")
                 v, fwd_i, rev_i = self.scanner.scan_jv(
                     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
                 )
+                print("scan complete")
                 fwd_j = fwd_i / d["area"]
                 fwd_p = v * fwd_j
                 rev_j = rev_i / d["area"]
