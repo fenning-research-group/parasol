@@ -445,6 +445,8 @@ class Controller:
             d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
             d["mpp"]["last_voltages"][1] = v
 
+            d["mpp"]["vmpp"] = v
+
             # Save in base filepath:MPP_stringID:
             mppfolder = os.path.join(d["_savedir"], "MPP")
             fpath = os.path.join(mppfolder, f"{d['name']}_{id}_MPP_1.csv")
