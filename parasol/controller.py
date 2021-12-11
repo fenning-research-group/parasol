@@ -179,10 +179,10 @@ class Controller:
 
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
-
+        print("Starting JV worker")
         # While the loop is running, add jv scans to queue
         while self.running:
-
+            print("Jv worker running")
             id = await self.jv_queue.get()
 
             scan_future = asyncio.gather(
