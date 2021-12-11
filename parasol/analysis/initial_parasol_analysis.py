@@ -76,7 +76,9 @@ class Parasol_String:
 
             # for each folder, create list of scan numbers
             for file in files:
-                scan_numbers.append(file.split("_")[-1]).split(".")[0]
+                scan_numbers.append(
+                    file.split("_")[-1]
+                )  # .split(".")[0] if we have extensions
 
             # sort files by scan number, create paths to files
             files_chronological = [x for _, x in sorted(zip(scan_numbers, files))]
