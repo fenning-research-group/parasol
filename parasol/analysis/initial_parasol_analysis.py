@@ -37,7 +37,7 @@ class Parasol_String:
         """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""
 
         # path to mpp folder --> rootfolder:MPP:
-        mpp_folder = os.path.join(self.stringpath, "MPP")
+        mpp_folder = [os.path.join(self.stringpath, "MPP")]
 
         # path to jv folders --> rootfolder:JV_{module}:
         jv_folders = []
