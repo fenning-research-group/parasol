@@ -122,9 +122,12 @@ class Controller:
                 "_future": mpp_future,
                 "vmpp": None,
             },
-            "_savedir": self._make_module_subdir(name, id, modulechannels),
             "lock": Lock(),
         }
+
+        self.strings[id]["_savedir"] = (
+            self._make_module_subdir(name, id, modulechannels),
+        )
 
         # Create the base MPP file with header and no data (we will append to it)
         self.create_mpp_file(id)
