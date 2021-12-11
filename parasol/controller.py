@@ -409,7 +409,9 @@ class Controller:
                     vmpp += value
 
             # Get voltage step
-            if d["mpp"]["last_powers"][0] or d["mpp"]["last_powers"][1] is None:
+            if (d["mpp"]["last_powers"][0] is None) or (
+                d["mpp"]["last_powers"][1] is None
+            ):
                 voltage_step = self.et_voltage_step
             elif d["mpp"]["last_powers"][1] >= d["mpp"]["last_powers"][0]:
                 voltage_step = (
