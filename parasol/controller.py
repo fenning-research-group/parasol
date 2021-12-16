@@ -179,8 +179,9 @@ class Controller:
 
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
+        # idk why but this line needs to be here for it work
+        print("JV Worker Added")
         # While the loop is running, add jv scans to queue
-        print("Starting JV worker")
         while self.running:
             id = await self.jv_queue.get()
 
@@ -201,8 +202,7 @@ class Controller:
 
     async def mpp_worker(self, loop):
         """Uses EastTester to conudct a MPP scan by calling track_mpp"""
-
-        print("Starting MPP worker")
+        # print("MPP Worker Added")
         # While the loop is running, add mpp scans to queue
         while self.running:
             id = await self.mpp_queue.get()
@@ -253,6 +253,7 @@ class Controller:
         self.thread = Thread(target=self.__make_background_event_loop)
         self.thread.start()
         time.sleep(0.5)
+        # time.sleep(2) --> still need print statement
 
         # Create JV worker for yokogawa
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
@@ -279,7 +280,7 @@ class Controller:
         """Uses Yokogawa to conudct a JV scan"""
 
         d = self.strings.get(id, None)
-        print("JV function called")
+        #print("JV function called")
 
         # Emsure MPP isn't running.
         with d["lock"]:
@@ -356,9 +357,9 @@ class Controller:
             d["jv"]["scan_count"] += 1
 
             # Turn on easttester output at old output voltage --> make calc_vmp function
-            # vmp = self.calc_last_vmp(d)
-            # et.output_on(ch)
-            # et.set_voltage(ch, vmp)
+            vmp = self.calc_last_vmp(d)
+            et.output_on(ch)
+            et.set_voltage(ch, vmp)
 
     def create_mpp_file(self, id):
         """Creates base file for MPP data"""
@@ -430,7 +431,6 @@ class Controller:
     def track_mpp(self, id):
         """Uses Easttester to track MPP with a perturb and observe algorithm"""
 
-        print("tracking on")
         d = self.strings.get(id, None)
 
         # Dont run until we have done JV scan
@@ -440,13 +440,9 @@ class Controller:
         # Ensure that JV isn't running
         with d["lock"]:
 
-            print("lock defeated")
             # get last vvmpp and next from functions
             vmpp = self.calc_last_vmp(d)
             v = self.calc_next_vmp(d, vmpp)
-
-            print("old vmp is:", vmpp)
-            print("new vmp is:", v)
 
             # Get time, set voltage
             t = time.time()
@@ -455,19 +451,14 @@ class Controller:
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
             # cycle off then on the east tester ---> probably hurt cells, but will clear errors for now
-            et.output_off(ch)
-            print("et off")
-
-            ##
-            et.output_on(ch)
-            print("et on")
+            #et.output_off(ch)
+            #print("et off")
+            #et.output_on(ch)
+            #print("et on")
             et.set_voltage(ch, v)
-            print("v set")
             i = et.measure_current(ch)
-            print("i measured:", i)
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
-
             # Update d[] by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = p
