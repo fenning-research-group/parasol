@@ -428,6 +428,7 @@ class Controller:
     def track_mpp(self, id):
         """Uses Easttester to track MPP with a perturb and observe algorithm"""
 
+        print("tracking on")
         d = self.strings.get(id, None)
 
         # Dont run until we have done JV scan
@@ -437,9 +438,13 @@ class Controller:
         # Ensure that JV isn't running
         with d["lock"]:
 
+            print("lock defeated")
             # get last vvmpp and next from functions
             vmpp = self.calc_last_vmp(d)
             v = self.calc_next_vmp(d, vmpp)
+            
+            print("old vmp is:", vmpp)
+            print("new vmp is:", v)
 
             # Get time, set voltage
             t = time.time()
@@ -449,10 +454,15 @@ class Controller:
             et = self.easttester[et_key]
             # cycle off then on the east tester ---> probably hurt cells, but will clear errors for now
             et.output_off(ch)
+            print("et off")
+
             ##
             et.output_on(ch)
+             print("et on")
             et.set_voltage(ch, v)
+            print("v set")
             i = et.measure_current(ch)
+            print("i measured:", i)
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
 
