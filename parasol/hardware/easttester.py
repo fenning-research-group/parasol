@@ -47,9 +47,7 @@ class EastTester:
     @et_lock
     def srcV_measI(self, channel):
         """Setup source voltage and measure I"""
-        # Set to external operation, constant voltage, and continuous operation
-        self.et.write(("LOAD:TRIGger EXT").encode())
-        time.sleep(self.et_delay)
+        # Set to constant voltage, and continuous operation
         self.et.write(("CH" + str(channel) + ":MODE CV\n").encode())
         time.sleep(self.et_delay)
         self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())

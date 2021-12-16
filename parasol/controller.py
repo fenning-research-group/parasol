@@ -311,6 +311,8 @@ class Controller:
                 v, fwd_i, rev_i = self.scanner.scan_jv(
                     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
                 )
+                self.relay.all_off()
+
                 print("scan complete")
                 fwd_j = fwd_i / d["area"]
                 fwd_p = v * fwd_j
@@ -347,7 +349,8 @@ class Controller:
 
                 # Calculate MPP, save to string dictionary
                 avg_p = (rev_p + fwd_p) / 2
-                v_maxloc = np.argmax(avg_p)
+                #v_maxloc = np.argmax(avg_p)
+                v_maxloc = np.argmin(avg_p)
                 v_mpp = v[v_maxloc]
                 d["jv"]["vmpp"][index] = v_mpp
 
