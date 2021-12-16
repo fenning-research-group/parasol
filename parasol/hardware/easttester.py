@@ -118,7 +118,10 @@ class EastTester:
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             print("command sent")
             time.sleep(self.et_delay)
-            curr = self.et.readlines()[-1]
+            time.sleep(self.et_delay)
+            curr = self.et.readlines()
+            print("lines read:" + curr)
+            curr = curr[-1]
             print("line read:", curr)
             curr = curr.decode("utf-8")
             print("line decoded:", curr)
