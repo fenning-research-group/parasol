@@ -494,6 +494,7 @@ def future_callback(future):
     try:
         if future.exception() is not None:
             print(f"Exception in future: {future.exception()}")
-            raise future.exception()
+            future.result()
+            # raise future.exception()
     except CancelledError:
         pass
