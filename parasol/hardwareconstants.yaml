@@ -5,7 +5,7 @@ relay:
 
 yokogawa:
   address: 'GPIB1::1::INSTR'
-  response_time: 0.001 # Seconds for command to process
+  response_time: 0.01 # Seconds for command to process changed from 0.001
 
 controller:
   et_voltage_step: 0.01 # Volts
