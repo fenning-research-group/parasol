@@ -442,7 +442,7 @@ class Controller:
             # get last vvmpp and next from functions
             vmpp = self.calc_last_vmp(d)
             v = self.calc_next_vmp(d, vmpp)
-            
+
             print("old vmp is:", vmpp)
             print("new vmp is:", v)
 
@@ -458,7 +458,7 @@ class Controller:
 
             ##
             et.output_on(ch)
-             print("et on")
+            print("et on")
             et.set_voltage(ch, v)
             print("v set")
             i = et.measure_current(ch)
