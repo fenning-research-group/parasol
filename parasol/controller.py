@@ -180,6 +180,7 @@ class Controller:
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
         # While the loop is running, add jv scans to queue
+        print("Starting JV worker")
         while self.running:
             id = await self.jv_queue.get()
 
@@ -201,6 +202,7 @@ class Controller:
     async def mpp_worker(self, loop):
         """Uses EastTester to conudct a MPP scan by calling track_mpp"""
 
+        print("Starting MPP worker")
         # While the loop is running, add mpp scans to queue
         while self.running:
             id = await self.mpp_queue.get()
