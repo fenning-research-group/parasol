@@ -180,7 +180,6 @@ class Controller:
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
         # While the loop is running, add jv scans to queue
-        print("JV worker started")
         while self.running:
             id = await self.jv_queue.get()
 
@@ -201,7 +200,6 @@ class Controller:
 
     async def mpp_worker(self, loop):
         """Uses EastTester to conudct a MPP scan by calling track_mpp"""
-        print("MPP worker started")
 
         # While the loop is running, add mpp scans to queue
         while self.running:
@@ -283,7 +281,6 @@ class Controller:
 
         # Emsure MPP isn't running.
         with d["lock"]:
-            print("Lock acquired")
 
             # Turn off easttester output
             et_key, ch = self.et_channels[id]
@@ -292,7 +289,6 @@ class Controller:
 
             for index, module in enumerate(d["module_channels"]):
 
-                print(f"Scanning module")
                 # Get date/time and make filepath
                 date_str = datetime.now().strftime("%Y-%m-%d")
                 time_str = datetime.now().strftime("%H:%M:%S")
@@ -307,13 +303,14 @@ class Controller:
 
                 # Scan device foward + reverse, calculate current density and power for both
                 self.relay.on(module)
-                print("relay on")
                 v, fwd_i, rev_i = self.scanner.scan_jv(
                     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
                 )
                 self.relay.all_off()
 
-                print("scan complete")
+                # flip the current density
+                fwd_i *= -1
+                rev_i *= -1
                 fwd_j = fwd_i / d["area"]
                 fwd_p = v * fwd_j
                 rev_j = rev_i / d["area"]
@@ -349,13 +346,17 @@ class Controller:
 
                 # Calculate MPP, save to string dictionary
                 avg_p = (rev_p + fwd_p) / 2
-                #v_maxloc = np.argmax(avg_p)
-                v_maxloc = np.argmin(avg_p)
+                v_maxloc = np.argmax(avg_p)
                 v_mpp = v[v_maxloc]
                 d["jv"]["vmpp"][index] = v_mpp
 
             # increase jv scan count
             d["jv"]["scan_count"] += 1
+
+            # Turn on easttester output at old output voltage --> make calc_vmp function
+            # vmp = self.calc_last_vmp(d)
+            # et.output_on(ch)
+            # et.set_voltage(ch, vmp)
 
     def create_mpp_file(self, id):
         """Creates base file for MPP data"""
@@ -390,6 +391,40 @@ class Controller:
                 ]
             )
 
+    def calc_last_vmp(self, d):
+        vmpp = 0
+        if d["mpp"]["vmpp"] is not None:
+            vmpp = d["mpp"]["vmpp"]
+        else:
+            for value in d["jv"]["vmpp"]:
+                # only correct for series --> we are almost def in parallel
+                vmpp += value
+
+        return vmpp
+
+    def calc_next_vmp(self, d, vmpp_last):
+        # Get voltage step (make sure we are moving toward the MPP)
+        if (d["mpp"]["last_powers"][0] is None) or (d["mpp"]["last_powers"][1] is None):
+            voltage_step = self.et_voltage_step
+        else:
+            if d["mpp"]["last_voltages"][1] >= d["mpp"]["last_voltages"][0]:
+                voltage_step = self.et_voltage_step
+            else:
+                voltage_step = -self.et_voltage_step
+
+            if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
+                voltage_step *= -1
+
+        # set the voltage
+        v = vmpp_last + voltage_step
+
+        # Ensure voltage is between the easttesters max and min values
+        if (v <= d["mpp"]["vmin"]) or (v >= d["mpp"]["vmax"]):
+            v = vmpp_last - 2 * voltage_step
+
+        # send back vmpp
+        return v
+
     def track_mpp(self, id):
         """Uses Easttester to track MPP with a perturb and observe algorithm"""
 
@@ -402,39 +437,19 @@ class Controller:
         # Ensure that JV isn't running
         with d["lock"]:
 
-            # Get last vmp, ideally from mpp tracking value, else from addition of jv vmpps
-            vmpp = 0
-            if d["mpp"]["vmpp"] is not None:
-                vmpp = d["mpp"]["vmpp"]
-            else:
-                for value in d["jv"]["vmpp"]:
-                    vmpp += value
-
-            # Get voltage step
-            if (d["mpp"]["last_powers"][0] is None) or (
-                d["mpp"]["last_powers"][1] is None
-            ):
-                voltage_step = self.et_voltage_step
-            else:
-                if d["mpp"]["last_voltages"][1] > d["mpp"]["last_voltages"][0]:
-                    voltage_step = self.et_voltage_step
-                else:
-                    voltage_step = -self.et_voltage_step
-
-                if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
-                    voltage_step *= -1
+            # get last vvmpp and next from functions
+            vmpp = self.calc_last_vmp(d)
+            v = self.calc_next_vmp(d, vmpp)
 
             # Get time, set voltage
             t = time.time()
-            v = vmpp + voltage_step
-
-            # Ensure voltage is between the easttesters max and min values
-            if (v < d["mpp"]["vmin"]) or (v > d["mpp"]["vmax"]):
-                v = vmpp - 2 * voltage_step
 
             # Turn on easttester output, set voltage, measure current, calculate desired parameters
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
+            # cycle off then on the east tester ---> probably hurt cells, but will clear errors for now
+            et.output_off(ch)
+            ##
             et.output_on(ch)
             et.set_voltage(ch, v)
             i = et.measure_current(ch)
@@ -446,7 +461,6 @@ class Controller:
             d["mpp"]["last_powers"][1] = p
             d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
             d["mpp"]["last_voltages"][1] = v
-
             d["mpp"]["vmpp"] = v
 
             # Save in base filepath:MPP_stringID:
