@@ -110,17 +110,22 @@ class EastTester:
         """Measure current several times and average"""
         i = 0
         curr_tot = 0
+        print("Measuring current...")
 
         # The easttester is not very accurate, so we need to average several times
         while i < self.et_avg_num:
 
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
+            print("command sent")
             time.sleep(self.et_delay)
-
             curr = self.et.readlines()[-1]
+            print("line read:", curr)
             curr = curr.decode("utf-8")
+            print("line decoded:", curr)
             curr = re.findall("\d*\.?\d+", curr)
+            print("line parsed:", curr)
             curr = float(curr[0])
+            print("line converted:", curr)
             curr_tot += curr
             i += 1
 
