@@ -180,7 +180,8 @@ class Controller:
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
         # idk why but this line needs to be here for it work
-        print("JV Worker Added")
+        # print("JV Worker Added")
+        time.sleep(0.5)
         # While the loop is running, add jv scans to queue
         while self.running:
             id = await self.jv_queue.get()
@@ -253,8 +254,7 @@ class Controller:
         self.thread = Thread(target=self.__make_background_event_loop)
         self.thread.start()
         time.sleep(0.5)
-        # time.sleep(2) --> still need print statement
-
+        
         # Create JV worker for yokogawa
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
 
