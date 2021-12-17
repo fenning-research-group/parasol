@@ -23,12 +23,8 @@ class Relay:
     def __init__(self):
         """Intialize relay"""
         self.lock = Lock()
-        self.RESPONSE_TIME = constants[
-            "response_time"
-        ]  # seconds for command to complete
-        self.SETTLING_TIME = constants[
-            "settling_time"
-        ]  # seconds for relay changeover to settle (voltage stabilization)
+        # Change --> Figure out the best timing for this
+        self.RESPONSE_TIME = constants["response_time"]  # sec to complete command
         self.relay_commands = {
             1: (65, 1),
             2: (65, 2),

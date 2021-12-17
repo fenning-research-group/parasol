@@ -1,7 +1,6 @@
 relay:
   address: 'COM3'
-  response_time: 0.1 # Seconds for command to process
-  settling_time: 5 # Seconds for relay changeover to settle (voltage stabilization)
+  response_time: 0.1 # Seconds for relay changeover to settle (voltage stabilitation)
 
 yokogawa:
   address: 'GPIB1::1::INSTR'

@@ -64,18 +64,13 @@ class Parasol_String:
         for folder in folderpath:
 
             # initialize lists
-            # files = []
             scan_numbers = []
             paths_chronological = []
 
-            # in each folder, get list of files that end with .csv
-            # all_files = os.listdir(folder)
-            # for file in all_files:
-            #     if file.find(".csv") != -1:
-            #         files.append(file)
+            # Grab list of files in folder
             files = os.listdir(folder)
 
-            # for each folder, create list of scan numbers
+            # for each file, create list of scan numbers
             for file in files:
                 scan_numbers.append(
                     file.split("_")[-1]
@@ -88,6 +83,8 @@ class Parasol_String:
 
             # create dictionary basefolder : file_paths
             file_dict[folder] = paths_chronological
+
+            print(file_dict)
 
         return file_dict
 
@@ -138,13 +135,13 @@ class Parasol_String:
 
             # make all data numpy arrays
             all_t = np.array(all_t)
-            print(all_t)
             all_t_elapsed = all_t - all_t[0]
             all_v = np.array(all_v)
             all_j_fwd = np.array(all_j_fwd)
             all_p_fwd = np.array(all_p_fwd)
             all_j_rev = np.array(all_j_rev)
             all_p_rev = np.array(all_p_rev)
+            print(all_p_rev)
 
             # pass all data to function to calculate parameters
             scalardict_fwd = self._calculate_jv_parameters(
@@ -154,6 +151,7 @@ class Parasol_String:
                 all_v, all_j_rev, all_p_rev, "rev"
             )
 
+            print(scalardict_fwd)
             # create dict, append time values and results from each scalardict
             dfdict = {}
             dfdict["epoch"] = [t_epoch for t_epoch in all_t]

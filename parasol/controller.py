@@ -179,8 +179,7 @@ class Controller:
 
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
-        # idk why but this line needs to be here for it work
-        # print("JV Worker Added")
+        # We need a sleep here or it never gets added to the queue
         time.sleep(0.5)
         # While the loop is running, add jv scans to queue
         while self.running:
@@ -203,7 +202,8 @@ class Controller:
 
     async def mpp_worker(self, loop):
         """Uses EastTester to conudct a MPP scan by calling track_mpp"""
-        # print("MPP Worker Added")
+        # We need a sleep here or it never gets added to the queue
+        time.sleep(0.5)
         # While the loop is running, add mpp scans to queue
         while self.running:
             id = await self.mpp_queue.get()
@@ -254,7 +254,7 @@ class Controller:
         self.thread = Thread(target=self.__make_background_event_loop)
         self.thread.start()
         time.sleep(0.5)
-        
+
         # Create JV worker for yokogawa
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
 
@@ -267,6 +267,7 @@ class Controller:
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         self.running = True
 
+    # Change this to restart all the hardware as well -> its a stop for everything.
     def stop(self):
         """Delete workers / stop queue"""
         self.running = False
@@ -280,7 +281,6 @@ class Controller:
         """Uses Yokogawa to conudct a JV scan"""
 
         d = self.strings.get(id, None)
-        #print("JV function called")
 
         # Emsure MPP isn't running.
         with d["lock"]:
@@ -394,6 +394,7 @@ class Controller:
                 ]
             )
 
+    # Change to look at vmpp for each module on the string, also change to work out parallel connections for cells
     def calc_last_vmp(self, d):
         vmpp = 0
         if d["mpp"]["vmpp"] is not None:
@@ -444,21 +445,17 @@ class Controller:
             vmpp = self.calc_last_vmp(d)
             v = self.calc_next_vmp(d, vmpp)
 
-            # Get time, set voltage
+            # Get time
             t = time.time()
 
             # Turn on easttester output, set voltage, measure current, calculate desired parameters
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
-            # cycle off then on the east tester ---> probably hurt cells, but will clear errors for now
-            #et.output_off(ch)
-            #print("et off")
-            #et.output_on(ch)
-            #print("et on")
             et.set_voltage(ch, v)
             i = et.measure_current(ch)
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
+
             # Update d[] by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = p
@@ -486,6 +483,5 @@ def future_callback(future):
         if future.exception() is not None:
             print(f"Exception in future: {future.exception()}")
             future.result()
-            # raise future.exception()
     except CancelledError:
         pass

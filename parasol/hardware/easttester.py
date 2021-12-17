@@ -11,7 +11,7 @@ MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["easttester"]
 
-
+# We have several workers managing east tester so we need to make sure two dont try to work at the same time
 def et_lock(f):
     """Locks Easttester"""
 
@@ -29,6 +29,9 @@ class EastTester:
         """initialize and set bounds for measurement (see srcV_measI for bounds)"""
         self.lock = Lock()
         self.connect(port=port)
+
+        # Change --> could use both source delay and sense delay as well.
+        # Get constants from hardwareconstants
         self.et_delay = constants["response_time"]
         self.et_v_min = constants["v_min"]
         self.et_v_max = constants["v_shutoff"]
@@ -103,9 +106,7 @@ class EastTester:
     def set_voltage(self, channel, voltage):
         """Sets voltage"""
         self.et.write(("VOLT" + str(channel) + ":CV %f\n" % (voltage)).encode())
-        time.sleep(self.et_delay*10)
-
-
+        time.sleep(self.et_delay * 10)
 
     @et_lock
     def measure_current(self, channel):
@@ -113,7 +114,7 @@ class EastTester:
         i = 0
         curr_tot = 0
 
-        # The easttester is not very accurate, so we need to average several times
+        # To avoid marching in the same direction we need to average here
         while i < self.et_avg_num:
 
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())

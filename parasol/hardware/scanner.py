@@ -13,16 +13,6 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["yokogawa"]
 
 
-def yok_lock(f):
-    """Lock Yokogawa"""
-
-    def inner(self, *args, **kwargs):
-        with self.lock:
-            return f(self, *args, **kwargs)
-
-    return inner
-
-
 class Scanner:
     """Used for JV scanning"""
 
@@ -30,8 +20,15 @@ class Scanner:
         """Initialize Yokogawa"""
         self.lock = Lock()
         self.connect(constants["address"])
+
+        # These are the same now
         self.RESPONSE_TIME = constants["response_time"]
-        self.delay = 0.05
+        self.sensdelay = 0.05
+        self.sourcedelay = "MIN"
+        self.intime = 50
+        self.max_voltage = 1.5  # V
+        self.max_current = 1  # A
+
         self._sourcing_current = False
         self.srcV_measI()
 
@@ -41,27 +38,33 @@ class Scanner:
         self.yoko = rm.open_resource(yoko_address)
         self.yoko.timeout = 10  # 10 seconds
 
-    # @yok_lock
     def srcV_measI(self):
         """Turn measurment on: Init settings for source V, measure I"""
+
+        # Basic commands
         self.yoko.write("*RST")  # Reset Factory
         self.yoko.write(":SOUR:FUNC VOLT")  # Source function Voltage
-        self.yoko.write(":SOUR:VOLT:RANG 1V")  # Source range setting 1 V
         self.yoko.write(":SOUR:CURR:PROT:LINK ON")  # Limiter tracking ON
-        self.yoko.write(":SOUR:CURR:PROT:ULIM 50mA")  # Limiter 50 mA
         self.yoko.write(":SOUR:CURR:PROT:STAT ON")  # Limiter ON
         self.yoko.write(":SOUR:VOLT:LEV 0V")  # Source level 0 VOLT
         self.yoko.write(":SENS:STAT ON")  # Measurement ON
         self.yoko.write(":SENS:FUNC CURR")  # Measurement function Current
-        self.yoko.write(":SENS:ITIM MIN")  # Integration time Minimum
         self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero OFF
         self.yoko.write(":TRIG:SOUR EXT")  # Trigger source External trigger
-        self.yoko.write(":SOUR:DEL MIN")  # Source delay Minimum
-        tempdelay = ":SENS:DEL " + str(self.delay) + " ms"
-        self.yoko.write(tempdelay)  # Measure delay set in __init__
+
+        # Change these settings depending on what we are running
+        tempmaxvolt = ":SOUR:VOLT:RANG " + str(self.max_voltage) + "V"
+        self.yoko.write(tempmaxvolt)  # Source range setting 1 V
+        tempmaxcurr = ":SOUR:CURR:PROT:ULIM " + str(self.max_current) + "A"
+        self.yoko.write(tempmaxcurr)  # Limiter 1 mA
+
+        # Change these commands to optimize speed of our measurement (its fast!)
+        self.yoko.write(":SENS:ITIM MIN")  # Integration time (20 us to 500 ms)
+        self.yoko.write(":SOUR:DEL MIN")  # Source delay (15 us to 3600 s)
+        tempsensdelay = ":SENS:DEL " + str(self.sensdelay) + " ms"
+        self.yoko.write(tempsensdelay)  # Sense Delay --> (0 to 3600 s)
         self._sourcing_current = False
 
-    # @yok_lock
     def srcI_measV(self):
         """Turn measurment on: Init settings for source I, measure V"""
         self.yoko.write("*RST")  # Reset Factory
@@ -81,22 +84,18 @@ class Scanner:
         self.yoko.write(tempdelay)  # Measure delay as set above
         self._sourcing_current = True
 
-    # @yok_lock
     def output_on(self):
         """Turn output on"""
         self.yoko.write(":OUTP:STAT ON")
 
-    # @yok_lock
     def output_off(self):
         """Turn output off"""
         self.yoko.write(":OUTP:STAT OFF")
 
-    # @yok_lock
     def _trig_read(self) -> str:
         """Initializes, apllies trigger, fetches value & returns as string"""
         return self.yoko.query(":INIT;*TRG;:FETC?")
 
-    # @yok_lock
     def set_voltage(self, v):
         """Set voltage"""
         if self._sourcing_current:
@@ -104,7 +103,6 @@ class Scanner:
         tempstr = ":SOUR:VOLT:LEV " + str(v) + "V"
         self.yoko.write(tempstr)
 
-    # @yok_lock
     def set_current(self, i):
         """Set current"""
         if not self._sourcing_current:
@@ -112,7 +110,6 @@ class Scanner:
         tempstr = ":SOUR:CURR:LEV " + str(i) + "A"
         self.yoko.write(tempstr)
 
-    # @yok_lock
     def voc(self) -> float:
         """Measures the open circuit voltage (V)"""
         self.set_current(0)
@@ -122,7 +119,6 @@ class Scanner:
 
         return voc
 
-    # @yok_lock
     def isc(self) -> float:
         """Measures the short circuit current (A)"""
         self.set_voltage(0)
@@ -132,7 +128,6 @@ class Scanner:
 
         return isc
 
-    # @yok_lock
     def _single_iv_sweep(self, vstart, vend, steps):
         """Runs a single IV sweep"""
         # Make empty numpy arrays for data
@@ -152,7 +147,6 @@ class Scanner:
 
         return v, i
 
-    # @yok_lock
     def scan_jv(self, vmin, vmax, steps):
         """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
         # Run reverse scan
