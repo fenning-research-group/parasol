@@ -111,7 +111,6 @@ class Controller:
                 "v": [None for i in range(n_modules)],
                 "j_fwd": [None for i in range(n_modules)],
                 "j_rev": [None for i in range(n_modules)],
-                "vmpp": [None for i in range(n_modules)],
             },
             "mpp": {
                 "interval": mpp_interval,
@@ -267,13 +266,24 @@ class Controller:
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         self.running = True
 
-    # Change this to restart all the hardware as well -> its a stop for everything.
     def stop(self):
-        """Delete workers / stop queue"""
+        """Delete workers / stop queue / reset hardware"""
+
+        # close all channels
+        self.relay.all_off()
+        # turn off yokogawa
+        self.scanner.srcV_measI()
+
         self.running = False
         ids = list(self.strings.keys())
         for id in ids:
+            # Unload all strings
             self.unload_string(id)
+            # Reset east tester 
+            et_key, ch = self.et_channels[id]
+            et = self.easttester[et_key]
+            et.srcV_measI(ch)
+
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
@@ -304,16 +314,16 @@ class Controller:
                     f"{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
                 )
 
-                # Scan device foward + reverse, calculate current density and power for both
+                # Open relay, scan device foward + reverse, turn off relay
                 self.relay.on(module)
                 v, fwd_i, rev_i = self.scanner.scan_jv(
                     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
                 )
                 self.relay.all_off()
 
-                # flip the current density
-                fwd_i *= -1
-                rev_i *= -1
+                # flip the current density, convert to mA, calculate parameters
+                fwd_i *= -1 * 1000
+                rev_i *= -1 * 1000
                 fwd_j = fwd_i / d["area"]
                 fwd_p = v * fwd_j
                 rev_j = rev_i / d["area"]
@@ -347,19 +357,14 @@ class Controller:
                 d["jv"]["j_fwd"][index] = fwd_j
                 d["jv"]["j_rev"][index] = rev_j
 
-                # Calculate MPP, save to string dictionary
-                avg_p = (rev_p + fwd_p) / 2
-                v_maxloc = np.argmax(avg_p)
-                v_mpp = v[v_maxloc]
-                d["jv"]["vmpp"][index] = v_mpp
-
             # increase jv scan count
             d["jv"]["scan_count"] += 1
 
-            # Turn on easttester output at old output voltage --> make calc_vmp function
+            # Turn on easttester output at old vmpp if we have one
             vmp = self.calc_last_vmp(d)
-            et.output_on(ch)
-            et.set_voltage(ch, vmp)
+            if vmp is not None:
+                et.output_on(ch)
+                et.set_voltage(ch, vmp)
 
     def create_mpp_file(self, id):
         """Creates base file for MPP data"""
@@ -394,17 +399,42 @@ class Controller:
                 ]
             )
 
-    # Change to look at vmpp for each module on the string, also change to work out parallel connections for cells
+    
     def calc_last_vmp(self, d):
+        """Grabs last vmpp from tracking if it exists. If not, calculates from JV curves"""
+        
         vmpp = 0
+        num_modules = len(d["module_channels"])
+        
+        # take vmp from mpp tracking if it has value
         if d["mpp"]["vmpp"] is not None:
             vmpp = d["mpp"]["vmpp"]
-        else:
-            for value in d["jv"]["vmpp"]:
-                # only correct for series --> we are almost def in parallel
-                vmpp += value
+        
+        # if we have run all modules on the string use JV curves
+        elif d["jv"]["j_fwd"][num_modules-1] is not None:
+            
+            # set voltage to voltage wave, make empty currents
+            v = d["jv"]["v"][0]
+            j_fwd = 0
+            j_rev = 0
 
+            # add up currents (parallel) in fwd/rev, then avg & calc vmpp
+            for value in d["jv"]["j_fwd"]:
+                j_fwd += value
+            j_fwd /= num_modules
+            for value in d["jv"]["j_rev"]:
+                j_rev += value
+            j_rev /= num_modules
+            j = (j_fwd+j_rev)/2
+            p = np.array(v*j)
+            vmpp = v[np.argmax(p)]
+
+        # else flag with None
+        else:
+            vmpp = None
+        
         return vmpp
+
 
     def calc_next_vmp(self, d, vmpp_last):
         # Get voltage step (make sure we are moving toward the MPP)
@@ -434,25 +464,28 @@ class Controller:
 
         d = self.strings.get(id, None)
 
-        # Dont run until we have done JV scan
-        if d["jv"]["vmpp"][-1] is None:
+        # Get last MPP, will be none if JV not filled
+        vmpp = self.calc_last_vmp(d)
+
+        # if we dont have a vmpp, skip
+        if vmpp is None:
             return
 
         # Ensure that JV isn't running
         with d["lock"]:
 
-            # get last vvmpp and next from functions
-            vmpp = self.calc_last_vmp(d)
+            # get next vmpp knowing last 
             v = self.calc_next_vmp(d, vmpp)
 
-            # Get time
-            t = time.time()
-
-            # Turn on easttester output, set voltage, measure current, calculate desired parameters
+            # Turn on easttester output, set voltage, measure current
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
             et.set_voltage(ch, v)
+            t = time.time()
             i = et.measure_current(ch)
+
+            # Convert current to mA and calc j and p
+            i *= 1000
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
 

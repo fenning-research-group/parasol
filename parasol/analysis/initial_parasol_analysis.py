@@ -74,7 +74,7 @@ class Parasol_String:
             for file in files:
                 scan_numbers.append(
                     file.split("_")[-1]
-                )  # .split(".")[0] if we have extensions
+                )
 
             # sort files by scan number, create paths to files
             files_chronological = [x for _, x in sorted(zip(scan_numbers, files))]
@@ -84,8 +84,6 @@ class Parasol_String:
             # create dictionary basefolder : file_paths
             file_dict[folder] = paths_chronological
 
-            print(file_dict)
-
         return file_dict
 
     def analyze_jv_files(self):
@@ -94,7 +92,7 @@ class Parasol_String:
         # cyle through every module/folder in jv dict
         for jv_folder in self.jv_folders:
 
-            # get list of file paths, create empty lists for important parameters
+            # get list of file paths, create empty lists for parameters
             jv_file_paths = self.jv_dict[jv_folder]
             all_t = []
             all_v = []
@@ -102,15 +100,6 @@ class Parasol_String:
             all_p_fwd = []
             all_j_rev = []
             all_p_rev = []
-
-            # get header info from first file --> not used for now
-            # with open(jv_file_paths[0], "r") as f:
-            #     date = f.readline().split(":")[-1]
-            #     time = f.readline().split(":")[-1]
-            #     epoch_time = f.readline().split(":")[-1]
-            #     string_id = f.readline().split(":")[-1]
-            #     module_id = f.readline().split(":")[-1]
-            #     area = f.readline().split(":")[-1]
 
             # cycle through each jv file
             for jv_file_path in jv_file_paths:
@@ -126,36 +115,31 @@ class Parasol_String:
                     _ = next(reader)  # area
 
                 # load rest of dataframe and split
-                df = pd.read_csv(jv_file_path, header=None, skiprows=6, index_col=0)
-                all_v.append(df.iloc[0])
-                all_j_fwd.append(df.iloc[2])
-                all_p_fwd.append(df.iloc[3])
-                all_j_rev.append(df.iloc[5])
-                all_p_rev.append(df.iloc[6])
+                all_data = np.loadtxt(jv_file_path, delimiter=',', skiprows = 8)
+                all_data = np.transpose(all_data)
+                print("data:", all_data)
+                all_v.append(all_data[0])
+                all_j_fwd.append(all_data[2])
+                all_p_fwd.append(all_data[3])
+                all_j_rev.append(all_data[5])
+                all_p_rev.append(all_data[6])
 
-            # make all data numpy arrays
+            # make time data numpy array, calc time elapsed
             all_t = np.array(all_t)
             all_t_elapsed = all_t - all_t[0]
-            all_v = np.array(all_v)
-            all_j_fwd = np.array(all_j_fwd)
-            all_p_fwd = np.array(all_p_fwd)
-            all_j_rev = np.array(all_j_rev)
-            all_p_rev = np.array(all_p_rev)
-            print(all_p_rev)
 
             # pass all data to function to calculate parameters
             scalardict_fwd = self._calculate_jv_parameters(
-                all_v, all_j_fwd, all_p_fwd, "fwd"
+                all_v, all_j_fwd, all_p_fwd, "FWD"
             )
             scalardict_rev = self._calculate_jv_parameters(
-                all_v, all_j_rev, all_p_rev, "rev"
+                all_v, all_j_rev, all_p_rev, "REV"
             )
 
-            print(scalardict_fwd)
             # create dict, append time values and results from each scalardict
             dfdict = {}
-            dfdict["epoch"] = [t_epoch for t_epoch in all_t]
-            dfdict["time_elapsed"] = [t_ for t_ in all_t_elapsed]
+            dfdict["Time (Epoch)"] = [t_epoch for t_epoch in all_t]
+            dfdict["Time Elapsed (s)"] = [t_ for t_ in all_t_elapsed]
             for k, v in scalardict_rev.items():
                 dfdict[k] = v
             for k, v in scalardict_fwd.items():
@@ -273,16 +257,16 @@ class Parasol_String:
 
         # create dict to hold data
         returndict = {
-            "pce_" + direction: pce_vals,
-            "jsc_" + direction: jsc_vals,
-            "voc_" + direction: voc_vals,
-            "ff_" + direction: ff_vals,
-            "rsh_" + direction: rsh_vals,
-            "rs_" + direction: rs_vals,
-            "rch_" + direction: rch_vals,
-            "jmp_" + direction: jmp_vals,
-            "vmp_" + direction: vmp_vals,
-            "pmp_" + direction: pmp_vals,
+            direction + " PCE (%)": pce_vals,
+            direction + " Jsc (mA/cm2)": jsc_vals,
+            direction + " Voc (V)": voc_vals,
+            direction + " FF (%)": ff_vals,
+            direction + " Rsh (Ω)": rsh_vals,
+            direction + " Rs (Ω)": rs_vals,
+            direction + " Rch (Ω)": rch_vals,
+            direction + " Jmp (mA)": jmp_vals,
+            direction + " Vmp (V)": vmp_vals,
+            direction + " Pmp (mW/cm2)": pmp_vals,
         }
 
         return returndict
@@ -292,14 +276,14 @@ class Parasol_String:
 
         # Ensure we dont have crazy numbers
         df_filtered = df[
-            (df["ff_rev"] < 100)
-            & (df["ff_rev"] > 0)
-            & (df["voc_rev"] < 10)
-            & (df["voc_rev"] > 0)
-            & (df["ff_fwd"] < 100)
-            & (df["ff_fwd"] > 0)
-            & (df["voc_fwd"] < 10)
-            & (df["voc_fwd"] > 0)
+            (df["REV FF (%)"] < 100)
+            & (df["REV FF (%)"] > 0)
+            & (df["REV Voc (V)"] < 10)
+            & (df["REV Voc (V)"] > 0)
+            & (df["FWD FF (%)"] < 100)
+            & (df["FWD FF (%)"] > 0)
+            & (df["FWD Voc (V)"] < 10)
+            & (df["FWD Voc (V)"] > 0)
         ]
 
         # Drop any rows with NaN values
@@ -307,73 +291,74 @@ class Parasol_String:
 
         return df_filtered_2
 
-        """Plot stats in parameter file"""
+    # def Plot_JV_Param(self,parameter_path):
+    #     """Plot stats in parameter file"""
 
-        df = pd.read_csv(parameter_path)
+    #     df = pd.read_csv(parameter_path)
 
-        # plot preferences
-        mpl.rcParams["axes.linewidth"] = 1.75
+    #     # plot preferences
+    #     mpl.rcParams["axes.linewidth"] = 1.75
 
-        # dictionary to label plots
-        LabelDict = {
-            "epoch": "Epoch Time",
-            "t": "Time Elapsed (hrs)",
-            "jsc_fwd": "Short Circut Current Density (mA/cm²)",
-            "voc_fwd": "Open Circut Voltage (V)",
-            "ff_fwd": "Fill Factor (%)",
-            "pce_fwd": "Power Conversion Efficiency (%)",
-            "rs_fwd": "Series Resistance (Ω/cm²)",
-            "rsh_fwd": "Shunt Resistance (Ω/cm²)",
-            "rch_fwd": "Channel Resistance (Ω/cm²)",
-            "vmp_fwd": "Maximum Power Point Voltage (V)",
-            "jmp_fwd": "Maximum Power Point Current (mA/cm²)",
-            "pmp_fwd": "Maximum Power Point Power (mW/cm²)",
-            "v_rev": "Voltage (V)",
-            "i_rev": "Current (mA)",
-            "j_rev": "Current Density (mA/cm²)",
-            "p_rev": "Power (mW)",
-            "jsc_rev": "Short Circut Current Density (mA/cm²)",
-            "voc_rev": "Open Circut Voltage (V)",
-            "ff_rev": "Fill Factor (%)",
-            "pce_rev": "Power Conversion Efficiency (%)",
-            "rs_rev": "Series Resistance (Ω/cm²)",
-            "rsh_rev": "Shunt Resistance (Ω/cm²)",
-            "rch_rev": "Channel Resistance (Ω/cm²)",
-            "vmp_rev": "Maximum Power Point Voltage (V)",
-            "jmp_rev": "Maximum Power Point Current (mA/cm²)",
-            "pmp_rev": "Maximum Power Point Power (mW/cm²)",
-        }
+    #     # dictionary to label plots
+    #     LabelDict = {
+    #         "epoch": "Epoch Time",
+    #         "t": "Time Elapsed (hrs)",
+    #         "jsc_fwd": "Short Circut Current Density (mA/cm²)",
+    #         "voc_fwd": "Open Circut Voltage (V)",
+    #         "ff_fwd": "Fill Factor (%)",
+    #         "pce_fwd": "Power Conversion Efficiency (%)",
+    #         "rs_fwd": "Series Resistance (Ω/cm²)",
+    #         "rsh_fwd": "Shunt Resistance (Ω/cm²)",
+    #         "rch_fwd": "Channel Resistance (Ω/cm²)",
+    #         "vmp_fwd": "Maximum Power Point Voltage (V)",
+    #         "jmp_fwd": "Maximum Power Point Current (mA/cm²)",
+    #         "pmp_fwd": "Maximum Power Point Power (mW/cm²)",
+    #         "v_rev": "Voltage (V)",
+    #         "i_rev": "Current (mA)",
+    #         "j_rev": "Current Density (mA/cm²)",
+    #         "p_rev": "Power (mW)",
+    #         "jsc_rev": "Short Circut Current Density (mA/cm²)",
+    #         "voc_rev": "Open Circut Voltage (V)",
+    #         "ff_rev": "Fill Factor (%)",
+    #         "pce_rev": "Power Conversion Efficiency (%)",
+    #         "rs_rev": "Series Resistance (Ω/cm²)",
+    #         "rsh_rev": "Shunt Resistance (Ω/cm²)",
+    #         "rch_rev": "Channel Resistance (Ω/cm²)",
+    #         "vmp_rev": "Maximum Power Point Voltage (V)",
+    #         "jmp_rev": "Maximum Power Point Current (mA/cm²)",
+    #         "pmp_rev": "Maximum Power Point Power (mW/cm²)",
+    #     }
 
-        # plot each value
-        for n in range(df.shape[0]):
-            xval = df[x][n]
-            yval = df[y][n]
-            zval = df[z].values
-            znorm = np.array(
-                (zval - np.nanmin(zval)) / (np.nanmax(zval) - np.nanmin(zval))
-            )
-            colors = plt.cm.viridis(znorm.astype(float))
-            plt.scatter(xval, yval, color=colors[n])
+    #     # plot each value
+    #     for n in range(df.shape[0]):
+    #         xval = df[x][n]
+    #         yval = df[y][n]
+    #         zval = df[z].values
+    #         znorm = np.array(
+    #             (zval - np.nanmin(zval)) / (np.nanmax(zval) - np.nanmin(zval))
+    #         )
+    #         colors = plt.cm.viridis(znorm.astype(float))
+    #         plt.scatter(xval, yval, color=colors[n])
 
-        # manage colorbar
-        norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
-        objs = plt.colorbar(
-            mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
-            orientation="vertical",
-            label=str(LabelDict[z]),
-        )
-        plt.setp(
-            objs.ax.get_yticklabels(),
-            rotation=-10,
-            fontsize=9,
-            weight="black",
-            snap=True,
-            position=(1, 0),
-        )
+    #     # manage colorbar
+    #     norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
+    #     objs = plt.colorbar(
+    #         mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
+    #         orientation="vertical",
+    #         label=str(LabelDict[z]),
+    #     )
+    #     plt.setp(
+    #         objs.ax.get_yticklabels(),
+    #         rotation=-10,
+    #         fontsize=9,
+    #         weight="black",
+    #         snap=True,
+    #         position=(1, 0),
+    #     )
 
-        # label axes
-        plt.ylabel(LabelDict[y], weight="black")
-        plt.xlabel(LabelDict[x], weight="black")
+    #     # label axes
+    #     plt.ylabel(LabelDict[y], weight="black")
+    #     plt.xlabel(LabelDict[x], weight="black")
 
-        # show plot
-        plt.show()
+    #     # show plot
+    #     plt.show()

@@ -21,11 +21,10 @@ class Scanner:
         self.lock = Lock()
         self.connect(constants["address"])
 
-        # These are the same now
-        self.RESPONSE_TIME = constants["response_time"]
+        # Change These
         self.sensdelay = 0.05
         self.sourcedelay = "MIN"
-        self.intime = 50
+        self.inttime = "MIN"
         self.max_voltage = 1.5  # V
         self.max_current = 1  # A
 
@@ -52,18 +51,23 @@ class Scanner:
         self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero OFF
         self.yoko.write(":TRIG:SOUR EXT")  # Trigger source External trigger
 
-        # Change these settings depending on what we are running
+        # These settings depend on what we are running
         tempmaxvolt = ":SOUR:VOLT:RANG " + str(self.max_voltage) + "V"
         self.yoko.write(tempmaxvolt)  # Source range setting 1 V
         tempmaxcurr = ":SOUR:CURR:PROT:ULIM " + str(self.max_current) + "A"
         self.yoko.write(tempmaxcurr)  # Limiter 1 mA
 
-        # Change these commands to optimize speed of our measurement (its fast!)
-        self.yoko.write(":SENS:ITIM MIN")  # Integration time (20 us to 500 ms)
-        self.yoko.write(":SOUR:DEL MIN")  # Source delay (15 us to 3600 s)
+        # These commands optimize the speed of our measurement
+        tempinttime = ":SENS:ITIM " + str(self.inttime)
+        self.yoko.write(tempinttime)  # Integration time (20 us to 500 ms)
+        tempsourcedelay = ":SOUR:DEL " + str(self.sourcedelay)
+        self.yoko.write(tempsourcedelay)  # Source delay (15 us to 3600 s)
         tempsensdelay = ":SENS:DEL " + str(self.sensdelay) + " ms"
         self.yoko.write(tempsensdelay)  # Sense Delay --> (0 to 3600 s)
         self._sourcing_current = False
+
+        # Turn output off
+        self.yoko.write(":OUTP:STAT OFF")
 
     def srcI_measV(self):
         """Turn measurment on: Init settings for source I, measure V"""
@@ -83,6 +87,7 @@ class Scanner:
         tempdelay = ":SENS:DEL " + str(self.delay) + " ms"  # read delay from __init__
         self.yoko.write(tempdelay)  # Measure delay as set above
         self._sourcing_current = True
+        
 
     def output_on(self):
         """Turn output on"""

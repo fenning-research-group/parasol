@@ -31,6 +31,8 @@ class EastTester:
         self.connect(port=port)
 
         # Change --> could use both source delay and sense delay as well.
+        self.source_delay = 0.05
+        self.sense_delay = 0.05
         # Get constants from hardwareconstants
         self.et_delay = constants["response_time"]
         self.et_v_min = constants["v_min"]
