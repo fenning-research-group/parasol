@@ -24,7 +24,7 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 class Controller:
     """Create controller class to manage eastester, relay, and yokogawa"""
 
-    def __init__(self, rootdir):
+    def __init__(self, rootdir=constants["root_dir"]):
         """Initialize controller"""
 
         # Initialize running variable, create root directory

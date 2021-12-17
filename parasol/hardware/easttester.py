@@ -63,8 +63,9 @@ class EastTester:
         # "NAME" : RANGE (MAX/SHUTOFF)
         # "LOW": 0.1 -> 19.999 (21.000)
         # "HIGH": 0.1 -> 150.000 (155.000)
-        # CHANGE --> we might want #1 or #2 here for channel in vrange... not sure yet
-        self.et.write(("LOAD:VRAN " + str(self.voltage_range)).encode())
+        self.et.write(
+            ("LOAD" + str(channel) + ":VRAN " + str(self.voltage_range)).encode()
+        )
         time.sleep(self.et_delay)
         self.et.write(("VOLT" + str(channel) + ":VMIN %f\n" % (self.et_v_min)).encode())
         time.sleep(self.et_delay)
@@ -75,7 +76,9 @@ class EastTester:
         # "NAME" : RANGE (MAX/SHUTOFF)
         # "LOW": 0 -> 3.000 (3.3)
         # "HIGH": 0 -> 20.000 (22.0)
-        self.et.write(("LOAD:CRAN " + str(self.current_range)).encode())
+        self.et.write(
+            ("LOAD" + str(channel) + ":CRAN " + str(self.current_range)).encode()
+        )
         time.sleep(self.et_delay)
         self.et.write(("CURR" + str(channel) + ":IMAX %f\n" % (self.et_i_max)).encode())
         time.sleep(self.et_delay)
@@ -110,8 +113,7 @@ class EastTester:
     def set_voltage(self, channel, voltage):
         """Sets voltage"""
         self.et.write(("VOLT" + str(channel) + ":CV %f\n" % (voltage)).encode())
-        # Change --> this could likely be placed before measure_current
-        time.sleep(self.et_delay * 10)
+        time.sleep(self.et_delay * 10)  # this could probably be moved to before sense
 
     @et_lock
     def measure_current(self, channel):

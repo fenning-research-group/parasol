@@ -1,8 +1,11 @@
+# TODO Optimize timings on east tester and yokogawa 
+
 controller:
+  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location
   mppt_voltage_step: 0.01 # Volts
   ET_1_PORT: 'COM4' # Port for ET1
-  ET_2_PORT: 'COM5' # Port for ET2
-  ET_3_PORT: 'COM6' # Port for ET3
+  ET_2_PORT: 'COM5' # Port for ET2 --> need to confirm
+  ET_3_PORT: 'COM6' # Port for ET3 --> need to confirm
 
 relay:
   address: 'COM3'
