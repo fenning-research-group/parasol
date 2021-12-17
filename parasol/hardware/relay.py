@@ -23,7 +23,6 @@ class Relay:
     def __init__(self):
         """Intialize relay"""
         self.lock = Lock()
-        # Change --> Figure out the best timing for this
         self.RESPONSE_TIME = constants["response_time"]  # sec to complete command
         self.relay_commands = {
             1: (65, 1),
