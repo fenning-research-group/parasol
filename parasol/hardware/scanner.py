@@ -20,14 +20,12 @@ class Scanner:
         """Initialize Yokogawa"""
         self.lock = Lock()
         self.connect(constants["address"])
-
-        # Change These
-        self.sensdelay = 0.05
-        self.sourcedelay = "MIN"
-        self.inttime = "MIN"
-        self.max_voltage = 1.5  # V
-        self.max_current = 1  # A
-
+        self.sourcedelay = constants["source_delay"]
+        self.sensedelay = constants["sense_delay"]
+        self.command_delay = constants["command_delay"]  # None, built in on yoko
+        self.inttime = constants["integration_time"]
+        self.max_voltage = constants["max_voltage"]
+        self.max_current = constants["max_current"]
         self._sourcing_current = False
         self.srcV_measI()
 
@@ -62,8 +60,8 @@ class Scanner:
         self.yoko.write(tempinttime)  # Integration time (20 us to 500 ms)
         tempsourcedelay = ":SOUR:DEL " + str(self.sourcedelay)
         self.yoko.write(tempsourcedelay)  # Source delay (15 us to 3600 s)
-        tempsensdelay = ":SENS:DEL " + str(self.sensdelay) + " ms"
-        self.yoko.write(tempsensdelay)  # Sense Delay --> (0 to 3600 s)
+        tempsensedelay = ":SENS:DEL " + str(self.sensedelay) + " ms"
+        self.yoko.write(tempsensedelay)  # Sense Delay --> (0 to 3600 s)
         self._sourcing_current = False
 
         # Turn output off
@@ -73,21 +71,31 @@ class Scanner:
         """Turn measurment on: Init settings for source I, measure V"""
         self.yoko.write("*RST")  # Reset Factory
         self.yoko.write(":SOUR:FUNC CURR")  # Source function Current
-        self.yoko.write(":SOUR:CURR:RANG 1A")  # Source range setting 0 A
         self.yoko.write(":SOUR:VOLT:PROT:LINK ON")  # Limiter tracking ON
-        self.yoko.write(":SOUR:VOLT:PROT:ULIM 2V")  # Limiter 2 V
         self.yoko.write(":SOUR:VOLT:PROT:STAT ON")  # Limiter ON
         self.yoko.write(":SOUR:CURR:LEV 0A")  # Source level –1.5 VOLT
         self.yoko.write(":SENS:STAT ON")  # Measurement ON
         self.yoko.write(":SENS:FUNC VOLT")  # Measurement function Current
-        self.yoko.write(":SENS:ITIM MIN")  # Integration time Minimum
         self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero OFF
         self.yoko.write(":TRIG:SOUR EXT")  # Trigger source External trigger
-        self.yoko.write(":SOUR:DEL MIN")  # Source delay Minimum
-        tempdelay = ":SENS:DEL " + str(self.delay) + " ms"  # read delay from __init__
-        self.yoko.write(tempdelay)  # Measure delay as set above
+
+        # These settings depend on what we are running
+        tempmaxcurr = ":SOUR:CURR:RANG " + str(self.max_current) + "A"
+        self.yoko.write(tempmaxcurr)  # Source range setting 0 A
+        tempmaxvolt = ":SOUR:VOLT:PROT:ULIM " + str(self.max_voltage) + "V"
+        self.yoko.write(tempmaxvolt)  # Limiter 2 V
+
+        # These commands optimize the speed of our measurement
+        tempinttime = ":SENS:ITIM " + str(self.inttime)
+        self.yoko.write(tempinttime)  # Integration time Minimum
+        tempsourcedelay = ":SOUR:DEL " + str(self.sourcedelay)
+        self.yoko.write(tempsourcedelay)  # Source delay Minimum
+        tempsensedelay = ":SENS:DEL " + str(self.sensedelay) + " ms"
+        self.yoko.write(tempsensedelay)  # Measure delay as set above
         self._sourcing_current = True
-        
+
+        # Turn output off
+        self.yoko.write(":OUTP:STAT OFF")
 
     def output_on(self):
         """Turn output on"""

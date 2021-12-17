@@ -1,20 +1,33 @@
-relay:
-  address: 'COM3'
-  response_time: 0.1 # Seconds for relay changeover to settle (voltage stabilitation)
-
-yokogawa:
-  address: 'GPIB1::1::INSTR'
-  response_time: 0.01 # Seconds for command to process changed from 0.001
-
 controller:
-  et_voltage_step: 0.01 # Volts
+  mppt_voltage_step: 0.01 # Volts
   ET_1_PORT: 'COM4' # Port for ET1
   ET_2_PORT: 'COM5' # Port for ET2
   ET_3_PORT: 'COM6' # Port for ET3
 
+relay:
+  address: 'COM3'
+  response_time: 0.1 # Seconds for relay switch to settle
+
+yokogawa:
+  address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
+  source_delay: "MIN" # Seconds for source to settle
+  sense_delay: 0.05 # Seconds for sense to settle
+  command_delay: 0 # Seconds between commands (built in on yoko)
+  integration_time: "MIN" # Seconds for integration time
+  max_voltage: 1.5 # Max volts
+  max_current: 1 # Max amps
+
 easttester:
-  response_time: 0.3 # Delay between commands
+  # Adress is stored in 'controller'
+  source_delay: 0.05 # Seconds for source to settle
+  sense_delay: 0.05 # Seconds for sense to settle
+  command_delay: 0.05 # Seconds between commands
+  avg_num: 5 # Number of currents to avg for reading --> ~integration time
+  max_voltage: 21 # Max voltage of 'low' range, 155 V for high range
+  max_current: 3.3 # Max current of 'low' range, 22 A for high range
+  
   v_min: 0.1 # Min voltage registered by ET
-  v_shutoff: 21 # Max voltage of 'low' range, 155 V for high range
-  i_shutoff: 3.3 # Max current of 'low' range, 22 A for high range
-  avg_num: 5 # Number of currents to avg for reading
+  voltage_range: "LOW" # "LOW" or "HIGH"
+  current_range: "LOW" # "LOW" or "HIGH"
+
+

@@ -34,7 +34,7 @@ class Controller:
             os.mkdir(rootdir)
 
         # grab voltage step used for perturb and observe algorithm
-        self.et_voltage_step = constants["et_voltage_step"]
+        self.et_voltage_step = constants["mppt_voltage_step"]
 
         # Connect to Relay, Scanner, and 3 EastTesters
         self.relay = Relay()
@@ -115,7 +115,7 @@ class Controller:
             "mpp": {
                 "interval": mpp_interval,
                 "vmin": 0.1,
-                "vmax": jv_vmax * n_modules,
+                "vmax": jv_vmax,
                 "last_powers": [None, None],
                 "last_voltages": [None, None],
                 "_future": mpp_future,
@@ -279,7 +279,7 @@ class Controller:
         for id in ids:
             # Unload all strings
             self.unload_string(id)
-            # Reset east tester 
+            # Reset east tester
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
             et.srcV_measI(ch)
@@ -399,20 +399,19 @@ class Controller:
                 ]
             )
 
-    
     def calc_last_vmp(self, d):
         """Grabs last vmpp from tracking if it exists. If not, calculates from JV curves"""
-        
+
         vmpp = 0
         num_modules = len(d["module_channels"])
-        
+
         # take vmp from mpp tracking if it has value
         if d["mpp"]["vmpp"] is not None:
             vmpp = d["mpp"]["vmpp"]
-        
+
         # if we have run all modules on the string use JV curves
-        elif d["jv"]["j_fwd"][num_modules-1] is not None:
-            
+        elif d["jv"]["j_fwd"][num_modules - 1] is not None:
+
             # set voltage to voltage wave, make empty currents
             v = d["jv"]["v"][0]
             j_fwd = 0
@@ -425,16 +424,15 @@ class Controller:
             for value in d["jv"]["j_rev"]:
                 j_rev += value
             j_rev /= num_modules
-            j = (j_fwd+j_rev)/2
-            p = np.array(v*j)
+            j = (j_fwd + j_rev) / 2
+            p = np.array(v * j)
             vmpp = v[np.argmax(p)]
 
         # else flag with None
         else:
             vmpp = None
-        
-        return vmpp
 
+        return vmpp
 
     def calc_next_vmp(self, d, vmpp_last):
         # Get voltage step (make sure we are moving toward the MPP)
@@ -474,7 +472,7 @@ class Controller:
         # Ensure that JV isn't running
         with d["lock"]:
 
-            # get next vmpp knowing last 
+            # get next vmpp knowing last
             v = self.calc_next_vmp(d, vmpp)
 
             # Turn on easttester output, set voltage, measure current

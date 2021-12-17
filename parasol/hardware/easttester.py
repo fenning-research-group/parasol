@@ -30,15 +30,16 @@ class EastTester:
         self.lock = Lock()
         self.connect(port=port)
 
-        # Change --> could use both source delay and sense delay as well.
-        self.source_delay = 0.05
-        self.sense_delay = 0.05
         # Get constants from hardwareconstants
-        self.et_delay = constants["response_time"]
-        self.et_v_min = constants["v_min"]
-        self.et_v_max = constants["v_shutoff"]
-        self.et_i_max = constants["i_shutoff"]
+        self.source_delay = constants["source_delay"]
+        self.sense_delay = constants["sense_delay"]
+        self.et_delay = self.source_delay["command_delay"]
         self.et_avg_num = constants["avg_num"]
+        self.et_v_max = constants["max_voltage"]
+        self.et_i_max = constants["max_current"]
+        self.et_v_min = constants["v_min"]
+        self.voltage_range = constants["voltage_range"]
+        self.current_range = constants["current_range"]
 
         # Set both channels to source voltage and measure current when initialized
         self.srcV_measI(1)
@@ -62,7 +63,8 @@ class EastTester:
         # "NAME" : RANGE (MAX/SHUTOFF)
         # "LOW": 0.1 -> 19.999 (21.000)
         # "HIGH": 0.1 -> 150.000 (155.000)
-        self.et.write(("LOAD:VRAN LOW").encode())
+        # CHANGE --> we might want #1 or #2 here for channel in vrange... not sure yet
+        self.et.write(("LOAD:VRAN " + str(self.voltage_range)).encode())
         time.sleep(self.et_delay)
         self.et.write(("VOLT" + str(channel) + ":VMIN %f\n" % (self.et_v_min)).encode())
         time.sleep(self.et_delay)
@@ -73,7 +75,7 @@ class EastTester:
         # "NAME" : RANGE (MAX/SHUTOFF)
         # "LOW": 0 -> 3.000 (3.3)
         # "HIGH": 0 -> 20.000 (22.0)
-        self.et.write(("LOAD:CRAN LOW").encode())
+        self.et.write(("LOAD:CRAN " + str(self.current_range)).encode())
         time.sleep(self.et_delay)
         self.et.write(("CURR" + str(channel) + ":IMAX %f\n" % (self.et_i_max)).encode())
         time.sleep(self.et_delay)
@@ -108,6 +110,7 @@ class EastTester:
     def set_voltage(self, channel, voltage):
         """Sets voltage"""
         self.et.write(("VOLT" + str(channel) + ":CV %f\n" % (voltage)).encode())
+        # Change --> this could likely be placed before measure_current
         time.sleep(self.et_delay * 10)
 
     @et_lock

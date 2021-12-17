@@ -72,9 +72,7 @@ class Parasol_String:
 
             # for each file, create list of scan numbers
             for file in files:
-                scan_numbers.append(
-                    file.split("_")[-1]
-                )
+                scan_numbers.append(file.split("_")[-1])
 
             # sort files by scan number, create paths to files
             files_chronological = [x for _, x in sorted(zip(scan_numbers, files))]
@@ -115,9 +113,8 @@ class Parasol_String:
                     _ = next(reader)  # area
 
                 # load rest of dataframe and split
-                all_data = np.loadtxt(jv_file_path, delimiter=',', skiprows = 8)
+                all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
                 all_data = np.transpose(all_data)
-                print("data:", all_data)
                 all_v.append(all_data[0])
                 all_j_fwd.append(all_data[2])
                 all_p_fwd.append(all_data[3])
