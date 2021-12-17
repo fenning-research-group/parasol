@@ -33,7 +33,7 @@ class EastTester:
         # Get constants from hardwareconstants
         self.source_delay = constants["source_delay"]
         self.sense_delay = constants["sense_delay"]
-        self.et_delay = self.source_delay["command_delay"]
+        self.et_delay = constants["command_delay"]
         self.et_avg_num = constants["avg_num"]
         self.et_v_max = constants["max_voltage"]
         self.et_i_max = constants["max_current"]
