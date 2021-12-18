@@ -461,7 +461,7 @@ class Controller:
         """Uses Easttester to track MPP with a perturb and observe algorithm"""
 
         d = self.strings.get(id, None)
-
+        
         # Get last MPP, will be none if JV not filled
         vmpp = self.calc_last_vmp(d)
 
@@ -474,14 +474,13 @@ class Controller:
 
             # get next vmpp knowing last
             v = self.calc_next_vmp(d, vmpp)
-
+            
             # Turn on easttester output, set voltage, measure current
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
             et.set_voltage(ch, v)
             t = time.time()
             i = et.measure_current(ch)
-
             # Convert current to mA and calc j and p
             i *= 1000
             j = i / (d["area"] * len(d["module_channels"]))

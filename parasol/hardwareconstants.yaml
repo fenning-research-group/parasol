@@ -22,8 +22,8 @@ yokogawa:
 
 easttester:
   # Adress is stored in 'controller'
-  source_delay: 0.05 # Seconds for source to settle
-  sense_delay: 0.05 # Seconds for sense to settle
+  source_delay: 0.5 # Seconds for source to settle (voltage stabilization) [0.25,0.25,0.5 had lag]
+  sense_delay: 0.25 # Seconds for sense to return value
   command_delay: 0.05 # Seconds between commands
   avg_num: 5 # Number of currents to avg for reading --> ~integration time
   max_voltage: 21 # Max voltage of 'low' range, 155 V for high range
