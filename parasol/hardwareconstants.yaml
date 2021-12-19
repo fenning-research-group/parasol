@@ -13,10 +13,10 @@ relay:
 
 yokogawa:
   address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
-  source_delay: "MIN" # Seconds for source to settle
-  sense_delay: 0.05 # Seconds for sense to settle
-  command_delay: 0 # Seconds between commands (built in on yoko)
-  integration_time: "MIN" # Seconds for integration time
+  source_delay: 0.05 # ms for source to settle
+  sense_delay: 0.05 # ms for sense to settle
+  command_delay: 0 # ms between commands (built in on yoko)
+  integration_time: 10 # ms for integration time
   max_voltage: 1.5 # Max volts
   max_current: 1 # Max amps
 

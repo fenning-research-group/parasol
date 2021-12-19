@@ -56,11 +56,11 @@ class Scanner:
         self.yoko.write(tempmaxcurr)  # Limiter 1 mA
 
         # These commands optimize the speed of our measurement
-        tempinttime = ":SENS:ITIM " + str(self.inttime)
+        tempinttime = ":SENS:ITIM " + str(self.inttime) + "ms"
         self.yoko.write(tempinttime)  # Integration time (20 us to 500 ms)
-        tempsourcedelay = ":SOUR:DEL " + str(self.sourcedelay)
+        tempsourcedelay = ":SOUR:DEL " + str(self.sourcedelay) + "ms"
         self.yoko.write(tempsourcedelay)  # Source delay (15 us to 3600 s)
-        tempsensedelay = ":SENS:DEL " + str(self.sensedelay) + " ms"
+        tempsensedelay = ":SENS:DEL " + str(self.sensedelay) + "ms"
         self.yoko.write(tempsensedelay)  # Sense Delay --> (0 to 3600 s)
         self._sourcing_current = False
 
