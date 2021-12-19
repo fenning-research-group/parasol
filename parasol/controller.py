@@ -96,10 +96,12 @@ class Controller:
         mpp_future.add_done_callback(future_callback)
 
         # Setup string dict with important information for running the program
+        startdate = datetime.now().strftime("x%Y%m%d")
         modulechannels = self.module_channels[id][:n_modules]
         self.strings[id] = {
             "name": name,
             "area": area,
+            "start_date": startdate,
             "module_channels": modulechannels,
             "jv": {
                 "interval": jv_interval,
@@ -126,7 +128,7 @@ class Controller:
         }
 
         self.strings[id]["_savedir"] = self._make_module_subdir(
-            name, id, modulechannels
+            name, id, modulechannels, startdate
         )
 
         # Create the base MPP file with header and no data (we will append to it)
@@ -155,21 +157,20 @@ class Controller:
         # analyze the saveloc
         Parasol_String(saveloc)
 
-    def _make_module_subdir(self, name, id, modulechannels):
+    def _make_module_subdir(self, name, id, modulechannels, startdate):
         """Make subdirectory for saving"""
 
         # Add date folder
-        date_str = datetime.now().strftime("x%Y%m%d")
-        datefpath = os.path.join(self.rootdir, date_str)
+        datefpath = os.path.join(self.rootdir, startdate)
         if not os.path.exists(datefpath):
             os.mkdir(datefpath)
 
         # Make base file path for saving
         idx = 0
-        basefpath = os.path.join(datefpath, f"x{date_str}_{name}")
+        basefpath = os.path.join(datefpath, f"{startdate}_{name}")
         while os.path.exists(basefpath):
             idx += 1
-            basefpath = os.path.join(datefpath, f"x{date_str}_{name}_{idx}")
+            basefpath = os.path.join(datefpath, f"{startdate}_{name}_{idx}")
         os.mkdir(basefpath)
 
         # Make subdirectory for MMP
@@ -320,7 +321,7 @@ class Controller:
                 jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
                 fpath = os.path.join(
                     jvfolder,
-                    f"{d['name']}_string{id}_module{module}_JV_{d['jv']['scan_count']}.csv",
+                    f"{d['start_date']}_{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
                 )
 
                 # Open relay, scan device foward + reverse, turn off relay
@@ -414,7 +415,9 @@ class Controller:
 
             # Save in base filepath:MPP_stringID:
             mppfolder = os.path.join(d["_savedir"], "MPP")
-            fpath = os.path.join(mppfolder, f"{d['name']}_string{id}_MPP_1.csv")
+            fpath = os.path.join(
+                mppfolder, f"{d['start_date']}_{d['name']}_{id}_MPP_1.csv"
+            )
 
             # Open file, append values to columns
             with open(fpath, "a", newline="") as f:
@@ -433,7 +436,7 @@ class Controller:
 
         # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
         mppfolder = os.path.join(d["_savedir"], "MPP")
-        fpath = os.path.join(mppfolder, f"{d['name']}_string{id}_MPP_1.csv")
+        fpath = os.path.join(mppfolder, f"{d['start_date']}_{d['name']}_{id}_MPP_1.csv")
 
         # Open file, write header/column names then fill
         with open(fpath, "w", newline="") as f:
