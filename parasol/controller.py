@@ -113,6 +113,7 @@ class Controller:
                 "j_rev": [None for i in range(n_modules)],
             },
             "mpp": {
+                "mode": 1,  # 1 = perturb and observe for now
                 "interval": mpp_interval,
                 "vmin": 0.1,
                 "vmax": jv_vmax,
@@ -287,6 +288,8 @@ class Controller:
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
+    # All tracking & scanning functions are below here
+
     def scan_jv(self, id):
         """Uses Yokogawa to conudct a JV scan"""
 
@@ -366,6 +369,52 @@ class Controller:
                 et.output_on(ch)
                 et.set_voltage(ch, vmp)
 
+    def track_mpp(self, id):
+        """Uses Easttester to track MPP with a perturb and observe algorithm"""
+
+        d = self.strings.get(id, None)
+
+        # Get last MPP, will be none if JV not filled
+        vmpp = self.calc_last_vmp(d)
+
+        # if we dont have a vmpp, skip
+        if vmpp is None:
+            return
+
+        # Ensure that JV isn't running
+        with d["lock"]:
+
+            # get next vmpp knowing last
+            v = self.calc_next_mpp_bias(d, vmpp)
+
+            # Turn on easttester output, set voltage, measure current
+            et_key, ch = self.et_channels[id]
+            et = self.easttester[et_key]
+            et.set_voltage(ch, v)
+            t = time.time()
+            i = et.measure_current(ch)
+
+            # Convert current to mA and calc j and p
+            i *= 1000
+            j = i / (d["area"] * len(d["module_channels"]))
+            p = v * j
+
+            # Update d[] by moving last value to first and append new values
+            d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
+            d["mpp"]["last_powers"][1] = p
+            d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
+            d["mpp"]["last_voltages"][1] = v
+            d["mpp"]["vmpp"] = v
+
+            # Save in base filepath:MPP_stringID:
+            mppfolder = os.path.join(d["_savedir"], "MPP")
+            fpath = os.path.join(mppfolder, f"{d['name']}_{id}_MPP_1.csv")
+
+            # Open file, append values to columns
+            with open(fpath, "a", newline="") as f:
+                writer = csv.writer(f, delimiter=",")
+                writer.writerow([t, v, i, j, p])
+
     def create_mpp_file(self, id):
         """Creates base file for MPP data"""
 
@@ -434,7 +483,24 @@ class Controller:
 
         return vmpp
 
-    def calc_next_vmp(self, d, vmpp_last):
+    def calc_next_mpp_bias(self, d, vmpp_last):
+        """
+        Calculates next vmpp with various options:
+        1. Perturb and observe, constant step
+        """
+
+        v = None
+        tracking_mode = d["mpp"]["mode"]
+
+        if tracking_mode == 1:
+            v = self.perturb_and_observe_constant(d, vmpp_last)
+        if tracking_mode == 2:
+            print("not implemented")
+
+        return v
+
+    def perturb_and_observe_constant(self, d, vmpp_last):
+        """Perturb and observe, constant step"""
         # Get voltage step (make sure we are moving toward the MPP)
         if (d["mpp"]["last_powers"][0] is None) or (d["mpp"]["last_powers"][1] is None):
             voltage_step = self.et_voltage_step
@@ -456,51 +522,6 @@ class Controller:
 
         # send back vmpp
         return v
-
-    def track_mpp(self, id):
-        """Uses Easttester to track MPP with a perturb and observe algorithm"""
-
-        d = self.strings.get(id, None)
-        
-        # Get last MPP, will be none if JV not filled
-        vmpp = self.calc_last_vmp(d)
-
-        # if we dont have a vmpp, skip
-        if vmpp is None:
-            return
-
-        # Ensure that JV isn't running
-        with d["lock"]:
-
-            # get next vmpp knowing last
-            v = self.calc_next_vmp(d, vmpp)
-            
-            # Turn on easttester output, set voltage, measure current
-            et_key, ch = self.et_channels[id]
-            et = self.easttester[et_key]
-            et.set_voltage(ch, v)
-            t = time.time()
-            i = et.measure_current(ch)
-            # Convert current to mA and calc j and p
-            i *= 1000
-            j = i / (d["area"] * len(d["module_channels"]))
-            p = v * j
-
-            # Update d[] by moving last value to first and append new values
-            d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
-            d["mpp"]["last_powers"][1] = p
-            d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
-            d["mpp"]["last_voltages"][1] = v
-            d["mpp"]["vmpp"] = v
-
-            # Save in base filepath:MPP_stringID:
-            mppfolder = os.path.join(d["_savedir"], "MPP")
-            fpath = os.path.join(mppfolder, f"{d['name']}_{id}_MPP_1.csv")
-
-            # Open file, append values to columns
-            with open(fpath, "a", newline="") as f:
-                writer = csv.writer(f, delimiter=",")
-                writer.writerow([t, v, i, j, p])
 
     def __del__(self):
         """Stops que and program on exit"""

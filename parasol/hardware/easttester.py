@@ -101,19 +101,23 @@ class EastTester:
     def output_on(self, channel):
         """Turns on output"""
         self.et.write(("CH" + str(channel) + ":SW ON\n").encode())
-        time.sleep(self.source_delay) #if this delay reduced we get issues in measuring current (first point low)
+        time.sleep(
+            self.source_delay
+        )  # if this delay reduced we get issues in measuring current (first point low)
 
     @et_lock
     def output_off(self, channel):
         """Turns off output"""
         self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
-        time.sleep(self.source_delay) #if this delay reduced we get issues in measuring current (first point low)
+        time.sleep(
+            self.source_delay
+        )  # if this delay reduced we get issues in measuring current (first point low)
 
     @et_lock
     def set_voltage(self, channel, voltage):
         """Sets voltage"""
         self.et.write(("VOLT" + str(channel) + ":CV %f\n" % (voltage)).encode())
-        time.sleep(self.source_delay) 
+        time.sleep(self.source_delay)
 
     @et_lock
     def measure_current(self, channel):
@@ -122,7 +126,7 @@ class EastTester:
         curr_tot = 0
         # To avoid marching in the wrong direction we need to average here
         while i < self.et_avg_num:
-            
+
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             time.sleep(self.sense_delay)
             curr = self.et.readlines()[-1]

@@ -1,73 +1,101 @@
-# This is just a dummy file for now too look at graphing.
-#
-# def Plot_JV_Param(self,parameter_path):
-#     """Plot stats in parameter file"""
+import numpy as np
+import pandas as pd
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import yaml
+import os
 
-#     df = pd.read_csv(parameter_path)
 
-#     # plot preferences
-#     mpl.rcParams["axes.linewidth"] = 1.75
+# Set yaml name, load controller info
+MODULE_DIR = os.path.dirname(__file__)
+with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
+    constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
 
-#     # dictionary to label plots
-#     LabelDict = {
-#         "epoch": "Epoch Time",
-#         "t": "Time Elapsed (hrs)",
-#         "jsc_fwd": "Short Circut Current Density (mA/cm²)",
-#         "voc_fwd": "Open Circut Voltage (V)",
-#         "ff_fwd": "Fill Factor (%)",
-#         "pce_fwd": "Power Conversion Efficiency (%)",
-#         "rs_fwd": "Series Resistance (Ω/cm²)",
-#         "rsh_fwd": "Shunt Resistance (Ω/cm²)",
-#         "rch_fwd": "Channel Resistance (Ω/cm²)",
-#         "vmp_fwd": "Maximum Power Point Voltage (V)",
-#         "jmp_fwd": "Maximum Power Point Current (mA/cm²)",
-#         "pmp_fwd": "Maximum Power Point Power (mW/cm²)",
-#         "v_rev": "Voltage (V)",
-#         "i_rev": "Current (mA)",
-#         "j_rev": "Current Density (mA/cm²)",
-#         "p_rev": "Power (mW)",
-#         "jsc_rev": "Short Circut Current Density (mA/cm²)",
-#         "voc_rev": "Open Circut Voltage (V)",
-#         "ff_rev": "Fill Factor (%)",
-#         "pce_rev": "Power Conversion Efficiency (%)",
-#         "rs_rev": "Series Resistance (Ω/cm²)",
-#         "rsh_rev": "Shunt Resistance (Ω/cm²)",
-#         "rch_rev": "Channel Resistance (Ω/cm²)",
-#         "vmp_rev": "Maximum Power Point Voltage (V)",
-#         "jmp_rev": "Maximum Power Point Current (mA/cm²)",
-#         "pmp_rev": "Maximum Power Point Power (mW/cm²)",
-#     }
 
-#     # plot each value
-#     for n in range(df.shape[0]):
-#         xval = df[x][n]
-#         yval = df[y][n]
-#         zval = df[z].values
-#         znorm = np.array(
-#             (zval - np.nanmin(zval)) / (np.nanmax(zval) - np.nanmin(zval))
-#         )
-#         colors = plt.cm.viridis(znorm.astype(float))
-#         plt.scatter(xval, yval, color=colors[n])
+class ParasolGrapher:
+    def __init__(self):
+        """Opens in root directory (same as parasol)"""
 
-#     # manage colorbar
-#     norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
-#     objs = plt.colorbar(
-#         mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
-#         orientation="vertical",
-#         label=str(LabelDict[z]),
-#     )
-#     plt.setp(
-#         objs.ax.get_yticklabels(),
-#         rotation=-10,
-#         fontsize=9,
-#         weight="black",
-#         snap=True,
-#         position=(1, 0),
-#     )
+        # Path to general data
+        self.rootdir = constants["root_dir"]
 
-#     # label axes
-#     plt.ylabel(LabelDict[y], weight="black")
-#     plt.xlabel(LabelDict[x], weight="black")
+        # Variables
+        self.variable_dict = {
+            "Time": "Time (Epoch)",
+            "Time Elapsed": "Time Elapsed (s)",
+            "FWD Jsc": "FWD Jsc (mA/cm2)",
+            "FWD Voc": "FWD Voc (V)",
+            "FWD FF": "FWD FF (%)",
+            "FWD Pce": "FWD PCE (%)",
+            "FWD Rs": "FWD Rs (Ohm/cm2)",
+            "FWD Rsh": "FWD Rsh (Ohm/cm2)",
+            "FWD Rch": "FWD Rch (Ohm/cm2)",
+            "FWD Vmp": "FWD Vmp (V)",
+            "FWD Jmp": "FWD Jmp (mA/cm2)",
+            "FWD Pmp": "FWD Pmp (mW/cm2)",
+            "REV Jsc": "REV Jsc (mA/cm2)",
+            "REV Voc": "REV Voc (V)",
+            "REV FF": "REV FF (%)",
+            "REV PCE": "REV PCE (%)",
+            "REV Rs": "REV Rs (Ohm/cm2)",
+            "REV Rsh": "REV Rsh (Ohm/cm2)",
+            "REV Rch": "REV Rch (Ohm/cm2)",
+            "REV Vmp": "REV Vmp (V)",
+            "REV Jmp": "REV Jmp (mA/cm2)",
+            "REV Pmp": "REV Pmp (mW/cm2)",
+        }
 
-#     # show plot
-#     plt.show()
+    def plot_JV(self, jvfolder):
+        print("pass")
+
+    def plot_XY_scalars(self, paramfiles, x, y):
+        """Plots x vs y for set of paramfiles"""
+        print("pass")
+
+    def plot_XYZ_scalar(self, paramfile, x, y, z):
+        """Plots x vs y with z colorbar for paramfile"""
+
+        # load datafolder path
+        df = pd.read_csv(paramfile)
+
+        # plot preferences
+        mpl.rcParams["axes.linewidth"] = 1.75
+
+        for n in range(df.shape[0]):
+
+            # Get values for x and y
+            xval = df[self.variable_dict[x]][n]
+            yval = df[self.variable_dict[y]][n]
+
+            # Get values for color bar
+            zval = df[self.variable_dict[z]].values
+            znorm = np.array(
+                (zval - np.nanmin(zval)) / (np.nanmax(zval) - np.nanmin(zval))
+            )
+            colors = plt.cm.viridis(znorm.astype(float))
+
+            # Plot
+            plt.scatter(xval, yval, color=colors[n])
+
+        # manage colorbar
+        norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
+        objs = plt.colorbar(
+            mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
+            orientation="vertical",
+            label=str(self.variable_dict[z]),
+        )
+        plt.setp(
+            objs.ax.get_yticklabels(),
+            rotation=-10,
+            fontsize=9,
+            weight="black",
+            snap=True,
+            position=(1, 0),
+        )
+
+        # label axes
+        plt.ylabel(self.variable_dict[y], weight="black")
+        plt.xlabel(self.variable_dict[x], weight="black")
+
+        # display
+        plt.show()

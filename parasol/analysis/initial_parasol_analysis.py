@@ -16,46 +16,40 @@ class Parasol_String:
     def __init__(self, stringpath):
         """Initialize the Parasol_String class"""
 
-        # intiliaze variables for program
+        # Intiliaze variables for program
         self.NUM_MODULES = 24
 
-        # create folder paths
+        # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder
         self.stringpath = stringpath
-        (
-            self.mpp_folder,
-            self.jv_folders,
-            self.analyzed_folder,
-        ) = self.create_folder_paths()
+        self.create_folder_paths()
 
-        # create dictionary of folder paths: file paths
+        # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         self.jv_dict = self.create_file_paths(self.jv_folders)
         self.mpp_dict = self.create_file_paths(self.mpp_folder)
 
-        # analyze jv files
+        # Analyze JV files: For each module export scalars_{module}.csv
         self.analyze_jv_files()
 
     def create_folder_paths(self):
         """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""
 
         # path to mpp folder --> rootfolder:MPP:
-        mpp_folder = [os.path.join(self.stringpath, "MPP")]
+        self.mpp_folder = [os.path.join(self.stringpath, "MPP")]
 
         # path to jv folders --> rootfolder:JV_{module}:
-        jv_folders = []
+        self.jv_folders = []
         for i in range(1, self.NUM_MODULES + 1):
             jv_folder = os.path.join(self.stringpath, "JV_" + str(int(i)))
             if os.path.exists(jv_folder):
-                jv_folders.append(jv_folder)
+                self.jv_folders.append(jv_folder)
 
         # path to analyzed folder --> rootfolder:Analyzed
-        analyzed_folder = os.path.join(self.stringpath, "Analyzed")
-        if not os.path.exists(analyzed_folder):
-            os.makedirs(analyzed_folder)
-
-        return mpp_folder, jv_folders, analyzed_folder
+        self.analyzed_folder = os.path.join(self.stringpath, "Analyzed")
+        if not os.path.exists(self.analyzed_folder):
+            os.makedirs(self.analyzed_folder)
 
     def create_file_paths(self, folderpath):
-        """Create file_dict[folder] = filepaths"""
+        """Create file_dict[folderpath] = filepaths"""
 
         # create blank dictionary to hold folder: file_paths
         file_dict = {}
@@ -89,6 +83,9 @@ class Parasol_String:
 
         # cyle through every module/folder in jv dict
         for jv_folder in self.jv_folders:
+
+            # Get Module Number
+            module_num = jv_folder.split("_")[-1]
 
             # get list of file paths, create empty lists for parameters
             jv_file_paths = self.jv_dict[jv_folder]
@@ -125,7 +122,7 @@ class Parasol_String:
             all_t = np.array(all_t)
             all_t_elapsed = all_t - all_t[0]
 
-            # pass all data to function to calculate parameters
+            # pass all vectors to function to calculate scalars
             scalardict_fwd = self._calculate_jv_parameters(
                 all_v, all_j_fwd, all_p_fwd, "FWD"
             )
@@ -133,20 +130,20 @@ class Parasol_String:
                 all_v, all_j_rev, all_p_rev, "REV"
             )
 
-            # create dict, append time values and results from each scalardict
-            dfdict = {}
-            dfdict["Time (Epoch)"] = [t_epoch for t_epoch in all_t]
-            dfdict["Time Elapsed (s)"] = [t_ for t_ in all_t_elapsed]
+            # create scalardict, append time values and results from each scalardict
+            scalardict = {}
+            scalardict["Time (Epoch)"] = [t_epoch for t_epoch in all_t]
+            scalardict["Time Elapsed (s)"] = [t_ for t_ in all_t_elapsed]
             for k, v in scalardict_rev.items():
-                dfdict[k] = v
+                scalardict[k] = v
             for k, v in scalardict_fwd.items():
-                dfdict[k] = v
+                scalardict[k] = v
 
-            # create df, filter it, and save in analyzed folder
-            df = pd.DataFrame(dfdict)
-            df_filtered = self.filter_jv_parameters(df)
-            save_loc = os.path.join(self.analyzed_folder, "Parameters.csv")
-            df_filtered.to_csv(save_loc, index=False)
+            # create scalar dataframe, filter it, and save it in analyzed folder
+            scalar_df = pd.DataFrame(scalardict)
+            scalar_df_filtered = self.filter_jv_parameters(scalar_df)
+            save_loc = os.path.join(self.analyzed_folder, f"Scalars_{module_num}.csv")
+            scalar_df_filtered.to_csv(save_loc, index=False)
 
     def _calculate_jv_parameters(self, all_v, all_j, all_p, direction):
         """Calculate parameters for each jv file"""
@@ -261,7 +258,7 @@ class Parasol_String:
             direction + " Rsh (Ohm/cm2)": rsh_vals,
             direction + " Rs (Ohm/cm2)": rs_vals,
             direction + " Rch (Ohm/cm2)": rch_vals,
-            direction + " Jmp (mA)": jmp_vals,
+            direction + " Jmp (mA/cm2)": jmp_vals,
             direction + " Vmp (V)": vmp_vals,
             direction + " Pmp (mW/cm2)": pmp_vals,
         }
