@@ -158,12 +158,18 @@ class Controller:
     def _make_module_subdir(self, name, id, modulechannels):
         """Make subdirectory for saving"""
 
+        # Add date folder
+        date_str = datetime.now().strftime("x%Y%m%d")
+        datefpath = os.path.join(self.rootdir, date_str)
+        if not os.path.exists(datefpath):
+            os.mkdir(datefpath)
+
         # Make base file path for saving
         idx = 0
-        basefpath = os.path.join(self.rootdir, f"{name}")
+        basefpath = os.path.join(datefpath, f"{name}")
         while os.path.exists(basefpath):
             idx += 1
-            basefpath = os.path.join(self.rootdir, f"{name}_{idx}")
+            basefpath = os.path.join(datefpath, f"{name}_{idx}")
         os.mkdir(basefpath)
 
         # Make subdirectory for MMP
