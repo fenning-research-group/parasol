@@ -166,10 +166,10 @@ class Controller:
 
         # Make base file path for saving
         idx = 0
-        basefpath = os.path.join(datefpath, f"{name}")
+        basefpath = os.path.join(datefpath, f"x{date_str}_{name}")
         while os.path.exists(basefpath):
             idx += 1
-            basefpath = os.path.join(datefpath, f"{name}_{idx}")
+            basefpath = os.path.join(datefpath, f"x{date_str}_{name}_{idx}")
         os.mkdir(basefpath)
 
         # Make subdirectory for MMP
@@ -320,7 +320,7 @@ class Controller:
                 jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
                 fpath = os.path.join(
                     jvfolder,
-                    f"{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
+                    f"{d['name']}_string{id}_module{module}_JV_{d['jv']['scan_count']}.csv",
                 )
 
                 # Open relay, scan device foward + reverse, turn off relay
@@ -414,7 +414,7 @@ class Controller:
 
             # Save in base filepath:MPP_stringID:
             mppfolder = os.path.join(d["_savedir"], "MPP")
-            fpath = os.path.join(mppfolder, f"{d['name']}_{id}_MPP_1.csv")
+            fpath = os.path.join(mppfolder, f"{d['name']}_string{id}_MPP_1.csv")
 
             # Open file, append values to columns
             with open(fpath, "a", newline="") as f:
@@ -433,7 +433,7 @@ class Controller:
 
         # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
         mppfolder = os.path.join(d["_savedir"], "MPP")
-        fpath = os.path.join(mppfolder, f"{d['name']}_{id}_MPP_1.csv")
+        fpath = os.path.join(mppfolder, f"{d['name']}_string{id}_MPP_1.csv")
 
         # Open file, write header/column names then fill
         with open(fpath, "w", newline="") as f:
