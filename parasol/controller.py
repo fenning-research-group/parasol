@@ -158,7 +158,7 @@ class Controller:
         }
 
         self.strings[id]["_savedir"] = self._make_module_subdir(
-            name, id, modulechannels, startdate
+            name, id, module_channels, startdate
         )
 
         # Create the base MPP file with header and no data (we will append to it)
@@ -187,7 +187,7 @@ class Controller:
         # analyze the saveloc
         Parasol_String(saveloc)
 
-    def _make_module_subdir(self, name, id, modulechannels, startdate):
+    def _make_module_subdir(self, name, id, module_channels, startdate):
         """Make subdirectory for saving"""
 
         # Add date folder
@@ -208,7 +208,7 @@ class Controller:
         os.mkdir(mppfpath)
 
         # Make subdirectory for each module
-        for modulechannel in modulechannels:
+        for modulechannel in module_channels:
             modulepath = os.path.join(basefpath, f"JV_{modulechannel}")
             os.mkdir(modulepath)
 
