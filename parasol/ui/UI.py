@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QApplication, QCheckBox, QComboBox
 from PyQt5.QtWidgets import QPushButton, QLineEdit
+from PyQt5 import QtCore
 
 from PyQt5 import uic
 import sys
