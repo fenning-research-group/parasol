@@ -10,9 +10,10 @@ import os
 
 from parasol.controller import Controller
 
+# get directry of this file
 MODULE_DIR = os.path.dirname(__file__)
 
-# Ensure resolution is correct
+# Ensure resolution/dpi is correct
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 
@@ -176,10 +177,11 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton5.clicked.connect(self.checktest5)
         self.checktestbutton6.clicked.connect(self.checktest6)
 
+        # Create GUI
         self.Launch_GUI()
 
-    def Update_Loaded_Modules(self):
-
+    def update_loaded_modules(self):
+        """Uses checkboxes in UI to get list of active modules"""
         # Set all variables to None
         modules1 = [None] * 4
         modules2 = [None] * 4
@@ -251,8 +253,8 @@ class PARASOL_UI(QMainWindow):
         self.module5 = [i for i in modules5 if i is not None]
         self.module6 = [i for i in modules6 if i is not None]
 
-    def Update_Dictionaries(self):
-
+    def update_dictionaries(self):
+        """Updates dictionaries[string id num] with data from the UI"""
         self.strings = {}
         # Make Dictionary for each channel
         self.strings[1] = {
@@ -357,51 +359,51 @@ class PARASOL_UI(QMainWindow):
             },
         }
 
-    def Lock_Values(self, stringid):
-
+    def lock_values(self, stringid):
+        """Locks values for the string subsection of the UI"""
         if stringid == 1:
-            self.Lock_Value1()
+            self.lock_value1()
         elif stringid == 2:
-            self.Lock_Value2()
+            self.lock_value2()
         elif stringid == 3:
-            self.Lock_Value3()
+            self.lock_value3()
         elif stringid == 4:
-            self.Lock_Value4()
+            self.lock_value4()
         elif stringid == 5:
-            self.Lock_Value5()
+            self.lock_value5()
         elif stringid == 6:
-            self.Lock_Value6()
+            self.lock_value6()
 
-    def Unlock_Values(self, stringid):
-
+    def unlock_values(self, stringid):
+        """Unlocks values for the string subsection of the UI"""
         if stringid == 1:
-            self.Unlock_Value1()
+            self.unlock_value1()
         elif stringid == 2:
-            self.Unlock_Value2()
+            self.unlock_value2()
         elif stringid == 3:
-            self.Unlock_Value3()
+            self.unlock_value3()
         elif stringid == 4:
-            self.Unlock_Value4()
+            self.unlock_value4()
         elif stringid == 5:
-            self.Unlock_Value5()
+            self.unlock_value5()
         elif stringid == 6:
-            self.Unlock_Value6()
+            self.unlock_value6()
 
     def load(self, stringid):
-
+        """Loads the module using the command in controller.py and data from the dictionaries/UI"""
         # Notify User
         print("Loading string: " + str(stringid))
 
         # Update Values
-        self.Update_Loaded_Modules()
-        self.Update_Dictionaries()
+        self.update_loaded_modules()
+        self.update_dictionaries()
 
         # Grab id, dictionary
         id = int(stringid)
         d = self.strings[id]
 
         # Lock Values
-        self.Lock_Values(id)
+        self.lock_values(id)
 
         # Grab values from dictionary
         name = d["name"]
@@ -431,6 +433,7 @@ class PARASOL_UI(QMainWindow):
         )
 
     def unload(self, stringid):
+        """Unloads the module using the command in controller.py and the stringid"""
 
         # Notify User
         print("Unloading string: " + str(stringid))
@@ -439,12 +442,14 @@ class PARASOL_UI(QMainWindow):
         id = int(stringid)
 
         # Unlock values
-        self.Unlock_Values(id)
+        self.unlock_values(id)
 
         # Call Unload String from controller
         self.controller.unload_string(id)
 
     def checktest(self, stringid):
+        """Checks the test using the command in _______ and the stringid"""
+
         print("Checking string: " + str(stringid))
 
     ################################################################################
@@ -453,7 +458,7 @@ class PARASOL_UI(QMainWindow):
 
     # Lock Values for Editing
 
-    def Lock_Value1(self):
+    def lock_value1(self):
         self.name1.setEnabled(False)
         self.area1.setEnabled(False)
         self.jvmode1.setEnabled(False)
@@ -463,8 +468,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep1.setEnabled(False)
         self.mppmode1.setEnabled(False)
         self.mppfrequency1.setEnabled(False)
+        self.checkbox1.setEnabled(False)
+        self.checkbox2.setEnabled(False)
+        self.checkbox3.setEnabled(False)
+        self.checkbox4.setEnabled(False)
 
-    def Lock_Value2(self):
+    def lock_value2(self):
         self.name2.setEnabled(False)
         self.area2.setEnabled(False)
         self.jvmode2.setEnabled(False)
@@ -474,8 +483,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep2.setEnabled(False)
         self.mppmode2.setEnabled(False)
         self.mppfrequency2.setEnabled(False)
+        self.checkbox5.setEnabled(False)
+        self.checkbox6.setEnabled(False)
+        self.checkbox7.setEnabled(False)
+        self.checkbox8.setEnabled(False)
 
-    def Lock_Value3(self):
+    def lock_value3(self):
         self.name3.setEnabled(False)
         self.area3.setEnabled(False)
         self.jvmode3.setEnabled(False)
@@ -485,8 +498,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep3.setEnabled(False)
         self.mppmode3.setEnabled(False)
         self.mppfrequency3.setEnabled(False)
+        self.checkbox9.setEnabled(False)
+        self.checkbox10.setEnabled(False)
+        self.checkbox11.setEnabled(False)
+        self.checkbox12.setEnabled(False)
 
-    def Lock_Value4(self):
+    def lock_value4(self):
         self.name4.setEnabled(False)
         self.area4.setEnabled(False)
         self.jvmode4.setEnabled(False)
@@ -496,8 +513,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep4.setEnabled(False)
         self.mppmode4.setEnabled(False)
         self.mppfrequency4.setEnabled(False)
+        self.checkbox13.setEnabled(False)
+        self.checkbox14.setEnabled(False)
+        self.checkbox15.setEnabled(False)
+        self.checkbox16.setEnabled(False)
 
-    def Lock_Value5(self):
+    def lock_value5(self):
         self.name5.setEnabled(False)
         self.area5.setEnabled(False)
         self.jvmode5.setEnabled(False)
@@ -507,8 +528,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep5.setEnabled(False)
         self.mppmode5.setEnabled(False)
         self.mppfrequency5.setEnabled(False)
+        self.checkbox17.setEnabled(False)
+        self.checkbox18.setEnabled(False)
+        self.checkbox19.setEnabled(False)
+        self.checkbox20.setEnabled(False)
 
-    def Lock_Value6(self):
+    def lock_value6(self):
         self.name6.setEnabled(False)
         self.area6.setEnabled(False)
         self.jvmode6.setEnabled(False)
@@ -518,10 +543,14 @@ class PARASOL_UI(QMainWindow):
         self.vstep6.setEnabled(False)
         self.mppmode6.setEnabled(False)
         self.mppfrequency6.setEnabled(False)
+        self.checkbox21.setEnabled(False)
+        self.checkbox22.setEnabled(False)
+        self.checkbox23.setEnabled(False)
+        self.checkbox24.setEnabled(False)
 
     # Unlock Values For Editing
 
-    def Unlock_Value1(self):
+    def unlock_value1(self):
         self.name1.setEnabled(True)
         self.area1.setEnabled(True)
         self.jvmode1.setEnabled(True)
@@ -531,8 +560,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep1.setEnabled(True)
         self.mppmode1.setEnabled(True)
         self.mppfrequency1.setEnabled(True)
+        self.checkbox1.setEnabled(True)
+        self.checkbox2.setEnabled(True)
+        self.checkbox3.setEnabled(True)
+        self.checkbox4.setEnabled(True)
 
-    def Unlock_Value2(self):
+    def unlock_value2(self):
         self.name2.setEnabled(True)
         self.area2.setEnabled(True)
         self.jvmode2.setEnabled(True)
@@ -542,8 +575,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep2.setEnabled(True)
         self.mppmode2.setEnabled(True)
         self.mppfrequency2.setEnabled(True)
+        self.checkbox5.setEnabled(True)
+        self.checkbox6.setEnabled(True)
+        self.checkbox7.setEnabled(True)
+        self.checkbox8.setEnabled(True)
 
-    def Unlock_Value3(self):
+    def unlock_value3(self):
         self.name3.setEnabled(True)
         self.area3.setEnabled(True)
         self.jvmode3.setEnabled(True)
@@ -553,8 +590,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep3.setEnabled(True)
         self.mppmode3.setEnabled(True)
         self.mppfrequency3.setEnabled(True)
+        self.checkbox9.setEnabled(True)
+        self.checkbox10.setEnabled(True)
+        self.checkbox11.setEnabled(True)
+        self.checkbox12.setEnabled(True)
 
-    def Unlock_Value4(self):
+    def unlock_value4(self):
         self.name4.setEnabled(True)
         self.area4.setEnabled(True)
         self.jvmode4.setEnabled(True)
@@ -564,8 +605,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep4.setEnabled(True)
         self.mppmode4.setEnabled(True)
         self.mppfrequency4.setEnabled(True)
+        self.checkbox13.setEnabled(True)
+        self.checkbox14.setEnabled(True)
+        self.checkbox15.setEnabled(True)
+        self.checkbox16.setEnabled(True)
 
-    def Unlock_Value5(self):
+    def unlock_value5(self):
         self.name5.setEnabled(True)
         self.area5.setEnabled(True)
         self.jvmode5.setEnabled(True)
@@ -575,8 +620,12 @@ class PARASOL_UI(QMainWindow):
         self.vstep5.setEnabled(True)
         self.mppmode5.setEnabled(True)
         self.mppfrequency5.setEnabled(True)
+        self.checkbox17.setEnabled(True)
+        self.checkbox18.setEnabled(True)
+        self.checkbox19.setEnabled(True)
+        self.checkbox20.setEnabled(True)
 
-    def Unlock_Value6(self):
+    def unlock_value6(self):
         self.name6.setEnabled(True)
         self.area6.setEnabled(True)
         self.jvmode6.setEnabled(True)
@@ -586,6 +635,10 @@ class PARASOL_UI(QMainWindow):
         self.vstep6.setEnabled(True)
         self.mppmode6.setEnabled(True)
         self.mppfrequency6.setEnabled(True)
+        self.checkbox21.setEnabled(True)
+        self.checkbox22.setEnabled(True)
+        self.checkbox23.setEnabled(True)
+        self.checkbox24.setEnabled(True)
 
     # Load Buttons
 
