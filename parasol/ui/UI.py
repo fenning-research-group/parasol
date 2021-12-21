@@ -395,15 +395,15 @@ class PARASOL_UI(QMainWindow):
 
         # Grab values from dictionary
         name = d["name"]
-        area = d["area"]
-        jv_mode = d["jv"]["mode"]
+        area = float(d["area"])
+        jv_mode = int(d["jv"]["mode"])
         module_channels = d["module_channels"]
-        jv_interval = d["jv"]["interval"]
-        jv_vmin = d["jv"]["vmin"]
-        jv_vmax = d["jv"]["vmax"]
-        jv_steps = d["jv"]["steps"]
-        mpp_mode = d["mpp"]["mode"]
-        mpp_interval = d["mpp"]["interval"]
+        jv_interval = float(d["jv"]["interval"])
+        jv_vmin = float(d["jv"]["vmin"])
+        jv_vmax = float(d["jv"]["vmax"])
+        jv_steps = int(d["jv"]["steps"])
+        mpp_mode = int(d["mpp"]["mode"])
+        mpp_interval = float(d["mpp"]["interval"])
 
         # call command here
         # self.controller.load_string()
