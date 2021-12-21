@@ -81,7 +81,7 @@ class Parasol_String:
     def analyze_jv_files(self):
         """Cycle through JV files, analyze, and make output file for parameters"""
 
-        # cyle through every module/folder in jv dict
+        # cycle through every module/folder in jv dict
         for jv_folder in self.jv_folders:
 
             # Get Module Number

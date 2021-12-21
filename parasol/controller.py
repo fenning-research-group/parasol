@@ -9,10 +9,10 @@ import os
 import csv
 from datetime import datetime
 import time
-from .hardware.relay import Relay
-from .hardware.scanner import Scanner
-from .hardware.easttester import EastTester
-from .analysis.initial_parasol_analysis import Parasol_String
+from parasol.hardware.relay import Relay
+from parasol.hardware.scanner import Scanner
+from parasol.hardware.easttester import EastTester
+from parasol.analysis.initial_parasol_analysis import Parasol_String
 
 
 # Set yaml name, load controller info
@@ -69,6 +69,7 @@ class Controller:
         self.threadpool = ThreadPoolExecutor(max_workers=6)
         self.start()
 
+    # load_sting(self,id,name,area,night_mode,mpp_mode,module_channels,jv_interval,mpp_interval,jv_vmin,jv_vmax,jv_steps,):
     def load_string(
         self,
         id,
@@ -97,11 +98,18 @@ class Controller:
 
         # Setup string dict with important information for running the program
         startdate = datetime.now().strftime("x%Y%m%d")
+
+        #
+        night_mode = 0
+        mpp_mode = 0
         modulechannels = self.module_channels[id][:n_modules]
+        #
+
         self.strings[id] = {
             "name": name,
             "area": area,
             "start_date": startdate,
+            "night_mode": night_mode,
             "module_channels": modulechannels,
             "jv": {
                 "interval": jv_interval,
@@ -115,7 +123,7 @@ class Controller:
                 "j_rev": [None for i in range(n_modules)],
             },
             "mpp": {
-                "mode": 1,  # 1 = perturb and observe for now
+                "mode": mpp_mode,  # 0 = perturb and observe for now
                 "interval": mpp_interval,
                 "vmin": 0.1,
                 "vmax": jv_vmax,
@@ -501,9 +509,9 @@ class Controller:
         v = None
         tracking_mode = d["mpp"]["mode"]
 
-        if tracking_mode == 1:
+        if tracking_mode == 0:
             v = self.perturb_and_observe_constant(d, vmpp_last)
-        if tracking_mode == 2:
+        if tracking_mode == 1:
             print("not implemented")
 
         return v
