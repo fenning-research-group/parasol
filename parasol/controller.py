@@ -69,22 +69,6 @@ class Controller:
         self.threadpool = ThreadPoolExecutor(max_workers=6)
         self.start()
 
-    # old
-    # def load_string(
-    #     self,
-    #     id,
-    #     name,
-    #     n_modules,
-    #     area,
-    #     jv_interval,
-    #     jv_vmin,
-    #     jv_vmax,
-    #     jv_steps,
-    #     mpp_interval,
-    # ):
-
-    # new
-    # f"load_sting({id},{name},{area},{jv_mode},{mpp_mode},{module_channels},{jv_interval},{mpp_interval},{jv_vmin},{jv_vmax},{jv_steps})"
     def load_string(
         self,
         id,
@@ -117,17 +101,10 @@ class Controller:
         # Setup string dict with important information for running the program
         startdate = datetime.now().strftime("x%Y%m%d")
 
-        #
-        # jv_mode = 0
-        # mpp_mode = 0
-        # modulechannels = self.module_channels[id][:n_modules]
-        #
-
         self.strings[id] = {
             "name": name,
             "area": area,
             "start_date": startdate,
-            #            "module_channels": modulechannels,
             "module_channels": module_channels,
             "jv": {
                 "mode": jv_mode,
@@ -137,9 +114,6 @@ class Controller:
                 "steps": jv_steps,
                 "scan_count": 0,
                 "_future": jv_future,
-                # "v": [None for i in range(n_modules)],
-                # "j_fwd": [None for i in range(n_modules)],
-                # "j_rev": [None for i in range(n_modules)],
                 "v": [None for i in range(len(module_channels))],
                 "j_fwd": [None for i in range(len(module_channels))],
                 "j_rev": [None for i in range(len(module_channels))],

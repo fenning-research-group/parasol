@@ -9,6 +9,13 @@ from parasol.controller import Controller
 
 MODULE_DIR = os.path.dirname(__file__)
 
+# Ensure resolution is correct
+if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
+    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
+    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
 
 class PARASOL_UI(QMainWindow):
     """
@@ -405,11 +412,7 @@ class PARASOL_UI(QMainWindow):
         mpp_mode = int(d["mpp"]["mode"])
         mpp_interval = float(d["mpp"]["interval"])
 
-        # call command here
-        # self.controller.load_string()
-        # print(
-        #     f"load_sting({id},{name},{area},{jv_mode},{mpp_mode},{module_channels},{jv_interval},{mpp_interval},{jv_vmin},{jv_vmax},{jv_steps})"
-        # )
+        # Call Load String from controller
         self.controller.load_string(
             id,
             name,
@@ -423,8 +426,6 @@ class PARASOL_UI(QMainWindow):
             jv_vmax,
             jv_steps,
         )
-        # load_string(id,name,n_modules,area,jv_interval,jv_vmin,jv_vmax,jv_steps, mpp_interval)
-        # load_sting(id,name,area,jv_mode,mpp_mode,module_channels,jv_interval,mpp_interval,jv_vmin,jv_vmax,jv_steps)
 
     def unload(self, stringid):
 
@@ -437,6 +438,7 @@ class PARASOL_UI(QMainWindow):
         # Unlock values
         self.Unlock_Values(id)
 
+        # Call Unload String from controller
         self.controller.unload_string(id)
 
     def checktest(self, stringid):
