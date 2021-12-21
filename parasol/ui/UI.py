@@ -11,6 +11,10 @@ MODULE_DIR = os.path.dirname(__file__)
 
 
 class PARASOL_UI(QMainWindow):
+    """
+    Launches PARASOL_UI.ui & passes variables to controller
+    """
+
     def __init__(self):
         super(PARASOL_UI, self).__init__()
 
@@ -403,8 +407,21 @@ class PARASOL_UI(QMainWindow):
 
         # call command here
         # self.controller.load_string()
-        print(
-            f"load_sting({id},{name},{area},{jv_mode},{mpp_mode},{module_channels},{jv_interval},{mpp_interval},{jv_vmin},{jv_vmax},{jv_steps})"
+        # print(
+        #     f"load_sting({id},{name},{area},{jv_mode},{mpp_mode},{module_channels},{jv_interval},{mpp_interval},{jv_vmin},{jv_vmax},{jv_steps})"
+        # )
+        self.controller.load_string(
+            id,
+            name,
+            area,
+            jv_mode,
+            mpp_mode,
+            module_channels,
+            jv_interval,
+            mpp_interval,
+            jv_vmin,
+            jv_vmax,
+            jv_steps,
         )
         # load_string(id,name,n_modules,area,jv_interval,jv_vmin,jv_vmax,jv_steps, mpp_interval)
         # load_sting(id,name,area,jv_mode,mpp_mode,module_channels,jv_interval,mpp_interval,jv_vmin,jv_vmax,jv_steps)
@@ -420,7 +437,7 @@ class PARASOL_UI(QMainWindow):
         # Unlock values
         self.Unlock_Values(id)
 
-        # unload_string(id)
+        self.controller.unload_string(id)
 
     def checktest(self, stringid):
         print("Checking string: " + str(stringid))

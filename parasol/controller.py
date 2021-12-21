@@ -69,19 +69,37 @@ class Controller:
         self.threadpool = ThreadPoolExecutor(max_workers=6)
         self.start()
 
-    # load_sting(self,id,name,area,night_mode,mpp_mode,module_channels,jv_interval,mpp_interval,jv_vmin,jv_vmax,jv_steps,):
+    # old
+    # def load_string(
+    #     self,
+    #     id,
+    #     name,
+    #     n_modules,
+    #     area,
+    #     jv_interval,
+    #     jv_vmin,
+    #     jv_vmax,
+    #     jv_steps,
+    #     mpp_interval,
+    # ):
+
+    # new
+    # f"load_sting({id},{name},{area},{jv_mode},{mpp_mode},{module_channels},{jv_interval},{mpp_interval},{jv_vmin},{jv_vmax},{jv_steps})"
     def load_string(
         self,
         id,
         name,
-        n_modules,
         area,
+        jv_mode,
+        mpp_mode,
+        module_channels,
         jv_interval,
+        mpp_interval,
         jv_vmin,
         jv_vmax,
         jv_steps,
-        mpp_interval,
     ):
+
         """Master command used to load a string of modules"""
 
         # Ensure id is not already in use and can be used
@@ -100,27 +118,31 @@ class Controller:
         startdate = datetime.now().strftime("x%Y%m%d")
 
         #
-        night_mode = 0
-        mpp_mode = 0
-        modulechannels = self.module_channels[id][:n_modules]
+        # jv_mode = 0
+        # mpp_mode = 0
+        # modulechannels = self.module_channels[id][:n_modules]
         #
 
         self.strings[id] = {
             "name": name,
             "area": area,
             "start_date": startdate,
-            "night_mode": night_mode,
-            "module_channels": modulechannels,
+            #            "module_channels": modulechannels,
+            "module_channels": module_channels,
             "jv": {
+                "mode": jv_mode,
                 "interval": jv_interval,
                 "vmin": jv_vmin,
                 "vmax": jv_vmax,
                 "steps": jv_steps,
                 "scan_count": 0,
                 "_future": jv_future,
-                "v": [None for i in range(n_modules)],
-                "j_fwd": [None for i in range(n_modules)],
-                "j_rev": [None for i in range(n_modules)],
+                # "v": [None for i in range(n_modules)],
+                # "j_fwd": [None for i in range(n_modules)],
+                # "j_rev": [None for i in range(n_modules)],
+                "v": [None for i in range(len(module_channels))],
+                "j_fwd": [None for i in range(len(module_channels))],
+                "j_rev": [None for i in range(len(module_channels))],
             },
             "mpp": {
                 "mode": mpp_mode,  # 0 = perturb and observe for now
