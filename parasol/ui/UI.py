@@ -19,7 +19,7 @@ class PARASOL_UI(QMainWindow):
         super(PARASOL_UI, self).__init__()
 
         # Initialize Controller
-        # self.controller = Controller()
+        self.controller = Controller()
 
         # Load the ui file
         ui_path = os.path.join(MODULE_DIR, "PARASOL_UI.ui")
