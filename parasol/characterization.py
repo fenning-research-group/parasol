@@ -14,17 +14,22 @@ class Characterization:
 
         self.et_voltage_step = constants["mppt_voltage_step"]
 
+        # set up jv mode where # shoud match the if statment below and "" should match name of that test
         self.jv_options = {
             0: "REV then FWD",
             1: "FWD then REV",
+            2: "FWD then REV, Jsc to Voc --> Untested",
         }
 
+        # set up mpp mode where # shoud match the if statment below and "" should match name of that test
         self.mpp_options = {
             0: "Perturb and Observe (constant V step)",
         }
 
     def scan_jv(self, d, scanner):
-
+        """
+        Takes in dictionary and scanner, scans JV, returns v, i fwd, and i rev
+        """
         # Get JV mode
         jv_mode = d["jv"]["mode"]
 
@@ -52,9 +57,17 @@ class Characterization:
                 vstart=d["jv"]["vmax"], vend=d["jv"]["vmin"], steps=d["jv"]["steps"]
             )
 
+        # Mode = 2 scan fwd then rev only - current
+        elif jv_mode == 2:
+
+            v, fwd_i, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
+                vstart=d["jv"]["vmax"], vend=d["jv"]["vmin"], steps=d["jv"]["steps"]
+            )
+
         return v, fwd_i, rev_i
 
-    def scan_mpp(self, d, easttester, ch, vmpp_last):
+    def track_mpp(self, d, easttester, ch, vmpp_last):
+        """Takes last vmpp, dictionary, et, and ch, tracks vmpp for next point, returns t, v, o"""
 
         mpp_mode = d["mpp"]["mode"]
 

@@ -164,7 +164,6 @@ class PARASOL_UI(QMainWindow):
             self.jvmode5.addItem(self.characterization.jv_options[item])
             self.jvmode6.addItem(self.characterization.jv_options[item])
 
-
         # Get load button & connect to function
         self.loadbutton1 = self.findChild(QPushButton, "LoadButton_1")
         self.loadbutton2 = self.findChild(QPushButton, "LoadButton_2")

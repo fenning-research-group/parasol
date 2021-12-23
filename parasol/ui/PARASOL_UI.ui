@@ -24,7 +24,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-362</y>
+         <y>0</y>
          <width>1130</width>
          <height>1102</height>
         </rect>
@@ -588,11 +588,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Perturb &amp; Observe (Constant V), No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QComboBox" name="JVModeBox_1">
                  <property name="geometry">
@@ -603,11 +598,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Full Sweep FWD Then REV, No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QLabel" name="MPPModeLabel_1">
                  <property name="geometry">
@@ -1209,11 +1199,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Perturb &amp; Observe (Constant V), No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QComboBox" name="JVModeBox_2">
                  <property name="geometry">
@@ -1224,11 +1209,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Full Sweep FWD Then REV, No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QLabel" name="MPPModeLabel_2">
                  <property name="geometry">
@@ -1831,13 +1811,8 @@
                   </rect>
                  </property>
                  <property name="currentText">
-                  <string>Perturb &amp; Observe (Constant V), No Night Change</string>
+                  <string/>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Perturb &amp; Observe (Constant V), No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QComboBox" name="JVModeBox_3">
                  <property name="geometry">
@@ -1848,11 +1823,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Full Sweep FWD Then REV, No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QLabel" name="MPPModeLabel_3">
                  <property name="geometry">
@@ -2455,13 +2425,8 @@
                   </rect>
                  </property>
                  <property name="currentText">
-                  <string>Perturb &amp; Observe (Constant V), No Night Change</string>
+                  <string/>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Perturb &amp; Observe (Constant V), No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QComboBox" name="JVModeBox_4">
                  <property name="geometry">
@@ -2472,11 +2437,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Full Sweep FWD Then REV, No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QLabel" name="MPPModeLabel_4">
                  <property name="geometry">
@@ -3079,13 +3039,8 @@
                   </rect>
                  </property>
                  <property name="currentText">
-                  <string>Perturb &amp; Observe (Constant V), No Night Change</string>
+                  <string/>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Perturb &amp; Observe (Constant V), No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QComboBox" name="JVModeBox_5">
                  <property name="geometry">
@@ -3096,11 +3051,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Full Sweep FWD Then REV, No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QLabel" name="MPPModeLabel_5">
                  <property name="geometry">
@@ -3702,11 +3652,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Perturb &amp; Observe (Constant V), No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QComboBox" name="JVModeBox_6">
                  <property name="geometry">
@@ -3717,11 +3662,6 @@
                    <height>23</height>
                   </rect>
                  </property>
-                 <item>
-                  <property name="text">
-                   <string>Full Sweep FWD Then REV, No Night Change</string>
-                  </property>
-                 </item>
                 </widget>
                 <widget class="QLabel" name="MPPModeLabel_6">
                  <property name="geometry">

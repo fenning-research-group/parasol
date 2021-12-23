@@ -138,7 +138,7 @@ class Controller:
         )
 
         # Create the base MPP file with header and no data (we will append to it)
-        self.create_mpp_file(id)
+        self._make_mpp_file(id)
 
     def unload_string(self, id):
         """Master command used to unload a string of modules"""
@@ -189,6 +189,39 @@ class Controller:
             os.mkdir(modulepath)
 
         return basefpath
+
+    def _make_mpp_file(self, id):
+        """Creates base file for MPP data"""
+
+        d = self.strings.get(id, None)
+
+        # Get date/time and make filepath
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        time_str = datetime.now().strftime("%H:%M:%S")
+        epoch_str = time.time()
+
+        # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
+        mppfolder = os.path.join(d["_savedir"], "MPP")
+        fpath = os.path.join(mppfolder, f"{d['start_date']}_{d['name']}_{id}_MPP_1.csv")
+
+        # Open file, write header/column names then fill
+        with open(fpath, "w", newline="") as f:
+            writer = csv.writer(f, delimiter=",")
+            writer.writerow(["Date:", date_str])
+            writer.writerow(["Time:", time_str])
+            writer.writerow(["epoch_time:", epoch_str])
+            writer.writerow(["String ID:", id])
+            writer.writerow(["Module ID:", d["module_channels"]])
+            writer.writerow(["Area (cm2):", d["area"]])
+            writer.writerow(
+                [
+                    "Time (epoch)",
+                    "Voltage (V)",
+                    "Current (mA)",
+                    "Current Density (mA/cm2)",
+                    "Power Density (mW/cm2)",
+                ]
+            )
 
     async def jv_worker(self, loop):
         """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
@@ -400,13 +433,12 @@ class Controller:
             et = self.easttester[et_key]
 
             # scan mpp
-            t, v, i = self.characterization.scan_mpp(d, et, ch, last_vmpp)
+            t, v, i = self.characterization.track_mpp(d, et, ch, last_vmpp)
 
             # Convert current to mA and calc j and p
             i *= 1000
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
-
 
             # Update d[] by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
@@ -427,42 +459,10 @@ class Controller:
                 writer = csv.writer(f, delimiter=",")
                 writer.writerow([t, v, i, j, p])
 
-    def create_mpp_file(self, id):
-        """Creates base file for MPP data"""
-
-        d = self.strings.get(id, None)
-
-        # Get date/time and make filepath
-        date_str = datetime.now().strftime("%Y-%m-%d")
-        time_str = datetime.now().strftime("%H:%M:%S")
-        epoch_str = time.time()
-
-        # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
-        mppfolder = os.path.join(d["_savedir"], "MPP")
-        fpath = os.path.join(mppfolder, f"{d['start_date']}_{d['name']}_{id}_MPP_1.csv")
-
-        # Open file, write header/column names then fill
-        with open(fpath, "w", newline="") as f:
-            writer = csv.writer(f, delimiter=",")
-            writer.writerow(["Date:", date_str])
-            writer.writerow(["Time:", time_str])
-            writer.writerow(["epoch_time:", epoch_str])
-            writer.writerow(["String ID:", id])
-            writer.writerow(["Module ID:", d["module_channels"]])
-            writer.writerow(["Area (cm2):", d["area"]])
-            writer.writerow(
-                [
-                    "Time (epoch)",
-                    "Voltage (V)",
-                    "Current (mA)",
-                    "Current Density (mA/cm2)",
-                    "Power Density (mW/cm2)",
-                ]
-            )
-
     def __del__(self):
         """Stops que and program on exit"""
         self.stop()
+
 
 def future_callback(future):
     """Callback function triggered when a future completes. Allows errors to be seen outside event loop"""

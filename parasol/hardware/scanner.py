@@ -160,6 +160,49 @@ class Scanner:
 
         return v, i
 
+        # set up jv mode where # shoud match the if statment below and "" should match name of that test
+
+    def iv_sweep_quadrant_fwd_rev(self, vstart, vend, steps):
+        """Runs a single IV sweep"""
+        # Make empty numpy arrays for data
+        v = np.linspace(vstart, vend, steps)
+        i_fwd = np.zeros(v.shape)
+        i_rev = np.zeros(v.shape)
+        i_fwd[:] = np.nan
+        i_rev[:] = np.nan
+
+        # Turn on output, set voltage, measure current, turn off output
+        self.output_on()
+
+        # Scan forward until we get out of the quadrant
+        index = 0
+
+        # find point before 1st point in quadrant
+        for v_point in v:
+            if v_point >= 0:
+                break
+            index += 1
+        index -= 1
+        start_index = index
+
+        # cycle from there until we get out of the quadrant
+        while index <= len(v):
+            self.set_voltage(v[index])
+            i_fwd[index] = float(self._trig_read())
+            if i_fwd[index] > 0:
+                break
+            index += 1
+
+        # Scan backwards until we get back to starting point
+        while index >= start_index:
+            self.set_voltage(v[index])
+            i_rev[index] = float(self._trig_read())
+            index -= 1
+
+        self.output_off()
+
+        return v, i_fwd, i_rev
+
     # def scan_jv(self, vmin, vmax, steps):
     #     """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
     #     # Run reverse scan
