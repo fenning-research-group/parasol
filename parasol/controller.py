@@ -35,7 +35,7 @@ class Controller:
             os.mkdir(rootdir)
 
         # grab voltage step used for perturb and observe algorithm
-        self.et_voltage_step = constants["mppt_voltage_step"]
+        # self.et_voltage_step = constants["mppt_voltage_step"]
 
         # Connect to Relay, Scanner, 3 EastTesters, and Characterization files
         self.relay = Relay()

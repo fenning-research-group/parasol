@@ -9,6 +9,7 @@ import sys
 import os
 
 from parasol.controller import Controller
+from parasol.characterization import Characterization
 
 # get directry of this file
 MODULE_DIR = os.path.dirname(__file__)
@@ -31,6 +32,7 @@ class PARASOL_UI(QMainWindow):
 
         # Initialize Controller
         self.controller = Controller()
+        self.characterization = Characterization()
 
         # Load the ui file
         ui_path = os.path.join(MODULE_DIR, "PARASOL_UI.ui")
@@ -116,7 +118,7 @@ class PARASOL_UI(QMainWindow):
         self.vstep5 = self.findChild(QLineEdit, "VstepsInput_5")
         self.vstep6 = self.findChild(QLineEdit, "VstepsInput_6")
 
-        # Get MPP mode
+        # Get MPP mode, clear, feed in options from characteriations
         self.mppmode1 = self.findChild(QComboBox, "MPPModeBox_1")
         self.mppmode2 = self.findChild(QComboBox, "MPPModeBox_2")
         self.mppmode3 = self.findChild(QComboBox, "MPPModeBox_3")
@@ -124,7 +126,22 @@ class PARASOL_UI(QMainWindow):
         self.mppmode5 = self.findChild(QComboBox, "MPPModeBox_5")
         self.mppmode6 = self.findChild(QComboBox, "MPPModeBox_6")
 
-        # Get JV mode button
+        self.mppmode1.clear()
+        self.mppmode2.clear()
+        self.mppmode3.clear()
+        self.mppmode4.clear()
+        self.mppmode5.clear()
+        self.mppmode6.clear()
+
+        for item in self.characterization.mpp_options:
+            self.mppmode1.addItem(self.characterization.mpp_options[item])
+            self.mppmode2.addItem(self.characterization.mpp_options[item])
+            self.mppmode3.addItem(self.characterization.mpp_options[item])
+            self.mppmode4.addItem(self.characterization.mpp_options[item])
+            self.mppmode5.addItem(self.characterization.mpp_options[item])
+            self.mppmode6.addItem(self.characterization.mpp_options[item])
+
+        # Get JV mode, clear, feed in options from characteriations
         self.jvmode1 = self.findChild(QComboBox, "JVModeBox_1")
         self.jvmode2 = self.findChild(QComboBox, "JVModeBox_2")
         self.jvmode3 = self.findChild(QComboBox, "JVModeBox_3")
@@ -133,8 +150,20 @@ class PARASOL_UI(QMainWindow):
         self.jvmode6 = self.findChild(QComboBox, "JVModeBox_6")
 
         self.jvmode1.clear()
-        self.jvmode1.addItem("FWD then REV")
-        self.jvmode1.addItem("REV then FWD")
+        self.jvmode2.clear()
+        self.jvmode3.clear()
+        self.jvmode4.clear()
+        self.jvmode5.clear()
+        self.jvmode6.clear()
+
+        for item in self.characterization.jv_options:
+            self.jvmode1.addItem(self.characterization.jv_options[item])
+            self.jvmode2.addItem(self.characterization.jv_options[item])
+            self.jvmode3.addItem(self.characterization.jv_options[item])
+            self.jvmode4.addItem(self.characterization.jv_options[item])
+            self.jvmode5.addItem(self.characterization.jv_options[item])
+            self.jvmode6.addItem(self.characterization.jv_options[item])
+
 
         # Get load button & connect to function
         self.loadbutton1 = self.findChild(QPushButton, "LoadButton_1")
