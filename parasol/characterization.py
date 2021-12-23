@@ -1,10 +1,27 @@
 import numpy as np
 import time
+import yaml
+import os
+
+# Set yaml name, load controller info
+MODULE_DIR = os.path.dirname(__file__)
+with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
+    constants = yaml.load(f, Loader=yaml.FullLoader)["characterization"]
 
 
 class Characterization:
     def __init__(self):
-        self.et_voltage_step = 0.05
+
+        self.et_voltage_step = constants["mppt_voltage_step"]
+
+        self.jv_options = {
+            0: "REV then FWD",
+            1: "FWD then REV",
+        }
+
+        self.mpp_options = {
+            0: "Perturb and Observe (constant V step)",
+        }
 
     def scan_jv(self, d, scanner):
 
@@ -38,13 +55,15 @@ class Characterization:
         return v, fwd_i, rev_i
 
     def scan_mpp(self, d, easttester, ch, vmpp_last):
-        
+
         mpp_mode = d["mpp"]["mode"]
 
         if mpp_mode == 0:
-            
+
             # Get voltage step (make sure we are moving toward the MPP)
-            if (d["mpp"]["last_powers"][0] is None) or (d["mpp"]["last_powers"][1] is None):
+            if (d["mpp"]["last_powers"][0] is None) or (
+                d["mpp"]["last_powers"][1] is None
+            ):
                 voltage_step = self.et_voltage_step
             else:
                 if d["mpp"]["last_voltages"][1] >= d["mpp"]["last_voltages"][0]:
@@ -64,14 +83,14 @@ class Characterization:
 
             # get time, set voltage measure current
             t = time.time()
-            i = easttester.set_V_measure_I(ch,v)
+            i = easttester.set_V_measure_I(ch, v)
 
         elif mpp_mode == 1:
             print("Not Implemented")
 
         # send back vmpp
         return t, v, i
-        
+
     def calc_last_vmp(self, d):
         """Grabs last vmpp from tracking if it exists. If not, calculates from JV curves"""
 
@@ -108,4 +127,3 @@ class Characterization:
             vmpp = None
 
         return vmpp
-

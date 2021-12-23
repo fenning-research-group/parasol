@@ -132,6 +132,10 @@ class PARASOL_UI(QMainWindow):
         self.jvmode5 = self.findChild(QComboBox, "JVModeBox_5")
         self.jvmode6 = self.findChild(QComboBox, "JVModeBox_6")
 
+        self.jvmode1.clear()
+        self.jvmode1.addItem("FWD then REV")
+        self.jvmode1.addItem("REV then FWD")
+
         # Get load button & connect to function
         self.loadbutton1 = self.findChild(QPushButton, "LoadButton_1")
         self.loadbutton2 = self.findChild(QPushButton, "LoadButton_2")
