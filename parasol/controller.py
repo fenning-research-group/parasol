@@ -13,6 +13,7 @@ from parasol.hardware.relay import Relay
 from parasol.hardware.scanner import Scanner
 from parasol.hardware.easttester import EastTester
 from parasol.analysis.initial_parasol_analysis import Parasol_String
+from parasol.characterization import Characterization
 
 
 # Set yaml name, load controller info
@@ -36,7 +37,7 @@ class Controller:
         # grab voltage step used for perturb and observe algorithm
         self.et_voltage_step = constants["mppt_voltage_step"]
 
-        # Connect to Relay, Scanner, and 3 EastTesters
+        # Connect to Relay, Scanner, 3 EastTesters, and Characterization files
         self.relay = Relay()
         self.scanner = Scanner()
         self.easttester = {
@@ -44,6 +45,7 @@ class Controller:
             #        "34": EastTester(port=constants["ET_2_PORT"]),
             #        "56": EastTester(port=constants["ET_3_PORT"]),
         }
+        self.characterization = Characterization()
 
         # Maps string ID to ET port (which of the 3 ET) and channel
         self.et_channels = {
@@ -300,10 +302,12 @@ class Controller:
         self.thread.join()
 
     # All tracking & scanning functions are below here
+    # Ideally, we want to move these to a different file
 
     def scan_jv(self, id):
         """Uses Yokogawa to conudct a JV scan"""
 
+        # get dictionary information
         d = self.strings.get(id, None)
 
         # Emsure MPP isn't running.
@@ -314,6 +318,7 @@ class Controller:
             et = self.easttester[et_key]
             et.output_off(ch)
 
+            # cycle through each device on the string
             for index, module in enumerate(d["module_channels"]):
 
                 # Get date/time and make filepath
@@ -330,9 +335,14 @@ class Controller:
 
                 # Open relay, scan device foward + reverse, turn off relay
                 self.relay.on(module)
-                v, fwd_i, rev_i = self.scanner.scan_jv(
-                    vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
-                )
+
+                #####
+                v, fwd_i, rev_i = self.characterization.scan_jv(d, self.scanner)
+                # v, fwd_i, rev_i = self.scanner.scan_jv(
+                #     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
+                # )
+                #####
+
                 self.relay.all_off()
 
                 # flip the current density, convert to mA, calculate parameters
@@ -374,7 +384,7 @@ class Controller:
             # increase jv scan count
             d["jv"]["scan_count"] += 1
 
-            # Turn on easttester output at old vmpp if we have one
+            # Turn on easttester output at old vmpp if we have one --> will need to change
             vmp = self.calc_last_vmp(d)
             if vmp is not None:
                 et.output_on(ch)
