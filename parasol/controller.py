@@ -337,7 +337,9 @@ class Controller:
                 self.relay.on(module)
 
                 #####
+                print('pretest')
                 v, fwd_i, rev_i = self.characterization.scan_jv(d, self.scanner)
+                print('posttest')
                 # v, fwd_i, rev_i = self.scanner.scan_jv(
                 #     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
                 # )
