@@ -141,7 +141,7 @@ class Scanner:
 
         return isc
 
-    def _single_iv_sweep(self, vstart, vend, steps):
+    def iv_sweep(self, vstart, vend, steps):
         """Runs a single IV sweep"""
         # Make empty numpy arrays for data
         v = np.linspace(vstart, vend, steps)
@@ -160,11 +160,11 @@ class Scanner:
 
         return v, i
 
-    def scan_jv(self, vmin, vmax, steps):
-        """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
-        # Run reverse scan
-        _, rev_i = self._single_iv_sweep(vstart=vmax, vend=vmin, steps=steps)
-        # Run forward scan
-        v, fwd_i = self._single_iv_sweep(vstart=vmin, vend=vmax, steps=steps)
+    # def scan_jv(self, vmin, vmax, steps):
+    #     """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
+    #     # Run reverse scan
+    #     _, rev_i = self._single_iv_sweep(vstart=vmax, vend=vmin, steps=steps)
+    #     # Run forward scan
+    #     v, fwd_i = self._single_iv_sweep(vstart=vmin, vend=vmax, steps=steps)
 
-        return v, fwd_i, rev_i
+    #     return v, fwd_i, rev_i

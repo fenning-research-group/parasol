@@ -301,9 +301,6 @@ class Controller:
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
-    # All tracking & scanning functions are below here
-    # Ideally, we want to move these to a different file
-
     def scan_jv(self, id):
         """Uses Yokogawa to conudct a JV scan"""
 
@@ -335,16 +332,7 @@ class Controller:
 
                 # Open relay, scan device foward + reverse, turn off relay
                 self.relay.on(module)
-
-                #####
-                print('pretest')
                 v, fwd_i, rev_i = self.characterization.scan_jv(d, self.scanner)
-                print('posttest')
-                # v, fwd_i, rev_i = self.scanner.scan_jv(
-                #     vmin=d["jv"]["vmin"], vmax=d["jv"]["vmax"], steps=d["jv"]["steps"]
-                # )
-                #####
-
                 self.relay.all_off()
 
                 # flip the current density, convert to mA, calculate parameters
@@ -387,7 +375,7 @@ class Controller:
             d["jv"]["scan_count"] += 1
 
             # Turn on easttester output at old vmpp if we have one --> will need to change
-            vmp = self.calc_last_vmp(d)
+            vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 et.output_on(ch)
                 et.set_voltage(ch, vmp)
@@ -398,7 +386,7 @@ class Controller:
         d = self.strings.get(id, None)
 
         # Get last MPP, will be none if JV not filled
-        vmpp = self.calc_last_vmp(d)
+        vmpp = self.characterization.calc_last_vmp(d)
 
         # if we dont have a vmpp, skip
         if vmpp is None:
@@ -407,14 +395,16 @@ class Controller:
         # Ensure that JV isn't running
         with d["lock"]:
 
-            # get next vmpp knowing last
-            v = self.calc_next_mpp_bias(d, vmpp)
-
             # Turn on easttester output, set voltage, measure current
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
-            et.set_voltage(ch, v)
+
+            # get time
             t = time.time()
+
+            # get next vmpp knowing last
+            v = self.calc_next_mpp_bias(d, vmpp)
+            et.set_voltage(ch, v)
             i = et.measure_current(ch)
 
             # Convert current to mA and calc j and p
@@ -473,40 +463,40 @@ class Controller:
                 ]
             )
 
-    def calc_last_vmp(self, d):
-        """Grabs last vmpp from tracking if it exists. If not, calculates from JV curves"""
+    # def calc_last_vmp(self, d):
+    #     """Grabs last vmpp from tracking if it exists. If not, calculates from JV curves"""
 
-        vmpp = 0
-        num_modules = len(d["module_channels"])
+    #     vmpp = 0
+    #     num_modules = len(d["module_channels"])
 
-        # take vmp from mpp tracking if it has value
-        if d["mpp"]["vmpp"] is not None:
-            vmpp = d["mpp"]["vmpp"]
+    #     # take vmp from mpp tracking if it has value
+    #     if d["mpp"]["vmpp"] is not None:
+    #         vmpp = d["mpp"]["vmpp"]
 
-        # if we have run all modules on the string use JV curves
-        elif d["jv"]["j_fwd"][num_modules - 1] is not None:
+    #     # if we have run all modules on the string use JV curves
+    #     elif d["jv"]["j_fwd"][num_modules - 1] is not None:
 
-            # set voltage to voltage wave, make empty currents
-            v = d["jv"]["v"][0]
-            j_fwd = 0
-            j_rev = 0
+    #         # set voltage to voltage wave, make empty currents
+    #         v = d["jv"]["v"][0]
+    #         j_fwd = 0
+    #         j_rev = 0
 
-            # add up currents (parallel) in fwd/rev, then avg & calc vmpp
-            for value in d["jv"]["j_fwd"]:
-                j_fwd += value
-            j_fwd /= num_modules
-            for value in d["jv"]["j_rev"]:
-                j_rev += value
-            j_rev /= num_modules
-            j = (j_fwd + j_rev) / 2
-            p = np.array(v * j)
-            vmpp = v[np.argmax(p)]
+    #         # add up currents (parallel) in fwd/rev, then avg & calc vmpp
+    #         for value in d["jv"]["j_fwd"]:
+    #             j_fwd += value
+    #         j_fwd /= num_modules
+    #         for value in d["jv"]["j_rev"]:
+    #             j_rev += value
+    #         j_rev /= num_modules
+    #         j = (j_fwd + j_rev) / 2
+    #         p = np.array(v * j)
+    #         vmpp = v[np.argmax(p)]
 
-        # else flag with None
-        else:
-            vmpp = None
+    #     # else flag with None
+    #     else:
+    #         vmpp = None
 
-        return vmpp
+    #     return vmpp
 
     def calc_next_mpp_bias(self, d, vmpp_last):
         """

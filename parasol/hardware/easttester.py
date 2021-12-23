@@ -139,3 +139,10 @@ class EastTester:
         curr_tot = curr_tot / self.et_avg_num
 
         return curr_tot
+
+    # no et lock, it calls functions with them
+    def set_I_measure_V(self, channel, voltage):
+        """Set voltage and measure current"""
+        self.set_voltage(channel, voltage)
+        curr = self.measure_current(channel)
+        return curr
