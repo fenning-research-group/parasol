@@ -386,10 +386,10 @@ class Controller:
         d = self.strings.get(id, None)
 
         # Get last MPP, will be none if JV not filled
-        vmpp = self.characterization.calc_last_vmp(d)
+        last_vmpp = self.characterization.calc_last_vmp(d)
 
         # if we dont have a vmpp, skip
-        if vmpp is None:
+        if last_vmpp is None:
             return
 
         # Ensure that JV isn't running
@@ -399,23 +399,20 @@ class Controller:
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
 
-            # get time
-            t = time.time()
-
-            # get next vmpp knowing last
-            v = self.calc_next_mpp_bias(d, vmpp)
-            et.set_voltage(ch, v)
-            i = et.measure_current(ch)
+            # scan mpp
+            t, v, i = self.characterization.scan_mpp(d, et, ch, last_vmpp)
 
             # Convert current to mA and calc j and p
             i *= 1000
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
 
+
             # Update d[] by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = p
             d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
+
             d["mpp"]["last_voltages"][1] = v
             d["mpp"]["vmpp"] = v
 
@@ -463,85 +460,9 @@ class Controller:
                 ]
             )
 
-    # def calc_last_vmp(self, d):
-    #     """Grabs last vmpp from tracking if it exists. If not, calculates from JV curves"""
-
-    #     vmpp = 0
-    #     num_modules = len(d["module_channels"])
-
-    #     # take vmp from mpp tracking if it has value
-    #     if d["mpp"]["vmpp"] is not None:
-    #         vmpp = d["mpp"]["vmpp"]
-
-    #     # if we have run all modules on the string use JV curves
-    #     elif d["jv"]["j_fwd"][num_modules - 1] is not None:
-
-    #         # set voltage to voltage wave, make empty currents
-    #         v = d["jv"]["v"][0]
-    #         j_fwd = 0
-    #         j_rev = 0
-
-    #         # add up currents (parallel) in fwd/rev, then avg & calc vmpp
-    #         for value in d["jv"]["j_fwd"]:
-    #             j_fwd += value
-    #         j_fwd /= num_modules
-    #         for value in d["jv"]["j_rev"]:
-    #             j_rev += value
-    #         j_rev /= num_modules
-    #         j = (j_fwd + j_rev) / 2
-    #         p = np.array(v * j)
-    #         vmpp = v[np.argmax(p)]
-
-    #     # else flag with None
-    #     else:
-    #         vmpp = None
-
-    #     return vmpp
-
-    def calc_next_mpp_bias(self, d, vmpp_last):
-        """
-        Calculates next vmpp with various options:
-        1. Perturb and observe, constant step
-        """
-
-        v = None
-        tracking_mode = d["mpp"]["mode"]
-
-        if tracking_mode == 0:
-            v = self.perturb_and_observe_constant(d, vmpp_last)
-        if tracking_mode == 1:
-            print("not implemented")
-
-        return v
-
-    def perturb_and_observe_constant(self, d, vmpp_last):
-        """Perturb and observe, constant step"""
-        # Get voltage step (make sure we are moving toward the MPP)
-        if (d["mpp"]["last_powers"][0] is None) or (d["mpp"]["last_powers"][1] is None):
-            voltage_step = self.et_voltage_step
-        else:
-            if d["mpp"]["last_voltages"][1] >= d["mpp"]["last_voltages"][0]:
-                voltage_step = self.et_voltage_step
-            else:
-                voltage_step = -self.et_voltage_step
-
-            if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
-                voltage_step *= -1
-
-        # set the voltage
-        v = vmpp_last + voltage_step
-
-        # Ensure voltage is between the easttesters max and min values
-        if (v <= d["mpp"]["vmin"]) or (v >= d["mpp"]["vmax"]):
-            v = vmpp_last - 2 * voltage_step
-
-        # send back vmpp
-        return v
-
     def __del__(self):
         """Stops que and program on exit"""
         self.stop()
-
 
 def future_callback(future):
     """Callback function triggered when a future completes. Allows errors to be seen outside event loop"""

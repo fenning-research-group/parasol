@@ -141,7 +141,7 @@ class EastTester:
         return curr_tot
 
     # no et lock, it calls functions with them
-    def set_I_measure_V(self, channel, voltage):
+    def set_V_measure_I(self, channel, voltage):
         """Set voltage and measure current"""
         self.set_voltage(channel, voltage)
         curr = self.measure_current(channel)

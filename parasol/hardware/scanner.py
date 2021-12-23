@@ -163,8 +163,8 @@ class Scanner:
     # def scan_jv(self, vmin, vmax, steps):
     #     """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
     #     # Run reverse scan
-    #     _, rev_i = self._single_iv_sweep(vstart=vmax, vend=vmin, steps=steps)
+    #     _, rev_i = self.iv_sweep(vstart=vmax, vend=vmin, steps=steps)
     #     # Run forward scan
-    #     v, fwd_i = self._single_iv_sweep(vstart=vmin, vend=vmax, steps=steps)
+    #     v, fwd_i = self.iv_sweep(vstart=vmin, vend=vmax, steps=steps)
 
     #     return v, fwd_i, rev_i
