@@ -106,7 +106,7 @@ class Scanner:
         self.yoko.write(":OUTP:STAT OFF")
 
     def _trig_read(self) -> str:
-        """Initializes, apllies trigger, fetches value & returns as string"""
+        """Read the last output value"""
         return self.yoko.query(":INIT;*TRG;:FETC?")
 
     def set_voltage(self, v):

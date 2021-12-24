@@ -52,8 +52,51 @@ class EastTester:
         self.et = serial.Serial(port, baudrate=115200, timeout=0.005)
 
     # untested
-    def srcI_measV(self, chanel):
-        print("not written yet")
+    def srcI_measV(self, channel):
+
+        # Set to constant voltage, and continuous operation
+        self.et.write(("CH" + str(channel) + ":MODE CC\n").encode())
+        time.sleep(self.et_delay)
+        self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())
+        time.sleep(self.et_delay)
+
+        # Set ranges for voltage, as well as max and min
+        # "NAME" : RANGE (MAX/SHUTOFF)
+        # "LOW": 0.1 -> 19.999 (21.000)
+        # "HIGH": 0.1 -> 150.000 (155.000)
+        self.et.write(
+            ("LOAD" + str(channel) + ":VRAN " + str(self.voltage_range)).encode()
+        )
+        time.sleep(self.et_delay)
+        self.et.write(("VOLT" + str(channel) + ":VMIN %f\n" % (self.et_v_min)).encode())
+        time.sleep(self.et_delay)
+        self.et.write(("VOLT" + str(channel) + ":VMAX %f\n" % (self.et_v_max)).encode())
+        time.sleep(self.et_delay)
+
+        # Set range for current, as well as max current (no min feature)
+        # "NAME" : RANGE (MAX/SHUTOFF)
+        # "LOW": 0 -> 3.000 (3.3)
+        # "HIGH": 0 -> 20.000 (22.0)
+        self.et.write(
+            ("LOAD" + str(channel) + ":CRAN " + str(self.current_range)).encode()
+        )
+        time.sleep(self.et_delay)
+        self.et.write(("CURR" + str(channel) + ":IMAX %f\n" % (self.et_i_max)).encode())
+        time.sleep(self.et_delay)
+
+        # Set max power output
+        # "NAME" : RANGE (MAX/SHUTOFF)
+        # ALL: 0 --> 200 (220)
+        self.et.write(
+            (
+                "POWE" + str(channel) + ":PMAX %f\n" % (self.et_v_max * self.et_i_max)
+            ).encode()
+        )
+        time.sleep(self.et_delay)
+
+        # Close channel
+        self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
+        time.sleep(self.et_delay)
 
     def srcV_measI(self, channel):
         """Setup source voltage and measure I"""
@@ -191,7 +234,7 @@ class EastTester:
         return voc
 
     # untested
-    def jsc(self, channel) -> float:
+    def isc(self, channel) -> float:
         self.set_voltage(channel, 0)
         jsc = self.measure_current(channel)
 
