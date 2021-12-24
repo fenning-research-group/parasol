@@ -18,7 +18,8 @@ class Characterization:
         self.jv_options = {
             0: "REV then FWD",
             1: "FWD then REV",
-            2: "FWD then REV, Jsc to Voc",
+            2: "REV then FWD, Voc to Jsc",
+            3: "FWD then REV, Jsc to Voc",
         }
 
         # set up mpp mode where # shoud match the if statment below and "" should match name of that test
@@ -58,9 +59,16 @@ class Characterization:
                 vstart=d["jv"]["vmax"], vend=d["jv"]["vmin"], steps=d["jv"]["steps"]
             )
 
-        # Mode = 2 scan fwd then rev only - current
+        # Mode = 2 scan rev then fwd (- current only)
         elif jv_mode == 2:
 
+            v, fwd_i, rev_i = scanner.iv_sweep_quadrant_rev_fwd(
+                vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
+            )
+
+        elif jv_mode == 3:
+
+            # do iv_swee fwd then rev (- current only)
             v, fwd_i, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
                 vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )

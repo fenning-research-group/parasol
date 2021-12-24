@@ -163,7 +163,7 @@ class Scanner:
         # set up jv mode where # shoud match the if statment below and "" should match name of that test
 
     def iv_sweep_quadrant_fwd_rev(self, vstart, vend, steps):
-        """Runs a single IV sweep"""
+        """Runs fwd then rev IV sweep in just 1 quadrant"""
         # Make empty numpy arrays for data
         v = np.linspace(vstart, vend, steps)
         i_fwd = np.zeros(v.shape)
@@ -198,6 +198,51 @@ class Scanner:
             self.set_voltage(v[index])
             i_rev[index] = float(self._trig_read())
             index -= 1
+
+        self.output_off()
+
+        return v, i_fwd, i_rev
+
+    def iv_sweep_quadrant_rev_fwd(self, vstart, vend, steps):
+        """Runs rev then fwd IV sweep in just 1 quadrant"""
+        # Make empty numpy arrays for data
+        v = np.linspace(vstart, vend, steps)
+        i_fwd = np.zeros(v.shape)
+        i_rev = np.zeros(v.shape)
+        i_fwd[:] = np.nan
+        i_rev[:] = np.nan
+
+        # Find point after voc
+        voc = self.voc(0)
+        end_index = np.where(np.diff(np.signbit(v - voc)))[0]
+        if (v[end_index] - voc) < 0:
+            end_index += 1
+
+        # find point before jsc
+        index = 0
+        for v_point in v:
+            if v_point >= 0:
+                break
+            index += 1
+        index -= 1
+        start_index = index
+
+        # Turn on output, set voltage, measure current, turn off output
+        self.output_on()
+
+        # Scan rev until we get back to starting point
+        index = end_index
+        while index >= start_index:
+            self.set_voltage(v[index])
+            i_rev[index] = float(self._trig_read())
+            index -= 1
+
+        # cycle from there until we get out of the quadrant
+        index = start_index
+        while index <= end_index:
+            self.set_voltage(v[index])
+            i_fwd[index] = float(self._trig_read())
+            index += 1
 
         self.output_off()
 
