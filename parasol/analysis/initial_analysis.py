@@ -5,13 +5,14 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import csv
 
-from parasol_grapher import ParasolGrapher
+from parasol.analysis.grapher import ParasolGrapher
 
 
 class Initial_Analysis:
     def __init__(self):
 
         self.NUM_MODULES = 24
+        self.grapher = ParasolGrapher()
 
     def analyze_from_save(self, stringpath):
         """Initialize the Parasol_String class"""
@@ -29,29 +30,23 @@ class Initial_Analysis:
 
     def check_test(self, jvpaths, mpppaths):
         """Check if test is valid"""
-
+        
         # No need to create folder paths --> no saving for now
-        self.jv_folders = jvpaths
-        # self.mpp_folder = mpppaths
-
-        # Remove last item in list
-        self.jv_folders.pop()
-        # self.mpp_folder.pop()
-
+        self.jv_folders = jvpaths        
+        
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         self.jv_dict = self.create_file_paths(self.jv_folders)
-        # self.mpp_dict = self.create_file_paths(self.mpp_folder)
-
-        # calculate pmpps (1 array per module)
+        
+        # calculate pmpps (1 array per module), stick in dictionary
         t_vals, pmp_fwd_vals, pmp_rev_vals = self.calc_pmps()
-
         plot_dict = {
             "Time Elapsed (s)": t_vals,
             "FWD Pmp (mW/cm2)": pmp_fwd_vals,
             "REV Pmp (mW/cm2)": pmp_rev_vals,
         }
 
-        self.analysis.grapher.plot_x_v_ys(plot_dict, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"])
+        # pass to grapher to graph
+        self.grapher.plot_x_v_ys(plot_dict, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"])
 
     def calc_pmps(self):
 
@@ -102,9 +97,9 @@ class Initial_Analysis:
             pmp_fwd = []
             pmp_rev = []
 
-            for index in range(len(all_v)):
-                pmp_fwd = pmp_fwd.append(np.max(all_p_fwd[index]))
-                pmp_rev = pmp_rev.append(np.max(all_p_rev[index]))
+            for index in range(len(all_p_fwd)):
+                pmp_fwd.append(np.max(all_p_fwd[index]))
+                pmp_rev.append(np.max(all_p_rev[index]))
 
             # append to list
             t_vals.append(all_t_elapsed)

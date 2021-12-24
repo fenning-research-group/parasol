@@ -44,6 +44,7 @@ class Controller:
             #        "56": EastTester(port=constants["ET_3_PORT"]),
         }
         self.characterization = Characterization()
+        self.initial_analysis = Initial_Analysis()
 
         # Maps string ID to ET port (which of the 3 ET) and channel
         self.et_channels = {
@@ -138,6 +139,9 @@ class Controller:
         # Create the base MPP file with header and no data (we will append to it)
         self._make_mpp_file(id)
 
+        # return root directory path
+        return self.strings[id]["_savedir"]
+
     def unload_string(self, id):
         """Master command used to unload a string of modules"""
 
@@ -159,7 +163,7 @@ class Controller:
             self.mpp_queue._queue.remove(id)
 
         # analyze the saveloc
-        Initial_Analysis.analyze_from_save(saveloc)
+        self.initial_analysis.analyze_from_save(saveloc)
         # Initial_Analysis.Test_Unload(saveloc)
 
     def _make_module_subdir(self, name, id, module_channels, startdate):
@@ -262,10 +266,10 @@ class Controller:
             scan_future.add_done_callback(future_callback)
 
             # Scan the string and let the user know
-            print(f"Tracking {id}")
+            # print(f"Tracking {id}")
             await scan_future
             self.mpp_queue.task_done()
-            print(f"Done Tracking {id}")
+            # print(f"Done Tracking {id}")
 
     async def jv_timer(self, id):
         """Manages timing for JV worker"""

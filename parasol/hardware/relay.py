@@ -63,7 +63,7 @@ class Relay:
             raise ValueError(f"Invalid relay id")
 
         cmd0, cmd1 = self.relay_commands[id]
-        print(f"Turning on relay {id}")
+        # print(f"Turning on relay {id}")
         self.inst.write((cmd0).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
         self.inst.write((cmd1).to_bytes(1, "big"))
@@ -72,6 +72,6 @@ class Relay:
     @relay_lock
     def all_off(self):
         """Close all relays"""
-        print(f"Turning off all relays")
+        # print(f"Turning off all relays")
         self.inst.write((71).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)

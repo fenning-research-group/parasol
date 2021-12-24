@@ -8,7 +8,7 @@ import os
 
 # Set yaml name, load controller info
 MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
+with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
 
 
@@ -49,12 +49,12 @@ class ParasolGrapher:
         print("pass")
 
     def plot_x_v_ys(self, df_dict, x, ys):
-        """Plots x vs y for set of paramfiles"""
+        """Plots x vs ys for a dict"""
 
         # make dataframe for datafolder dictionary
         df = pd.DataFrame.from_dict(df_dict)
 
-        # get x wave
+        # get x list
         x_vals = df[x]
 
         # cycle through the multiple y parameters

@@ -8,7 +8,7 @@ from PyQt5 import QtCore
 from PyQt5 import uic
 import sys
 import os
-import datetime
+from datetime import datetime
 import yaml
 import numpy as np
 
@@ -19,7 +19,7 @@ from parasol.analysis.initial_analysis import Initial_Analysis
 
 # get directry of this file, import YAML for controller
 MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
+with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
 
 # Ensure resolution/dpi is correct
@@ -50,6 +50,14 @@ class PARASOL_UI(QMainWindow):
         self.startdate4 = None
         self.startdate5 = None
         self.startdate6 = None
+
+        # Make blank variables for saveloc
+        self.savedir1 = None
+        self.savedir2 = None
+        self.savedir3 = None
+        self.savedir4 = None
+        self.savedir5 = None
+        self.savedir6= None
 
         # Load the ui file
         ui_path = os.path.join(MODULE_DIR, "PARASOL_UI.ui")
@@ -308,6 +316,7 @@ class PARASOL_UI(QMainWindow):
         # Make Dictionary for each channel
         self.strings[1] = {
             "start_date": self.startdate1,
+            "_savedir": self.savedir1,
             "name": self.name1.text(),
             "area": self.area1.text(),
             "module_channels": self.module1,
@@ -326,6 +335,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[2] = {
             "start_date": self.startdate2,
+            "_savedir" : self.savedir2,
             "name": self.name2.text(),
             "area": self.area2.text(),
             "module_channels": self.module2,
@@ -344,6 +354,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[3] = {
             "start_date": self.startdate3,
+            "_savedir" : self.savedir3,
             "name": self.name3.text(),
             "area": self.area3.text(),
             "module_channels": self.module3,
@@ -362,6 +373,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[4] = {
             "start_date": self.startdate4,
+            "_savedir" : self.savedir4,
             "name": self.name4.text(),
             "area": self.area4.text(),
             "module_channels": self.module4,
@@ -380,6 +392,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[5] = {
             "start_date": self.startdate5,
+            "_savedir" : self.savedir5,
             "name": self.name5.text(),
             "area": self.area5.text(),
             "module_channels": self.module5,
@@ -398,6 +411,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[6] = {
             "start_date": self.startdate6,
+            "_savedir" : self.savedir6,
             "name": self.name6.text(),
             "area": self.area6.text(),
             "module_channels": self.module6,
@@ -474,7 +488,7 @@ class PARASOL_UI(QMainWindow):
         mpp_interval = float(d["mpp"]["interval"])
 
         # Call Load String from controller
-        self.controller.load_string(
+        saveloc = self.controller.load_string(
             id,
             start_date,
             name,
@@ -488,6 +502,26 @@ class PARASOL_UI(QMainWindow):
             jv_vmax,
             jv_steps,
         )
+
+        # Update saveloc 
+        if id ==1:
+            self.savedir1 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 2:
+            self.savedir2 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 3:
+            self.savedir3 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 4:
+            self.savedir4 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 5:
+            self.savedir5 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 6:
+            self.savedir6 = saveloc
+            d["_savedir"] = saveloc
 
     def unload(self, stringid):
         """Unloads the module using the command in controller.py and the stringid"""
@@ -504,26 +538,53 @@ class PARASOL_UI(QMainWindow):
         # Call Unload String from controller
         self.controller.unload_string(id)
 
+        # get dictionary
+        d = self.strings[id]
+
+        #Manage save dir
+        saveloc = None
+        if id ==1:
+            self.savedir1 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 2:
+            self.savedir2 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 3:
+            self.savedir3 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 4:
+            self.savedir4 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 5:
+            self.savedir5 = saveloc
+            d["_savedir"] = saveloc
+        elif id == 6:
+            self.savedir6 = saveloc
+            d["_savedir"] = saveloc
+        
+
     def checktest(self, stringid):
         """Checks the test using the command in _______ and the stringid"""
 
         print("Checking string: " + str(stringid))
 
         # Get useful info from wave
-        rootpath = constants["root_dir"]
+        # rootpath = constants["_savedir"]
         id = int(stringid)
-        startdate = self.strings[id]["start_date"]
-        name = self.strings[id]["name"]
+        # startdate = self.strings[id]["start_date"]
+        # name = self.strings[id]["name"]
         module_channels = self.strings[id]["module_channels"]
 
-        # Create folderpaths to folders that contain data
-        test_path = os.path.join(rootpath, startdate)
-        test_path = os.path.join(test_path, startdate + "_" + name)
+        # # Create folderpaths to folders that contain data
+        # test_path = os.path.join(rootpath, startdate)
+        # test_path = os.path.join(test_path, startdate + "_" + name)
+        
+        test_path = self.strings[id]["_savedir"]
         jv_paths = []
         for module in module_channels:
-            jv_paths.append(os.path.join(test_path, "JV_" + module + ".csv"))
+            jv_paths.append(os.path.join(test_path, "JV_" + str(module)))
 
-        mpp_paths = [os.path.join(test_path, "MPP_1.csv")]
+        mpp_paths = [os.path.join(test_path, "MPP")]
 
         # Send to initial_analysis to give quick plot
         self.initial_analysis.check_test(jv_paths, mpp_paths)
