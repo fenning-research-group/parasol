@@ -101,7 +101,7 @@ class Characterization:
             i = easttester.set_V_measure_I(ch, v)
 
         elif mpp_mode == 1:
-            
+
             num_modules = len(d["module_channels"])
 
             # set voltage to voltage wave, make empty currents
@@ -122,11 +122,9 @@ class Characterization:
 
             voc = v_vals[np.argmin(np.abs(v_vals))]
 
-            v = voc*0.75
+            v = voc * 0.75
             t = time.time()
             i = easttester.set_V_measure_I(ch, v)
-
-            
 
         # send back vmpp
         return t, v, i

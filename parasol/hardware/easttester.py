@@ -42,6 +42,7 @@ class EastTester:
         self.current_range = constants["current_range"]
 
         # Set both channels to source voltage and measure current when initialized
+        self._sourcing_current = [None, False, False]
         self.srcV_measI(1)
         self.srcV_measI(2)
 
@@ -50,7 +51,10 @@ class EastTester:
         # Connect using serial, use highest transferrate and shortest timeout
         self.et = serial.Serial(port, baudrate=115200, timeout=0.005)
 
-    @et_lock
+    # untested
+    def srcI_measV(self, chanel):
+        print("not written yet")
+
     def srcV_measI(self, channel):
         """Setup source voltage and measure I"""
         # Set to constant voltage, and continuous operation
@@ -116,11 +120,28 @@ class EastTester:
     @et_lock
     def set_voltage(self, channel, voltage):
         """Sets voltage"""
+
+        # New
+        if self._sourcing_current[channel] == True:
+            self.srcV_measI(channel)
+            self._sourcing_current[channel] = False
+
         self.et.write(("VOLT" + str(channel) + ":CV %f\n" % (voltage)).encode())
         time.sleep(self.source_delay)
 
+    # untested
     @et_lock
-    def measure_current(self, channel):
+    def set_current(self, channel, current):
+
+        #
+        if self._sourcing_current[channel] == False:
+            self.srcI_measV(channel)
+            self._sourcing_current[channel] = True
+
+        self.et.write(("CURR" + str(channel) + ":CC %f\n" % (current)).encode())
+
+    @et_lock
+    def measure_current(self, channel) -> float:
         """Measure current several times and average"""
         i = 0
         curr_tot = 0
@@ -140,8 +161,44 @@ class EastTester:
 
         return curr_tot
 
+    # untested
+    @et_lock
+    def measure_voltage(self, channel) -> float:
+        """Measure current several times and average"""
+        i = 0
+        volt_tot = 0
+        # To avoid marching in the wrong direction we need to average here
+        while i < self.et_avg_num:
+
+            self.et.write(("MEAS" + str(channel) + ":VOLT?\n").encode())
+            time.sleep(self.sense_delay)
+            volt = self.et.readlines()[-1]
+            volt = volt.decode("utf-8")
+            volt = re.findall("\d*\.?\d+", volt)
+            volt = float(volt[0])
+            volt_tot += volt
+            i += 1
+
+        volt_tot = volt_tot / self.et_avg_num
+
+        return volt_tot
+
+    # untested
+    def voc(self, channel) -> float:
+        self.set_current(channel, 0)
+        voc = self.measure_voltage(channel)
+
+        return voc
+
+    # untested
+    def jsc(self, channel) -> float:
+        self.set_voltage(channel, 0)
+        jsc = self.measure_current(channel)
+
+        return jsc
+
     # no et lock, it calls functions with them
-    def set_V_measure_I(self, channel, voltage):
+    def set_V_measure_I(self, channel, voltage) -> float:
         """Set voltage and measure current"""
         self.set_voltage(channel, voltage)
         curr = self.measure_current(channel)
