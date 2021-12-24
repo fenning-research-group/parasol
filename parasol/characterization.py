@@ -18,12 +18,13 @@ class Characterization:
         self.jv_options = {
             0: "REV then FWD",
             1: "FWD then REV",
-            2: "FWD then REV, Jsc to Voc --> Untested",
+            2: "FWD then REV, Jsc to Voc",
         }
 
         # set up mpp mode where # shoud match the if statment below and "" should match name of that test
         self.mpp_options = {
             0: "Perturb and Observe (constant V step)",
+            1: "75% of Voc --> Untested",
         }
 
     def scan_jv(self, d, scanner):
@@ -61,7 +62,7 @@ class Characterization:
         elif jv_mode == 2:
 
             v, fwd_i, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
-                vstart=d["jv"]["vmax"], vend=d["jv"]["vmin"], steps=d["jv"]["steps"]
+                vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )
 
         return v, fwd_i, rev_i
@@ -71,6 +72,7 @@ class Characterization:
 
         mpp_mode = d["mpp"]["mode"]
 
+        # MPP mode 0 is constant perturb and observe
         if mpp_mode == 0:
 
             # Get voltage step (make sure we are moving toward the MPP)
@@ -99,7 +101,32 @@ class Characterization:
             i = easttester.set_V_measure_I(ch, v)
 
         elif mpp_mode == 1:
-            print("Not Implemented")
+            
+            num_modules = len(d["module_channels"])
+
+            # set voltage to voltage wave, make empty currents
+            v_vals = d["jv"]["v"][0]
+            j_fwd = 0
+            j_rev = 0
+
+            # add up currents (parallel) in fwd/rev
+            for value in d["jv"]["j_fwd"]:
+                j_fwd += value
+            j_fwd /= num_modules
+            for value in d["jv"]["j_rev"]:
+                j_rev += value
+            j_rev /= num_modules
+
+            # average forward and reverse current, calc p and vmpp
+            j = (j_fwd + j_rev) / 2
+
+            voc = v_vals[np.argmin(np.abs(v_vals))]
+
+            v = voc*0.75
+            t = time.time()
+            i = easttester.set_V_measure_I(ch, v)
+
+            
 
         # send back vmpp
         return t, v, i
