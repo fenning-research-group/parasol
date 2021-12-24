@@ -48,6 +48,26 @@ class ParasolGrapher:
     def plot_JV(self, jvfolder):
         print("pass")
 
+    def plot_x_v_ys(self, df_dict, x, ys):
+        """Plots x vs y for set of paramfiles"""
+
+        # make dataframe for datafolder dictionary
+        df = pd.DataFrame.from_dict(df_dict)
+
+        # get x wave
+        x_vals = df[x]
+
+        # cycle through the multiple y parameters
+        for y_param in ys:
+
+            y_vals = df[y_param]
+
+            # for each parameter, plot all data
+            for i in range(len(y_vals)):
+                plt.scatter(x_vals[i], y_vals[i])
+
+        plt.show()
+
     def plot_XY_scalars(self, paramfiles, x, y):
         """Plots x vs y for set of paramfiles"""
         print("pass")

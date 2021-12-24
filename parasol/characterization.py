@@ -59,16 +59,16 @@ class Characterization:
                 vstart=d["jv"]["vmax"], vend=d["jv"]["vmin"], steps=d["jv"]["steps"]
             )
 
-        # Mode = 2 scan rev then fwd (- current only)
+        # Mode = 2 scan rev then fwd (quadrant 4 only)
         elif jv_mode == 2:
 
             v, fwd_i, rev_i = scanner.iv_sweep_quadrant_rev_fwd(
                 vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )
 
+        # Mode = 3, scan fwd then rev (quadrant 4 only)
         elif jv_mode == 3:
 
-            # do iv_swee fwd then rev (- current only)
             v, fwd_i, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
                 vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )
@@ -108,6 +108,7 @@ class Characterization:
             t = time.time()
             i = easttester.set_V_measure_I(ch, v)
 
+        # Mode = 1, bias at 75% of Voc
         elif mpp_mode == 1:
 
             num_modules = len(d["module_channels"])

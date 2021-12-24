@@ -9,10 +9,11 @@ import os
 import csv
 from datetime import datetime
 import time
+
 from parasol.hardware.relay import Relay
 from parasol.hardware.scanner import Scanner
 from parasol.hardware.easttester import EastTester
-from parasol.analysis.initial_parasol_analysis import Parasol_String
+from parasol.analysis.initial_analysis import Initial_Analysis
 from parasol.characterization import Characterization
 
 
@@ -33,9 +34,6 @@ class Controller:
         self.rootdir = rootdir
         if not os.path.exists(rootdir):
             os.mkdir(rootdir)
-
-        # grab voltage step used for perturb and observe algorithm
-        # self.et_voltage_step = constants["mppt_voltage_step"]
 
         # Connect to Relay, Scanner, 3 EastTesters, and Characterization files
         self.relay = Relay()
@@ -74,6 +72,7 @@ class Controller:
     def load_string(
         self,
         id,
+        startdate,
         name,
         area,
         jv_mode,
@@ -101,7 +100,6 @@ class Controller:
         mpp_future.add_done_callback(future_callback)
 
         # Setup string dict with important information for running the program
-        startdate = datetime.now().strftime("x%Y%m%d")
 
         self.strings[id] = {
             "name": name,
@@ -161,7 +159,8 @@ class Controller:
             self.mpp_queue._queue.remove(id)
 
         # analyze the saveloc
-        Parasol_String(saveloc)
+        Initial_Analysis.analyze_from_save(saveloc)
+        # Initial_Analysis.Test_Unload(saveloc)
 
     def _make_module_subdir(self, name, id, module_channels, startdate):
         """Make subdirectory for saving"""

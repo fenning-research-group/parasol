@@ -5,19 +5,16 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import csv
 
-# File Structure:
-# WorkingDirectory:StringName:
-# WorkingDirectory:StringName:MPP:
-# WorkingDirectory:StringName:JV_{module}:
-# WorkingDirectory:StringName:Analyzed:
+from parasol_grapher import ParasolGrapher
 
 
-class Parasol_String:
-    def __init__(self, stringpath):
-        """Initialize the Parasol_String class"""
+class Initial_Analysis:
+    def __init__(self):
 
-        # Intiliaze variables for program
         self.NUM_MODULES = 24
+
+    def analyze_from_save(self, stringpath):
+        """Initialize the Parasol_String class"""
 
         # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder
         self.stringpath = stringpath
@@ -29,6 +26,92 @@ class Parasol_String:
 
         # Analyze JV files: For each module export scalars_{module}.csv
         self.analyze_jv_files()
+
+    def check_test(self, jvpaths, mpppaths):
+        """Check if test is valid"""
+
+        # No need to create folder paths --> no saving for now
+        self.jv_folders = jvpaths
+        # self.mpp_folder = mpppaths
+
+        # Remove last item in list
+        self.jv_folders.pop()
+        # self.mpp_folder.pop()
+
+        # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
+        self.jv_dict = self.create_file_paths(self.jv_folders)
+        # self.mpp_dict = self.create_file_paths(self.mpp_folder)
+
+        # calculate pmpps (1 array per module)
+        t_vals, pmp_fwd_vals, pmp_rev_vals = self.calc_pmps()
+
+        plot_dict = {
+            "Time Elapsed (s)": t_vals,
+            "FWD Pmp (mW/cm2)": pmp_fwd_vals,
+            "REV Pmp (mW/cm2)": pmp_rev_vals,
+        }
+
+        self.analysis.grapher.plot_x_v_ys(plot_dict, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"])
+
+    def calc_pmps(self):
+
+        t_vals = []
+        pmp_fwd_vals = []
+        pmp_rev_vals = []
+
+        # cycle through each folder/module
+        for jv_folder in self.jv_folders:
+            jv_file_paths = self.jv_dict[jv_folder]
+
+            all_t = []
+            all_v = []
+            # all_j_fwd = []
+            all_p_fwd = []
+            # all_j_rev = []
+            all_p_rev = []
+
+            # cycle through each jv file
+            for jv_file_path in jv_file_paths:
+
+                # get time information
+                with open(jv_file_path) as f:
+                    reader = csv.reader(f)
+                    _ = next(reader)  # date
+                    _ = next(reader)  # time
+                    all_t.append(float(next(reader)[-1]))  # epoch time
+                    _ = next(reader)  # string
+                    _ = next(reader)  # module
+                    _ = next(reader)  # area
+
+                # load rest of dataframe and split
+                all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
+                all_data = np.transpose(all_data)
+
+                # get voltage and power data
+                # all_v.append(all_data[0])
+                # all_j_fwd.append(all_data[2])
+                all_p_fwd.append(all_data[3])
+                # all_j_rev.append(all_data[5])
+                all_p_rev.append(all_data[6])
+
+            # make time data numpy array, calc time elapsed
+            all_t = np.array(all_t)
+            all_t_elapsed = all_t - all_t[0]
+
+            # calc pmp
+            pmp_fwd = []
+            pmp_rev = []
+
+            for index in range(len(all_v)):
+                pmp_fwd = pmp_fwd.append(np.max(all_p_fwd[index]))
+                pmp_rev = pmp_rev.append(np.max(all_p_rev[index]))
+
+            # append to list
+            t_vals.append(all_t_elapsed)
+            pmp_fwd_vals.append(pmp_fwd)
+            pmp_rev_vals.append(pmp_rev)
+
+        return t_vals, pmp_fwd_vals, pmp_rev_vals
 
     def create_folder_paths(self):
         """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""

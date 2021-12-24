@@ -1,3 +1,4 @@
+from datetime import date
 import PyQt5
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QCheckBox, QComboBox
@@ -7,12 +8,19 @@ from PyQt5 import QtCore
 from PyQt5 import uic
 import sys
 import os
+import datetime
+import yaml
+import numpy as np
 
+# Import Controller (call load, unload), characterization (know test types), and initial_analysis (check on tests)
 from parasol.controller import Controller
 from parasol.characterization import Characterization
+from parasol.analysis.initial_analysis import Initial_Analysis
 
-# get directry of this file
+# get directry of this file, import YAML for controller
 MODULE_DIR = os.path.dirname(__file__)
+with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
+    constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
 
 # Ensure resolution/dpi is correct
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
@@ -33,6 +41,15 @@ class PARASOL_UI(QMainWindow):
         # Initialize Controller
         self.controller = Controller()
         self.characterization = Characterization()
+        self.initial_analysis = Initial_Analysis()
+
+        # Make blank variables for the start date
+        self.startdate1 = None
+        self.startdate2 = None
+        self.startdate3 = None
+        self.startdate4 = None
+        self.startdate5 = None
+        self.startdate6 = None
 
         # Load the ui file
         ui_path = os.path.join(MODULE_DIR, "PARASOL_UI.ui")
@@ -210,7 +227,7 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton6.clicked.connect(self.checktest6)
 
         # Create GUI
-        self.Launch_GUI()
+        self.launch_gui()
 
     def update_loaded_modules(self):
         """Uses checkboxes in UI to get list of active modules"""
@@ -290,6 +307,7 @@ class PARASOL_UI(QMainWindow):
         self.strings = {}
         # Make Dictionary for each channel
         self.strings[1] = {
+            "start_date": self.startdate1,
             "name": self.name1.text(),
             "area": self.area1.text(),
             "module_channels": self.module1,
@@ -307,6 +325,7 @@ class PARASOL_UI(QMainWindow):
         }
 
         self.strings[2] = {
+            "start_date": self.startdate2,
             "name": self.name2.text(),
             "area": self.area2.text(),
             "module_channels": self.module2,
@@ -324,6 +343,7 @@ class PARASOL_UI(QMainWindow):
         }
 
         self.strings[3] = {
+            "start_date": self.startdate3,
             "name": self.name3.text(),
             "area": self.area3.text(),
             "module_channels": self.module3,
@@ -341,6 +361,7 @@ class PARASOL_UI(QMainWindow):
         }
 
         self.strings[4] = {
+            "start_date": self.startdate4,
             "name": self.name4.text(),
             "area": self.area4.text(),
             "module_channels": self.module4,
@@ -358,6 +379,7 @@ class PARASOL_UI(QMainWindow):
         }
 
         self.strings[5] = {
+            "start_date": self.startdate5,
             "name": self.name5.text(),
             "area": self.area5.text(),
             "module_channels": self.module5,
@@ -375,6 +397,7 @@ class PARASOL_UI(QMainWindow):
         }
 
         self.strings[6] = {
+            "start_date": self.startdate6,
             "name": self.name6.text(),
             "area": self.area6.text(),
             "module_channels": self.module6,
@@ -438,6 +461,7 @@ class PARASOL_UI(QMainWindow):
         self.lock_values(id)
 
         # Grab values from dictionary
+        start_date = d["start_date"]
         name = d["name"]
         area = float(d["area"])
         jv_mode = int(d["jv"]["mode"])
@@ -452,6 +476,7 @@ class PARASOL_UI(QMainWindow):
         # Call Load String from controller
         self.controller.load_string(
             id,
+            start_date,
             name,
             area,
             jv_mode,
@@ -484,9 +509,46 @@ class PARASOL_UI(QMainWindow):
 
         print("Checking string: " + str(stringid))
 
+        # Get useful info from wave
+        rootpath = constants["root_dir"]
+        id = int(stringid)
+        startdate = self.strings[id]["start_date"]
+        name = self.strings[id]["name"]
+        module_channels = self.strings[id]["module_channels"]
+
+        # Create folderpaths to folders that contain data
+        test_path = os.path.join(rootpath, startdate)
+        test_path = os.path.join(test_path, startdate + "_" + name)
+        jv_paths = []
+        for module in module_channels:
+            jv_paths.append(os.path.join(test_path, "JV_" + module + ".csv"))
+
+        mpp_paths = [os.path.join(test_path, "MPP_1.csv")]
+
+        # Send to initial_analysis to give quick plot
+        self.initial_analysis.check_test(jv_paths, mpp_paths)
+
     ################################################################################
     # Buttons / Duplicated Functions
     ################################################################################
+
+    def checktest1(self):
+        self.checktest(1)
+
+    def checktest2(self):
+        self.checktest(2)
+
+    def checktest3(self):
+        self.checktest(3)
+
+    def checktest4(self):
+        self.checktest(4)
+
+    def checktest5(self):
+        self.checktest(5)
+
+    def checktest6(self):
+        self.checktest(6)
 
     # Lock Values for Editing
 
@@ -675,21 +737,27 @@ class PARASOL_UI(QMainWindow):
     # Load Buttons
 
     def load1(self):
+        self.startdate1 = datetime.now().strftime("x%Y%m%d")
         self.load(1)
 
     def load2(self):
+        self.startdate2 = datetime.now().strftime("x%Y%m%d")
         self.load(2)
 
     def load3(self):
+        self.startdate3 = datetime.now().strftime("x%Y%m%d")
         self.load(3)
 
     def load4(self):
+        self.startdate4 = datetime.now().strftime("x%Y%m%d")
         self.load(4)
 
     def load5(self):
+        self.startdate5 = datetime.now().strftime("x%Y%m%d")
         self.load(5)
 
     def load6(self):
+        self.startdate6 = datetime.now().strftime("x%Y%m%d")
         self.load(6)
 
     # Unload Buttons
@@ -732,7 +800,9 @@ class PARASOL_UI(QMainWindow):
     def checktest6(self):
         self.checktest(6)
 
-    def Launch_GUI(self):
+    # Launches GUI
+
+    def launch_gui(self):
         app = QApplication(sys.argv)
         # UIWindow = PARASOL_UI()
         app.exec_()
