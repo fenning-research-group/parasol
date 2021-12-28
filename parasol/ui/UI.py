@@ -16,6 +16,7 @@ import numpy as np
 from parasol.controller import Controller
 from parasol.characterization import Characterization
 from parasol.analysis.analysis import Analysis
+from parasol.analysis.grapher import Grapher
 
 # get directry of this file, import YAML for controller
 MODULE_DIR = os.path.dirname(__file__)
@@ -42,6 +43,7 @@ class PARASOL_UI(QMainWindow):
         self.controller = Controller()
         self.characterization = Characterization()
         self.analysis = Analysis()
+        self.grapher = Grapher()
 
         # Make blank variables for the start date
         self.startdate1 = None
@@ -586,7 +588,11 @@ class PARASOL_UI(QMainWindow):
         mpp_paths = [os.path.join(test_path, "MPP")]
 
         # Send to analysis to give quick plot
-        self.analysis.check_test(jv_paths, mpp_paths)
+        plot_df = self.analysis.check_test(jv_paths, mpp_paths)
+
+        self.grapher.plot_x_v_ys(
+            plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+        )
 
     ################################################################################
     # Buttons / Duplicated Functions

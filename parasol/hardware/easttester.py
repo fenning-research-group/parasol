@@ -57,8 +57,8 @@ class EastTester:
         # Set to constant voltage, and continuous operation
         self.et.write(("CH" + str(channel) + ":MODE CC\n").encode())
         time.sleep(self.et_delay)
-        self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())
-        time.sleep(self.et_delay)
+        # self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())
+        # time.sleep(self.et_delay)
 
         # Set ranges for voltage, as well as max and min
         # "NAME" : RANGE (MAX/SHUTOFF)
@@ -103,8 +103,8 @@ class EastTester:
         # Set to constant voltage, and continuous operation
         self.et.write(("CH" + str(channel) + ":MODE CV\n").encode())
         time.sleep(self.et_delay)
-        self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())
-        time.sleep(self.et_delay)
+        # self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())
+        # time.sleep(self.et_delay)
 
         # Set ranges for voltage, as well as max and min
         # "NAME" : RANGE (MAX/SHUTOFF)
@@ -176,7 +176,6 @@ class EastTester:
     @et_lock
     def set_current(self, channel, current):
 
-        #
         if self._sourcing_current[channel] == False:
             self.srcI_measV(channel)
             self._sourcing_current[channel] = True
@@ -193,8 +192,8 @@ class EastTester:
 
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             time.sleep(self.sense_delay)
-            curr = self.et.readlines()[-1]
-            curr = curr.decode("utf-8")
+            curr = self.et.readlines()
+            curr = curr[-1].decode("utf-8")
             curr = re.findall("\d*\.?\d+", curr)
             curr = float(curr[0])
             curr_tot += curr

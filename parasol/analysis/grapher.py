@@ -4,7 +4,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import yaml
 import os
+import csv
 
+from parasol.analysis.analysis import Analysis
 
 # Set yaml name, load controller info
 MODULE_DIR = os.path.dirname(__file__)
@@ -12,12 +14,15 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
 
 
-class ParasolGrapher:
+class Grapher:
     def __init__(self):
         """Opens in root directory (same as parasol)"""
 
         # Path to general data
         self.rootdir = constants["root_dir"]
+
+        # Load analysis package to manage JV files
+        self.analysis = Analysis()
 
         # Variables
         self.variable_dict = {
@@ -74,8 +79,56 @@ class ParasolGrapher:
 
         plt.show()
 
-    def plot_jvs(self, jvfiles):
-        print("pass")
+    def plot_module_jvs(self,jvfolder):
+        jv_dict = self.analysis.create_file_paths([jvfolder])
+        jv_file_paths = jv_dict[jvfolder]
+        self.plot_jvs(jv_file_paths)
+    
+    def plot_jvs(self, jv_file_paths):
+        
+        # THIS IS FROM ANALYSIS ANALYZE_JV_FILES
+        all_t = []
+        all_v = []
+        all_j_fwd = []
+        #all_p_fwd = []
+        all_j_rev = []
+        #all_p_rev = []
+
+        # cycle through each jv file
+        for jv_file_path in jv_file_paths:
+
+            # get time information
+            with open(jv_file_path) as f:
+                reader = csv.reader(f)
+                _ = next(reader)  # date
+                _ = next(reader)  # time
+                all_t.append(float(next(reader)[-1]))  # epoch time
+                _ = next(reader)  # string
+                _ = next(reader)  # module
+                _ = next(reader)  # area
+
+            # load rest of dataframe and split
+            all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
+            all_data = np.transpose(all_data)
+            all_v.append(all_data[0])
+            all_j_fwd.append(all_data[2])
+            #all_p_fwd.append(all_data[3])
+            all_j_rev.append(all_data[5])
+            #all_p_rev.append(all_data[6])
+
+        # make time data numpy array, calc time elapsed
+        all_t = np.array(all_t)
+        all_t_elapsed = all_t - all_t[0]
+
+        for jvpair in range(len(all_t_elapsed)):
+            plt.plot(all_v[jvpair],all_j_fwd[jvpair])
+            plt.plot(all_v[jvpair],all_j_rev[jvpair], '--')
+
+        plt.show()
+        
+
+    # Plot x v y with color axis as different devices
+    # Plot x v y with color axis another parameter (z)
 
     def plot_xy_scalars(self, paramfiles, x, y):
         """Plots x vs y for set of paramfiles"""
@@ -99,11 +152,6 @@ class ParasolGrapher:
         # display
         plt.show()
 
-    def plot_xys_scalars(self, paramfiles, x, ys):
-        """Plots x vs multiple ys for set of paramfiles"""
-        for y in ys:
-            self.plot_xy_scalars(paramfiles, x, y)
-
     def plot_xyz_scalar(self, paramfile, x, y, z):
         """Plots x vs y with z colorbar for paramfile"""
 
@@ -116,11 +164,11 @@ class ParasolGrapher:
         for n in range(df.shape[0]):
 
             # Get values for x and y
-            xval = df[self.variable_dict[x]][n]
-            yval = df[self.variable_dict[y]][n]
+            xval = df[x][n]
+            yval = df[y][n]
 
             # Get values for color bar
-            zval = df[self.variable_dict[z]].values
+            zval = df[z].values
             znorm = np.array(
                 (zval - np.nanmin(zval)) / (np.nanmax(zval) - np.nanmin(zval))
             )
@@ -134,7 +182,7 @@ class ParasolGrapher:
         objs = plt.colorbar(
             mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
             orientation="vertical",
-            label=str(self.variable_dict[z]),
+            label=str(z),
         )
         plt.setp(
             objs.ax.get_yticklabels(),
@@ -146,13 +194,20 @@ class ParasolGrapher:
         )
 
         # label axes
-        plt.ylabel(self.variable_dict[y], weight="black")
-        plt.xlabel(self.variable_dict[x], weight="black")
+        plt.ylabel(y, weight="black")
+        plt.xlabel(x, weight="black")
 
         # display
         plt.show()
+
+    # Plots Functions above for multiple ys
 
     def plot_xysz_scalar(self, paramfile, x, ys, z):
         """Plots x vs multiple ys with z colorbar"""
         for y in ys:
             self.plot_xyz_scalars(paramfile, x, y, z)
+
+    def plot_xys_scalars(self, paramfiles, x, ys):
+        """Plots x vs multiple ys for set of paramfiles"""
+        for y in ys:
+            self.plot_xy_scalars(paramfiles, x, y)

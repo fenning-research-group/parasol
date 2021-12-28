@@ -5,17 +5,14 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import csv
 
-from parasol.analysis.grapher import ParasolGrapher
-
 
 class Analysis:
     def __init__(self):
 
         self.NUM_MODULES = 24
-        self.grapher = ParasolGrapher()
 
     def check_test(self, jvpaths, mpppaths):
-        """Check if test is valid"""
+        """Returns FWD & REV Pmp v Time"""
 
         # No need to create folder paths --> no saving for now
         self.jv_folders = jvpaths
@@ -35,10 +32,11 @@ class Analysis:
         data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
         plot_df = pd.DataFrame(columns=col_names, data=data)
 
+        return plot_df
         # pass to grapher to graph
-        self.grapher.plot_x_v_ys(
-            plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
-        )
+        # self.grapher.plot_x_v_ys(
+        #     plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+        # )
 
     def analyze_from_savepath(self, stringpath):
         """Initialize the Parasol_String class"""
@@ -49,10 +47,11 @@ class Analysis:
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         self.jv_dict = self.create_file_paths(self.jv_folders)
-        self.mpp_dict = self.create_file_paths(self.mpp_folder)
+        #self.mpp_dict = self.create_file_paths(self.mpp_folder)
 
         # Analyze JV files: For each module export scalars_{module}.csv
         analyzed_waves = self.analyze_jv_files()
+
 
     def create_folder_paths(self):
         """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""
@@ -72,14 +71,14 @@ class Analysis:
         if not os.path.exists(self.analyzed_folder):
             os.makedirs(self.analyzed_folder)
 
-    def create_file_paths(self, folderpath):
+    def create_file_paths(self, folderpaths):
         """Create file_dict[folderpath] = filepaths"""
 
         # create blank dictionary to hold folder: file_paths
         file_dict = {}
 
         # cycle through folders
-        for folder in folderpath:
+        for folder in folderpaths:
 
             # initialize lists
             scan_numbers = []
@@ -166,7 +165,7 @@ class Analysis:
         """Cycle through JV files, analyze, and make output file for parameters"""
 
         # Make blank array to keep save locations
-        save_locs = []
+        save_locations = []
 
         # cycle through every module/folder in jv dict
         for jv_folder in self.jv_folders:
@@ -231,9 +230,12 @@ class Analysis:
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
             save_loc = os.path.join(self.analyzed_folder, f"Scalars_{module_num}.csv")
             scalar_df_filtered.to_csv(save_loc, index=False)
-            save_locs.append[save_loc]
+            save_locations.append(save_loc)
 
-        return save_locs
+        return save_locations
+
+    #def _load_jv_file(self,filepath):
+
 
     def _calculate_jv_parameters(self, all_v, all_j, all_p, direction):
         """Calculate parameters for each jv file"""

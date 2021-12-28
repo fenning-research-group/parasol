@@ -161,7 +161,9 @@ class Controller:
             self.mpp_queue._queue.remove(id)
 
         # analyze the saveloc
-        Analysis.analyze_from_savepath(saveloc)
+        self.analysis = Analysis()
+        print('Analysis saved at ', saveloc)
+        self.analysis.analyze_from_savepath(saveloc)
 
     def _make_module_subdir(self, name, id, module_channels, startdate):
         """Make subdirectory for saving"""
@@ -263,10 +265,10 @@ class Controller:
             scan_future.add_done_callback(future_callback)
 
             # Scan the string and let the user know
-            # print(f"Tracking {id}")
+            print(f"Tracking {id}")
             await scan_future
             self.mpp_queue.task_done()
-            # print(f"Done Tracking {id}")
+            print(f"Done Tracking {id}")
 
     async def jv_timer(self, id):
         """Manages timing for JV worker"""
@@ -420,7 +422,6 @@ class Controller:
 
         # Get last MPP, will be none if JV not filled
         last_vmpp = self.characterization.calc_last_vmp(d)
-
         # if we dont have a vmpp, skip
         if last_vmpp is None:
             return
