@@ -45,17 +45,17 @@ class ParasolGrapher:
             "REV Pmp": "REV Pmp (mW/cm2)",
         }
 
-    def plot_JV(self, jvfolder):
-        print("pass")
-
-    def plot_x_v_ys(self, df_dict, x, ys):
-        """Plots x vs ys for a dict"""
+    def plot_x_v_ys(self, df, x, ys):
+        """Plots x vs multiple ys for one dataframe"""
 
         # make dataframe for datafolder dictionary
-        df = pd.DataFrame.from_dict(df_dict)
+        # df = pd.DataFrame.from_dict(df_dict)
 
         # get x list
         x_vals = df[x]
+
+        # get y labels
+        y_label = ""
 
         # cycle through the multiple y parameters
         for y_param in ys:
@@ -65,14 +65,46 @@ class ParasolGrapher:
             # for each parameter, plot all data
             for i in range(len(y_vals)):
                 plt.scatter(x_vals[i], y_vals[i])
+                y_label += str(y_param) + " / "
+
+        # label axes
+        y_label = y_label[:-3]
+        plt.ylabel(y_label, weight="black")
+        plt.xlabel(x, weight="black")
 
         plt.show()
 
-    def plot_XY_scalars(self, paramfiles, x, y):
-        """Plots x vs y for set of paramfiles"""
+    def plot_jvs(self, jvfiles):
         print("pass")
 
-    def plot_XYZ_scalar(self, paramfile, x, y, z):
+    def plot_xy_scalars(self, paramfiles, x, y):
+        """Plots x vs y for set of paramfiles"""
+
+        mpl.rcParams["axes.linewidth"] = 1.75
+
+        for paramfile in paramfiles:
+
+            # read in dataframe
+            df = pd.read_csv(paramfile)
+
+            # get x and y vals, add to plot
+            x_vals = df[x]
+            y_vals = df[y]
+            plt.scatter(x_vals, y_vals)
+
+        # label axes
+        plt.ylabel(y, weight="black")
+        plt.xlabel(x, weight="black")
+
+        # display
+        plt.show()
+
+    def plot_xys_scalars(self, paramfiles, x, ys):
+        """Plots x vs multiple ys for set of paramfiles"""
+        for y in ys:
+            self.plot_xy_scalars(paramfiles, x, y)
+
+    def plot_xyz_scalar(self, paramfile, x, y, z):
         """Plots x vs y with z colorbar for paramfile"""
 
         # load datafolder path
@@ -119,3 +151,8 @@ class ParasolGrapher:
 
         # display
         plt.show()
+
+    def plot_xysz_scalar(self, paramfile, x, ys, z):
+        """Plots x vs multiple ys with z colorbar"""
+        for y in ys:
+            self.plot_xyz_scalars(paramfile, x, y, z)

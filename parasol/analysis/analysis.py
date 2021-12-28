@@ -8,13 +8,39 @@ import csv
 from parasol.analysis.grapher import ParasolGrapher
 
 
-class Initial_Analysis:
+class Analysis:
     def __init__(self):
 
         self.NUM_MODULES = 24
         self.grapher = ParasolGrapher()
 
-    def analyze_from_save(self, stringpath):
+    def check_test(self, jvpaths, mpppaths):
+        """Check if test is valid"""
+
+        # No need to create folder paths --> no saving for now
+        self.jv_folders = jvpaths
+
+        # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
+        self.jv_dict = self.create_file_paths(self.jv_folders)
+
+        # calculate pmpps (1 array per module), stick in dictionary
+        t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps()
+        # plot_dict = {
+        #     "Time Elapsed (s)": t_vals,
+        #     "FWD Pmp (mW/cm2)": pmp_fwd_vals,
+        #     "REV Pmp (mW/cm2)": pmp_rev_vals,
+        # }
+
+        col_names = ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+        data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
+        plot_df = pd.DataFrame(columns=col_names, data=data)
+
+        # pass to grapher to graph
+        self.grapher.plot_x_v_ys(
+            plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+        )
+
+    def analyze_from_savepath(self, stringpath):
         """Initialize the Parasol_String class"""
 
         # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder
@@ -26,29 +52,57 @@ class Initial_Analysis:
         self.mpp_dict = self.create_file_paths(self.mpp_folder)
 
         # Analyze JV files: For each module export scalars_{module}.csv
-        self.analyze_jv_files()
+        analyzed_waves = self.analyze_jv_files()
 
-    def check_test(self, jvpaths, mpppaths):
-        """Check if test is valid"""
-        
-        # No need to create folder paths --> no saving for now
-        self.jv_folders = jvpaths        
-        
-        # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
-        self.jv_dict = self.create_file_paths(self.jv_folders)
-        
-        # calculate pmpps (1 array per module), stick in dictionary
-        t_vals, pmp_fwd_vals, pmp_rev_vals = self.calc_pmps()
-        plot_dict = {
-            "Time Elapsed (s)": t_vals,
-            "FWD Pmp (mW/cm2)": pmp_fwd_vals,
-            "REV Pmp (mW/cm2)": pmp_rev_vals,
-        }
+    def create_folder_paths(self):
+        """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""
 
-        # pass to grapher to graph
-        self.grapher.plot_x_v_ys(plot_dict, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"])
+        # path to mpp folder --> rootfolder:MPP:
+        self.mpp_folder = [os.path.join(self.stringpath, "MPP")]
 
-    def calc_pmps(self):
+        # path to jv folders --> rootfolder:JV_{module}:
+        self.jv_folders = []
+        for i in range(1, self.NUM_MODULES + 1):
+            jv_folder = os.path.join(self.stringpath, "JV_" + str(int(i)))
+            if os.path.exists(jv_folder):
+                self.jv_folders.append(jv_folder)
+
+        # path to analyzed folder --> rootfolder:Analyzed
+        self.analyzed_folder = os.path.join(self.stringpath, "Analyzed")
+        if not os.path.exists(self.analyzed_folder):
+            os.makedirs(self.analyzed_folder)
+
+    def create_file_paths(self, folderpath):
+        """Create file_dict[folderpath] = filepaths"""
+
+        # create blank dictionary to hold folder: file_paths
+        file_dict = {}
+
+        # cycle through folders
+        for folder in folderpath:
+
+            # initialize lists
+            scan_numbers = []
+            paths_chronological = []
+
+            # Grab list of files in folder
+            files = os.listdir(folder)
+
+            # for each file, create list of scan numbers
+            for file in files:
+                scan_numbers.append(file.split("_")[-1])
+
+            # sort files by scan number, create paths to files
+            files_chronological = [x for _, x in sorted(zip(scan_numbers, files))]
+            for file in files_chronological:
+                paths_chronological.append(os.path.join(folder, file))
+
+            # create dictionary basefolder : file_paths
+            file_dict[folder] = paths_chronological
+
+        return file_dict
+
+    def check_pmps(self):
 
         t_vals = []
         pmp_fwd_vals = []
@@ -108,56 +162,11 @@ class Initial_Analysis:
 
         return t_vals, pmp_fwd_vals, pmp_rev_vals
 
-    def create_folder_paths(self):
-        """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""
-
-        # path to mpp folder --> rootfolder:MPP:
-        self.mpp_folder = [os.path.join(self.stringpath, "MPP")]
-
-        # path to jv folders --> rootfolder:JV_{module}:
-        self.jv_folders = []
-        for i in range(1, self.NUM_MODULES + 1):
-            jv_folder = os.path.join(self.stringpath, "JV_" + str(int(i)))
-            if os.path.exists(jv_folder):
-                self.jv_folders.append(jv_folder)
-
-        # path to analyzed folder --> rootfolder:Analyzed
-        self.analyzed_folder = os.path.join(self.stringpath, "Analyzed")
-        if not os.path.exists(self.analyzed_folder):
-            os.makedirs(self.analyzed_folder)
-
-    def create_file_paths(self, folderpath):
-        """Create file_dict[folderpath] = filepaths"""
-
-        # create blank dictionary to hold folder: file_paths
-        file_dict = {}
-
-        # cycle through folders
-        for folder in folderpath:
-
-            # initialize lists
-            scan_numbers = []
-            paths_chronological = []
-
-            # Grab list of files in folder
-            files = os.listdir(folder)
-
-            # for each file, create list of scan numbers
-            for file in files:
-                scan_numbers.append(file.split("_")[-1])
-
-            # sort files by scan number, create paths to files
-            files_chronological = [x for _, x in sorted(zip(scan_numbers, files))]
-            for file in files_chronological:
-                paths_chronological.append(os.path.join(folder, file))
-
-            # create dictionary basefolder : file_paths
-            file_dict[folder] = paths_chronological
-
-        return file_dict
-
     def analyze_jv_files(self):
         """Cycle through JV files, analyze, and make output file for parameters"""
+
+        # Make blank array to keep save locations
+        save_locs = []
 
         # cycle through every module/folder in jv dict
         for jv_folder in self.jv_folders:
@@ -222,6 +231,9 @@ class Initial_Analysis:
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
             save_loc = os.path.join(self.analyzed_folder, f"Scalars_{module_num}.csv")
             scalar_df_filtered.to_csv(save_loc, index=False)
+            save_locs.append[save_loc]
+
+        return save_locs
 
     def _calculate_jv_parameters(self, all_v, all_j, all_p, direction):
         """Calculate parameters for each jv file"""
@@ -247,12 +259,10 @@ class Initial_Analysis:
                 # calculate jsc and rsh using J(v=0) to J(v=0.05)
                 wherevis0 = np.nanargmin(np.abs(v))
                 wherevis0_1 = np.nanargmin(np.abs(v - 0.05))
-
                 j1 = j[wherevis0]
                 j2 = j[wherevis0_1]
                 v1 = v[wherevis0]
                 v2 = v[wherevis0_1]
-
                 m = (j2 - j1) / (v2 - v1)
                 b = j1 - m * v1
                 if m != 0:
@@ -266,12 +276,10 @@ class Initial_Analysis:
                 v_iter = max(int(0.05 / (v[2] - v[1])), 1)
                 wherejis0 = np.nanargmin(np.abs(j))
                 wherejis0_1 = wherejis0 - int(v_iter)
-
                 j1 = j[wherejis0]
                 j2 = j[wherejis0_1]
                 v1 = v[wherejis0]
                 v2 = v[wherejis0_1]
-
                 m = (j2 - j1) / (v2 - v1)
                 b = j1 - m * v1
                 rs = float(abs(1 / m))

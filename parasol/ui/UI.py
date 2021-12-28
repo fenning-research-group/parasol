@@ -12,10 +12,10 @@ from datetime import datetime
 import yaml
 import numpy as np
 
-# Import Controller (call load, unload), characterization (know test types), and initial_analysis (check on tests)
+# Import Controller (call load, unload), characterization (know test types), and analysis (check on tests)
 from parasol.controller import Controller
 from parasol.characterization import Characterization
-from parasol.analysis.initial_analysis import Initial_Analysis
+from parasol.analysis.analysis import Analysis
 
 # get directry of this file, import YAML for controller
 MODULE_DIR = os.path.dirname(__file__)
@@ -41,7 +41,7 @@ class PARASOL_UI(QMainWindow):
         # Initialize Controller
         self.controller = Controller()
         self.characterization = Characterization()
-        self.initial_analysis = Initial_Analysis()
+        self.analysis = Analysis()
 
         # Make blank variables for the start date
         self.startdate1 = None
@@ -57,7 +57,7 @@ class PARASOL_UI(QMainWindow):
         self.savedir3 = None
         self.savedir4 = None
         self.savedir5 = None
-        self.savedir6= None
+        self.savedir6 = None
 
         # Load the ui file
         ui_path = os.path.join(MODULE_DIR, "PARASOL_UI.ui")
@@ -335,7 +335,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[2] = {
             "start_date": self.startdate2,
-            "_savedir" : self.savedir2,
+            "_savedir": self.savedir2,
             "name": self.name2.text(),
             "area": self.area2.text(),
             "module_channels": self.module2,
@@ -354,7 +354,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[3] = {
             "start_date": self.startdate3,
-            "_savedir" : self.savedir3,
+            "_savedir": self.savedir3,
             "name": self.name3.text(),
             "area": self.area3.text(),
             "module_channels": self.module3,
@@ -373,7 +373,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[4] = {
             "start_date": self.startdate4,
-            "_savedir" : self.savedir4,
+            "_savedir": self.savedir4,
             "name": self.name4.text(),
             "area": self.area4.text(),
             "module_channels": self.module4,
@@ -392,7 +392,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[5] = {
             "start_date": self.startdate5,
-            "_savedir" : self.savedir5,
+            "_savedir": self.savedir5,
             "name": self.name5.text(),
             "area": self.area5.text(),
             "module_channels": self.module5,
@@ -411,7 +411,7 @@ class PARASOL_UI(QMainWindow):
 
         self.strings[6] = {
             "start_date": self.startdate6,
-            "_savedir" : self.savedir6,
+            "_savedir": self.savedir6,
             "name": self.name6.text(),
             "area": self.area6.text(),
             "module_channels": self.module6,
@@ -503,8 +503,8 @@ class PARASOL_UI(QMainWindow):
             jv_steps,
         )
 
-        # Update saveloc 
-        if id ==1:
+        # Update saveloc
+        if id == 1:
             self.savedir1 = saveloc
             d["_savedir"] = saveloc
         elif id == 2:
@@ -541,9 +541,9 @@ class PARASOL_UI(QMainWindow):
         # get dictionary
         d = self.strings[id]
 
-        #Manage save dir
+        # Manage save dir
         saveloc = None
-        if id ==1:
+        if id == 1:
             self.savedir1 = saveloc
             d["_savedir"] = saveloc
         elif id == 2:
@@ -561,7 +561,6 @@ class PARASOL_UI(QMainWindow):
         elif id == 6:
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
-        
 
     def checktest(self, stringid):
         """Checks the test using the command in _______ and the stringid"""
@@ -578,7 +577,7 @@ class PARASOL_UI(QMainWindow):
         # # Create folderpaths to folders that contain data
         # test_path = os.path.join(rootpath, startdate)
         # test_path = os.path.join(test_path, startdate + "_" + name)
-        
+
         test_path = self.strings[id]["_savedir"]
         jv_paths = []
         for module in module_channels:
@@ -586,8 +585,8 @@ class PARASOL_UI(QMainWindow):
 
         mpp_paths = [os.path.join(test_path, "MPP")]
 
-        # Send to initial_analysis to give quick plot
-        self.initial_analysis.check_test(jv_paths, mpp_paths)
+        # Send to analysis to give quick plot
+        self.analysis.check_test(jv_paths, mpp_paths)
 
     ################################################################################
     # Buttons / Duplicated Functions

@@ -13,7 +13,7 @@ import time
 from parasol.hardware.relay import Relay
 from parasol.hardware.scanner import Scanner
 from parasol.hardware.easttester import EastTester
-from parasol.analysis.initial_analysis import Initial_Analysis
+from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
 
 
@@ -44,7 +44,6 @@ class Controller:
             #        "56": EastTester(port=constants["ET_3_PORT"]),
         }
         self.characterization = Characterization()
-        self.initial_analysis = Initial_Analysis()
 
         # Maps string ID to ET port (which of the 3 ET) and channel
         self.et_channels = {
@@ -139,7 +138,6 @@ class Controller:
         # Create the base MPP file with header and no data (we will append to it)
         self._make_mpp_file(id)
 
-        # return root directory path
         return self.strings[id]["_savedir"]
 
     def unload_string(self, id):
@@ -163,8 +161,7 @@ class Controller:
             self.mpp_queue._queue.remove(id)
 
         # analyze the saveloc
-        self.initial_analysis.analyze_from_save(saveloc)
-        # Initial_Analysis.Test_Unload(saveloc)
+        Analysis.analyze_from_savepath(saveloc)
 
     def _make_module_subdir(self, name, id, module_channels, startdate):
         """Make subdirectory for saving"""
