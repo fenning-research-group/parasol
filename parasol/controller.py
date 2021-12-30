@@ -44,6 +44,7 @@ class Controller:
             #        "56": EastTester(port=constants["ET_3_PORT"]),
         }
         self.characterization = Characterization()
+        self.analysis = Analysis()
 
         # Maps string ID to ET port (which of the 3 ET) and channel
         self.et_channels = {
@@ -131,9 +132,10 @@ class Controller:
             "lock": Lock(),
         }
 
-        self.strings[id]["_savedir"] = self._make_module_subdir(
-            name, id, module_channels, startdate
-        )
+        (
+            self.strings[id]["_savedir"],
+            self.strings[id]["name"],
+        ) = self._make_module_subdir(name, id, module_channels, startdate)
 
         # Create the base MPP file with header and no data (we will append to it)
         self._make_mpp_file(id)
@@ -161,8 +163,7 @@ class Controller:
             self.mpp_queue._queue.remove(id)
 
         # analyze the saveloc
-        self.analysis = Analysis()
-        print('Analysis saved at ', saveloc)
+        print("Analysis saved at ", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
 
     def _make_module_subdir(self, name, id, module_channels, startdate):
@@ -179,6 +180,8 @@ class Controller:
         while os.path.exists(basefpath):
             idx += 1
             basefpath = os.path.join(datefpath, f"{startdate}_{name}_{idx}")
+        if idx != 0:
+            name += f"_{idx}"
         os.mkdir(basefpath)
 
         # Make subdirectory for MMP
@@ -190,7 +193,7 @@ class Controller:
             modulepath = os.path.join(basefpath, f"JV_{modulechannel}")
             os.mkdir(modulepath)
 
-        return basefpath
+        return basefpath, name
 
     def _make_mpp_file(self, id):
         """Creates base file for MPP data"""
@@ -204,7 +207,9 @@ class Controller:
 
         # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
         mppfolder = os.path.join(d["_savedir"], "MPP")
-        fpath = os.path.join(mppfolder, f"{d['start_date']}_{d['name']}_{id}_MPP_1.csv")
+        fpath = os.path.join(
+            mppfolder, f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv"
+        )
 
         # Open file, write header/column names then fill
         with open(fpath, "w", newline="") as f:
@@ -452,7 +457,7 @@ class Controller:
             # Save in base filepath:MPP_stringID:
             mppfolder = os.path.join(d["_savedir"], "MPP")
             fpath = os.path.join(
-                mppfolder, f"{d['start_date']}_{d['name']}_{id}_MPP_1.csv"
+                mppfolder, f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv"
             )
 
             # Open file, append values to columns

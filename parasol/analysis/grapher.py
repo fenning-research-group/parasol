@@ -24,7 +24,6 @@ class Grapher:
         # Load analysis package to manage JV files
         self.analysis = Analysis()
 
-        # Variables
         self.variable_dict = {
             "Time": "Time (Epoch)",
             "Time Elapsed": "Time Elapsed (s)",
@@ -48,6 +47,24 @@ class Grapher:
             "REV Vmp": "REV Vmp (V)",
             "REV Jmp": "REV Jmp (mA/cm2)",
             "REV Pmp": "REV Pmp (mW/cm2)",
+        }
+
+        self.fwd_rev_cursor_dict = {
+            0: ">",
+            1: "<",
+        }
+
+        self.cursor_dict = {
+            1: "o",
+            2: "s",
+            3: "^",
+            4: "v",
+            5: "D",
+            6: "*",
+            7: "p",
+            8: "h",
+            9: "P",
+            10: "X",
         }
 
     def plot_x_v_ys(self, df, x, ys):
@@ -79,53 +96,39 @@ class Grapher:
 
         plt.show()
 
-    def plot_module_jvs(self,jvfolder):
+    # Plot JV scans for a single module
+
+    def plot_module_jvs(self, jvfolder):
         jv_dict = self.analysis.create_file_paths([jvfolder])
         jv_file_paths = jv_dict[jvfolder]
         self.plot_jvs(jv_file_paths)
-    
-    def plot_jvs(self, jv_file_paths):
-        
-        # THIS IS FROM ANALYSIS ANALYZE_JV_FILES
-        all_t = []
-        all_v = []
-        all_j_fwd = []
-        #all_p_fwd = []
-        all_j_rev = []
-        #all_p_rev = []
 
-        # cycle through each jv file
-        for jv_file_path in jv_file_paths:
+    def plot_jvs(self, jvfiles):
 
-            # get time information
-            with open(jv_file_path) as f:
-                reader = csv.reader(f)
-                _ = next(reader)  # date
-                _ = next(reader)  # time
-                all_t.append(float(next(reader)[-1]))  # epoch time
-                _ = next(reader)  # string
-                _ = next(reader)  # module
-                _ = next(reader)  # area
+        # load jv files
+        (
+            all_t,
+            all_v,
+            all_j_fwd,
+            all_p_fwd,
+            all_j_rev,
+            all_p_rev,
+        ) = self.analysis.load_jv_files(jvfiles)
 
-            # load rest of dataframe and split
-            all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
-            all_data = np.transpose(all_data)
-            all_v.append(all_data[0])
-            all_j_fwd.append(all_data[2])
-            #all_p_fwd.append(all_data[3])
-            all_j_rev.append(all_data[5])
-            #all_p_rev.append(all_data[6])
+        colors = plt.cm.viridis(np.linspace(0, 1, len(jvfiles)))
 
         # make time data numpy array, calc time elapsed
         all_t = np.array(all_t)
         all_t_elapsed = all_t - all_t[0]
 
         for jvpair in range(len(all_t_elapsed)):
-            plt.plot(all_v[jvpair],all_j_fwd[jvpair])
-            plt.plot(all_v[jvpair],all_j_rev[jvpair], '--')
+            plt.plot(all_v[jvpair], all_j_fwd[jvpair], color=colors[jvpair])
+            plt.plot(all_v[jvpair], all_j_rev[jvpair], "--", color=colors[jvpair])
 
+        # label axes
+        plt.ylabel("J (mA/cm2)", weight="black")
+        plt.xlabel("V (V)", weight="black")
         plt.show()
-        
 
     # Plot x v y with color axis as different devices
     # Plot x v y with color axis another parameter (z)
@@ -147,6 +150,35 @@ class Grapher:
 
         # label axes
         plt.ylabel(y, weight="black")
+        plt.xlabel(x, weight="black")
+
+        # display
+        plt.show()
+
+    def plot_xy2_scalars(self, paramfiles, x, ys):
+        """Plots x vs ys (assumed to be fwd/rev) for set of paramfiles"""
+
+        mpl.rcParams["axes.linewidth"] = 1.75
+
+        for paramfile in paramfiles:
+
+            # read in dataframe
+            df = pd.read_csv(paramfile)
+
+            # get x and y vals, add to plot
+            x_vals = df[x]
+
+            for idx, y in enumerate(ys):
+                y_vals = df[y]
+                plt.scatter(x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx])
+
+        # label axes
+        ylab = ""
+        for y in ys:
+            ylab += str(y) + " / "
+        ylab = ylab[:-3]
+
+        plt.ylabel(ylab, weight="black")
         plt.xlabel(x, weight="black")
 
         # display
@@ -199,15 +231,3 @@ class Grapher:
 
         # display
         plt.show()
-
-    # Plots Functions above for multiple ys
-
-    def plot_xysz_scalar(self, paramfile, x, ys, z):
-        """Plots x vs multiple ys with z colorbar"""
-        for y in ys:
-            self.plot_xyz_scalars(paramfile, x, y, z)
-
-    def plot_xys_scalars(self, paramfiles, x, ys):
-        """Plots x vs multiple ys for set of paramfiles"""
-        for y in ys:
-            self.plot_xy_scalars(paramfiles, x, y)

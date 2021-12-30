@@ -1,8 +1,6 @@
 import pandas as pd
 import numpy as np
 import os
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 import csv
 
 
@@ -11,11 +9,13 @@ class Analysis:
 
         self.NUM_MODULES = 24
 
-    def check_test(self, jvpaths, mpppaths):
+    # Main tests
+
+    def check_test(self, jvfolderpaths, mpppaths):
         """Returns FWD & REV Pmp v Time"""
 
         # No need to create folder paths --> no saving for now
-        self.jv_folders = jvpaths
+        self.jv_folders = jvfolderpaths
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         self.jv_dict = self.create_file_paths(self.jv_folders)
@@ -43,34 +43,60 @@ class Analysis:
 
         # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder
         self.stringpath = stringpath
-        self.create_folder_paths()
+        (
+            self.mpp_folder,
+            self.jv_folders,
+            self.analyzed_folder,
+        ) = self.create_folder_paths(stringpath)
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         self.jv_dict = self.create_file_paths(self.jv_folders)
-        #self.mpp_dict = self.create_file_paths(self.mpp_folder)
+        # self.mpp_dict = self.create_file_paths(self.mpp_folder)
 
         # Analyze JV files: For each module export scalars_{module}.csv
         analyzed_waves = self.analyze_jv_files()
 
+    # deals with folder paths --> everything else is file paths
 
-    def create_folder_paths(self):
+    # self.FileStructure.filepath_to_runinfo(file_path)
+    def filepath_to_runinfo(self, file_path):
+        """Returns runinfo from filepath using filename standardization"""
+        file_name = file_path.split(":")[-1]
+
+        run_info = {
+            # "scan_number" : file_name.split("_")[-1],  scan number
+            # "scan_type" : file_name.split("_")[-2],   scan type
+            "module_id": file_name.split("_")[-3],  # module id
+            "string_id": file_name.split("_")[-4],  # string id
+            "name": file_name.split("_")[1:-5],  # name
+            "date": file_name.split("_")[0],  # date
+        }
+
+        return run_info
+
+    # this can be replaced with folderstructure
+    # mpp_folder, jv_folders, analyzed_folder = self.FileStructure.get_test_subfolders(stringpath)
+    def create_folder_paths(self, stringpath):
         """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""
 
         # path to mpp folder --> rootfolder:MPP:
-        self.mpp_folder = [os.path.join(self.stringpath, "MPP")]
+        mpp_folder = [os.path.join(stringpath, "MPP")]
 
         # path to jv folders --> rootfolder:JV_{module}:
-        self.jv_folders = []
+        jv_folders = []
         for i in range(1, self.NUM_MODULES + 1):
-            jv_folder = os.path.join(self.stringpath, "JV_" + str(int(i)))
+            jv_folder = os.path.join(stringpath, "JV_" + str(int(i)))
             if os.path.exists(jv_folder):
-                self.jv_folders.append(jv_folder)
+                jv_folders.append(jv_folder)
 
         # path to analyzed folder --> rootfolder:Analyzed
-        self.analyzed_folder = os.path.join(self.stringpath, "Analyzed")
-        if not os.path.exists(self.analyzed_folder):
-            os.makedirs(self.analyzed_folder)
+        analyzed_folder = os.path.join(stringpath, "Analyzed")
+        if not os.path.exists(analyzed_folder):
+            os.makedirs(analyzed_folder)
 
+        return mpp_folder, jv_folders, analyzed_folder
+
+    # self.FileStructure.map_test_files(folderpaths)
     def create_file_paths(self, folderpaths):
         """Create file_dict[folderpath] = filepaths"""
 
@@ -101,6 +127,8 @@ class Analysis:
 
         return file_dict
 
+    # Workhorse functions for check_test and analyze_from_savepath
+
     def check_pmps(self):
 
         t_vals = []
@@ -111,36 +139,15 @@ class Analysis:
         for jv_folder in self.jv_folders:
             jv_file_paths = self.jv_dict[jv_folder]
 
-            all_t = []
-            all_v = []
-            # all_j_fwd = []
-            all_p_fwd = []
-            # all_j_rev = []
-            all_p_rev = []
-
-            # cycle through each jv file
-            for jv_file_path in jv_file_paths:
-
-                # get time information
-                with open(jv_file_path) as f:
-                    reader = csv.reader(f)
-                    _ = next(reader)  # date
-                    _ = next(reader)  # time
-                    all_t.append(float(next(reader)[-1]))  # epoch time
-                    _ = next(reader)  # string
-                    _ = next(reader)  # module
-                    _ = next(reader)  # area
-
-                # load rest of dataframe and split
-                all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
-                all_data = np.transpose(all_data)
-
-                # get voltage and power data
-                # all_v.append(all_data[0])
-                # all_j_fwd.append(all_data[2])
-                all_p_fwd.append(all_data[3])
-                # all_j_rev.append(all_data[5])
-                all_p_rev.append(all_data[6])
+            # load jv files
+            (
+                all_t,
+                all_v,
+                all_j_fwd,
+                all_p_fwd,
+                all_j_rev,
+                all_p_rev,
+            ) = self.analysis.load_jv_files(jv_file_paths)
 
             # make time data numpy array, calc time elapsed
             all_t = np.array(all_t)
@@ -173,36 +180,15 @@ class Analysis:
             # Get Module Number
             module_num = jv_folder.split("_")[-1]
 
-            # get list of file paths, create empty lists for parameters
             jv_file_paths = self.jv_dict[jv_folder]
-            all_t = []
-            all_v = []
-            all_j_fwd = []
-            all_p_fwd = []
-            all_j_rev = []
-            all_p_rev = []
-
-            # cycle through each jv file
-            for jv_file_path in jv_file_paths:
-
-                # get time information
-                with open(jv_file_path) as f:
-                    reader = csv.reader(f)
-                    _ = next(reader)  # date
-                    _ = next(reader)  # time
-                    all_t.append(float(next(reader)[-1]))  # epoch time
-                    _ = next(reader)  # string
-                    _ = next(reader)  # module
-                    _ = next(reader)  # area
-
-                # load rest of dataframe and split
-                all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
-                all_data = np.transpose(all_data)
-                all_v.append(all_data[0])
-                all_j_fwd.append(all_data[2])
-                all_p_fwd.append(all_data[3])
-                all_j_rev.append(all_data[5])
-                all_p_rev.append(all_data[6])
+            (
+                all_t,
+                all_v,
+                all_j_fwd,
+                all_p_fwd,
+                all_j_rev,
+                all_p_rev,
+            ) = self.load_jv_files(jv_file_paths)
 
             # make time data numpy array, calc time elapsed
             all_t = np.array(all_t)
@@ -225,17 +211,20 @@ class Analysis:
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
 
+            # get info from jv file name
+            d = self.filepath_to_runinfo(jv_file_paths[-1])
+
             # create scalar dataframe, filter it, and save it in analyzed folder
             scalar_df = pd.DataFrame(scalardict)
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
-            save_loc = os.path.join(self.analyzed_folder, f"Scalars_{module_num}.csv")
+            save_loc = os.path.join(
+                self.analyzed_folder,
+                f"{d['date']}_{d['name']}_{d['string_id']}_{d['module_id']}_Scalars_1.csv",
+            )
             scalar_df_filtered.to_csv(save_loc, index=False)
             save_locations.append(save_loc)
 
         return save_locations
-
-    #def _load_jv_file(self,filepath):
-
 
     def _calculate_jv_parameters(self, all_v, all_j, all_p, direction):
         """Calculate parameters for each jv file"""
@@ -372,3 +361,48 @@ class Analysis:
         df_filtered_2 = df_filtered.reset_index(drop=True)
 
         return df_filtered_2
+
+    # Loads jv files
+
+    def load_jv_files(self, jv_file_paths):
+
+        all_t = []
+        all_v = []
+        all_j_fwd = []
+        all_p_fwd = []
+        all_j_rev = []
+        all_p_rev = []
+
+        for jv_file_path in jv_file_paths:
+
+            t, v, j_fwd, p_fwd, j_rev, p_rev = self.load_jv_file(jv_file_path)
+            all_t.append(t)
+            all_v.append(v)
+            all_j_fwd.append(j_fwd)
+            all_p_fwd.append(p_fwd)
+            all_j_rev.append(j_rev)
+            all_p_rev.append(p_rev)
+
+        return all_t, all_v, all_j_fwd, all_p_fwd, all_j_rev, all_p_rev
+
+    def load_jv_file(self, jv_file_path):
+        # get time information
+        with open(jv_file_path) as f:
+            reader = csv.reader(f)
+            _ = next(reader)  # date
+            _ = next(reader)  # time
+            t = float(next(reader)[-1])  # epoch time
+            _ = next(reader)  # string
+            _ = next(reader)  # module
+            _ = next(reader)  # area
+
+        # load rest of dataframe and split
+        all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
+        all_data = np.transpose(all_data)
+        v = all_data[0]
+        j_fwd = all_data[2]
+        p_fwd = all_data[3]
+        j_rev = all_data[5]
+        p_rev = all_data[6]
+
+        return t, v, j_fwd, p_fwd, j_rev, p_rev

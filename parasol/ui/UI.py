@@ -206,6 +206,13 @@ class PARASOL_UI(QMainWindow):
         self.loadbutton5.clicked.connect(self.load5)
         self.loadbutton6.clicked.connect(self.load6)
 
+        self.loadbutton1.setEnabled(True)
+        self.loadbutton2.setEnabled(True)
+        self.loadbutton3.setEnabled(True)
+        self.loadbutton4.setEnabled(True)
+        self.loadbutton5.setEnabled(True)
+        self.loadbutton6.setEnabled(True)
+
         # Get unload button & connect to function
         self.unloadbutton1 = self.findChild(QPushButton, "UnLoadButton_1")
         self.unloadbutton2 = self.findChild(QPushButton, "UnLoadButton_2")
@@ -221,6 +228,13 @@ class PARASOL_UI(QMainWindow):
         self.unloadbutton5.clicked.connect(self.unload5)
         self.unloadbutton6.clicked.connect(self.unload6)
 
+        self.unloadbutton1.setEnabled(False)
+        self.unloadbutton2.setEnabled(False)
+        self.unloadbutton3.setEnabled(False)
+        self.unloadbutton4.setEnabled(False)
+        self.unloadbutton5.setEnabled(False)
+        self.unloadbutton6.setEnabled(False)
+
         # Get check test button & connect to function
         self.checktestbutton1 = self.findChild(QPushButton, "CheckTestButton_1")
         self.checktestbutton2 = self.findChild(QPushButton, "CheckTestButton_2")
@@ -235,6 +249,13 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton4.clicked.connect(self.checktest4)
         self.checktestbutton5.clicked.connect(self.checktest5)
         self.checktestbutton6.clicked.connect(self.checktest6)
+
+        self.checktestbutton1.setEnabled(False)
+        self.checktestbutton2.setEnabled(False)
+        self.checktestbutton3.setEnabled(False)
+        self.checktestbutton4.setEnabled(False)
+        self.checktestbutton5.setEnabled(False)
+        self.checktestbutton6.setEnabled(False)
 
         # Create GUI
         self.launch_gui()
@@ -633,6 +654,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox3.setEnabled(False)
         self.checkbox4.setEnabled(False)
 
+        self.loadbutton1.setEnabled(False)
+        self.unloadbutton1.setEnabled(True)
+        self.checktestbutton1.setEnabled(True)
+
     def lock_value2(self):
         self.name2.setEnabled(False)
         self.area2.setEnabled(False)
@@ -647,6 +672,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox6.setEnabled(False)
         self.checkbox7.setEnabled(False)
         self.checkbox8.setEnabled(False)
+
+        self.loadbutton2.setEnabled(False)
+        self.unloadbutton2.setEnabled(True)
+        self.checktestbutton2.setEnabled(True)
 
     def lock_value3(self):
         self.name3.setEnabled(False)
@@ -663,6 +692,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox11.setEnabled(False)
         self.checkbox12.setEnabled(False)
 
+        self.loadbutton3.setEnabled(False)
+        self.unloadbutton3.setEnabled(True)
+        self.checktestbutton3.setEnabled(True)
+
     def lock_value4(self):
         self.name4.setEnabled(False)
         self.area4.setEnabled(False)
@@ -677,6 +710,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox14.setEnabled(False)
         self.checkbox15.setEnabled(False)
         self.checkbox16.setEnabled(False)
+
+        self.loadbutton4.setEnabled(False)
+        self.unloadbutton4.setEnabled(True)
+        self.checktestbutton4.setEnabled(True)
 
     def lock_value5(self):
         self.name5.setEnabled(False)
@@ -693,6 +730,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox19.setEnabled(False)
         self.checkbox20.setEnabled(False)
 
+        self.loadbutton5.setEnabled(False)
+        self.unloadbutton5.setEnabled(True)
+        self.checktestbutton5.setEnabled(True)
+
     def lock_value6(self):
         self.name6.setEnabled(False)
         self.area6.setEnabled(False)
@@ -707,6 +748,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox22.setEnabled(False)
         self.checkbox23.setEnabled(False)
         self.checkbox24.setEnabled(False)
+
+        self.loadbutton6.setEnabled(False)
+        self.unloadbutton6.setEnabled(True)
+        self.checktestbutton6.setEnabled(True)
 
     # Unlock Values For Editing
 
@@ -725,6 +770,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox3.setEnabled(True)
         self.checkbox4.setEnabled(True)
 
+        self.loadbutton1.setEnabled(True)
+        self.unloadbutton1.setEnabled(False)
+        self.checktestbutton1.setEnabled(False)
+
     def unlock_value2(self):
         self.name2.setEnabled(True)
         self.area2.setEnabled(True)
@@ -739,6 +788,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox6.setEnabled(True)
         self.checkbox7.setEnabled(True)
         self.checkbox8.setEnabled(True)
+
+        self.loadbutton2.setEnabled(True)
+        self.unloadbutton2.setEnabled(False)
+        self.checktestbutton2.setEnabled(False)
 
     def unlock_value3(self):
         self.name3.setEnabled(True)
@@ -755,6 +808,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox11.setEnabled(True)
         self.checkbox12.setEnabled(True)
 
+        self.loadbutton3.setEnabled(True)
+        self.unloadbutton3.setEnabled(False)
+        self.checktestbutton3.setEnabled(False)
+
     def unlock_value4(self):
         self.name4.setEnabled(True)
         self.area4.setEnabled(True)
@@ -769,6 +826,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox14.setEnabled(True)
         self.checkbox15.setEnabled(True)
         self.checkbox16.setEnabled(True)
+
+        self.loadbutton4.setEnabled(True)
+        self.unloadbutton4.setEnabled(False)
+        self.checktestbutton4.setEnabled(False)
 
     def unlock_value5(self):
         self.name5.setEnabled(True)
@@ -785,6 +846,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox19.setEnabled(True)
         self.checkbox20.setEnabled(True)
 
+        self.loadbutton5.setEnabled(True)
+        self.unloadbutton5.setEnabled(False)
+        self.checktestbutton5.setEnabled(False)
+
     def unlock_value6(self):
         self.name6.setEnabled(True)
         self.area6.setEnabled(True)
@@ -799,6 +864,10 @@ class PARASOL_UI(QMainWindow):
         self.checkbox22.setEnabled(True)
         self.checkbox23.setEnabled(True)
         self.checkbox24.setEnabled(True)
+
+        self.loadbutton6.setEnabled(True)
+        self.unloadbutton6.setEnabled(False)
+        self.checktestbutton6.setEnabled(False)
 
     # Load Buttons
 
