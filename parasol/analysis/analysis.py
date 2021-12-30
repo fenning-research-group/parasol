@@ -3,11 +3,14 @@ import numpy as np
 import os
 import csv
 
+from parasol.analysis.filestructure import FileStructure
+
 
 class Analysis:
     def __init__(self):
 
         self.NUM_MODULES = 24
+        self.filestructure = FileStructure()
 
     # Main tests
 
@@ -18,7 +21,7 @@ class Analysis:
         self.jv_folders = jvfolderpaths
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
-        self.jv_dict = self.create_file_paths(self.jv_folders)
+        self.jv_dict = self.filestructure.map_test_files(self.jv_folders)
 
         # calculate pmpps (1 array per module), stick in dictionary
         t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps()
@@ -47,11 +50,10 @@ class Analysis:
             self.mpp_folder,
             self.jv_folders,
             self.analyzed_folder,
-        ) = self.create_folder_paths(stringpath)
+        ) = self.filestructure.get_test_subfolders(stringpath)
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
-        self.jv_dict = self.create_file_paths(self.jv_folders)
-        # self.mpp_dict = self.create_file_paths(self.mpp_folder)
+        self.jv_dict = self.filestructure.map_test_files(self.jv_folders)
 
         # Analyze JV files: For each module export scalars_{module}.csv
         analyzed_waves = self.analyze_jv_files()
@@ -59,73 +61,73 @@ class Analysis:
     # deals with folder paths --> everything else is file paths
 
     # self.FileStructure.filepath_to_runinfo(file_path)
-    def filepath_to_runinfo(self, file_path):
-        """Returns runinfo from filepath using filename standardization"""
-        file_name = os.path.basename(file_path)
+    # def filepath_to_runinfo(self, file_path):
+    #     """Returns runinfo from filepath using filename standardization"""
+    #     file_name = os.path.basename(file_path)
 
-        run_info = {
-            # "scan_number" : file_name.split("_")[-1],  scan number
-            # "scan_type" : file_name.split("_")[-2],   scan type
-            "module_id": file_name.split("_")[-3],  # module id
-            "string_id": file_name.split("_")[-4],  # string id
-            "name": file_name.split("_")[1:-5],  # name
-            "date": file_name.split("_")[0],  # date
-        }
+    #     run_info = {
+    #         # "scan_number" : file_name.split("_")[-1],  scan number
+    #         # "scan_type" : file_name.split("_")[-2],   scan type
+    #         "module_id": file_name.split("_")[-3],  # module id
+    #         "string_id": file_name.split("_")[-4],  # string id
+    #         "name": file_name.split("_")[1:-5],  # name
+    #         "date": file_name.split("_")[0],  # date
+    #     }
 
-        return run_info
+    #     return run_info
 
     # this can be replaced with folderstructure
     # mpp_folder, jv_folders, analyzed_folder = self.FileStructure.get_test_subfolders(stringpath)
-    def create_folder_paths(self, stringpath):
-        """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""
+    # def create_folder_paths(self, stringpath):
+    #     """Create folder paths for analysis including: self.mpp_folder, self.jv_folder, and self.analyzed_folder"""
 
-        # path to mpp folder --> rootfolder:MPP:
-        mpp_folder = [os.path.join(stringpath, "MPP")]
+    #     # path to mpp folder --> rootfolder:MPP:
+    #     mpp_folder = [os.path.join(stringpath, "MPP")]
 
-        # path to jv folders --> rootfolder:JV_{module}:
-        jv_folders = []
-        for i in range(1, self.NUM_MODULES + 1):
-            jv_folder = os.path.join(stringpath, "JV_" + str(int(i)))
-            if os.path.exists(jv_folder):
-                jv_folders.append(jv_folder)
+    #     # path to jv folders --> rootfolder:JV_{module}:
+    #     jv_folders = []
+    #     for i in range(1, self.NUM_MODULES + 1):
+    #         jv_folder = os.path.join(stringpath, "JV_" + str(int(i)))
+    #         if os.path.exists(jv_folder):
+    #             jv_folders.append(jv_folder)
 
-        # path to analyzed folder --> rootfolder:Analyzed
-        analyzed_folder = os.path.join(stringpath, "Analyzed")
-        if not os.path.exists(analyzed_folder):
-            os.makedirs(analyzed_folder)
+    #     # path to analyzed folder --> rootfolder:Analyzed
+    #     analyzed_folder = os.path.join(stringpath, "Analyzed")
+    #     if not os.path.exists(analyzed_folder):
+    #         os.makedirs(analyzed_folder)
 
-        return mpp_folder, jv_folders, analyzed_folder
+    #     return mpp_folder, jv_folders, analyzed_folder
 
     # self.FileStructure.map_test_files(folderpaths)
-    def create_file_paths(self, folderpaths):
-        """Create file_dict[folderpath] = filepaths"""
+    # def create_file_paths(self, folderpaths):
+    #     """Create file_dict[folderpath] = filepaths"""
 
-        # create blank dictionary to hold folder: file_paths
-        file_dict = {}
+    #     # create blank dictionary to hold folder: file_paths
+    #     file_dict = {}
 
-        # cycle through folders
-        for folder in folderpaths:
+    #     # cycle through folders
+    #     for folder in folderpaths:
 
-            # initialize lists
-            scan_numbers = []
-            paths_chronological = []
+    #         # initialize lists
+    #         scan_numbers = []
+    #         paths_chronological = []
 
-            # Grab list of files in folder
-            files = os.listdir(folder)
+    #         # Grab list of files in folder
+    #         files = os.listdir(folder)
 
-            # for each file, create list of scan numbers
-            for file in files:
-                scan_numbers.append(file.split("_")[-1])
+    #         # for each file, create list of scan numbers
+    #         for file in files:
+    #             scan_numbers.append(file.split("_")[-1])
 
-            # sort files by scan number, create paths to files
-            files_chronological = [x for _, x in sorted(zip(scan_numbers, files))]
-            for file in files_chronological:
-                paths_chronological.append(os.path.join(folder, file))
+    #         # sort files by scan number, create paths to files
+    #         files_chronological = [x for _, x in sorted(zip(scan_numbers, files))]
+    #         for file in files_chronological:
+    #             paths_chronological.append(os.path.join(folder, file))
 
-            # create dictionary basefolder : file_paths
-            file_dict[folder] = paths_chronological
+    #         # create dictionary basefolder : file_paths
+    #         file_dict[folder] = paths_chronological
 
-        return file_dict
+    #     return file_dict
 
     # Workhorse functions for check_test and analyze_from_savepath
 
@@ -212,7 +214,7 @@ class Analysis:
                 scalardict[k] = v
 
             # get info from jv file name
-            d = self.filepath_to_runinfo(jv_file_paths[-1])
+            d = self.filestructure.filepath_to_runinfo(jv_file_paths[-1])
 
             # create scalar dataframe, filter it, and save it in analyzed folder
             scalar_df = pd.DataFrame(scalardict)

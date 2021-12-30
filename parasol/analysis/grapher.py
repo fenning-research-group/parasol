@@ -6,7 +6,8 @@ import yaml
 import os
 import csv
 
-from parasol.analysis.analysis import Analysis
+# from parasol.analysis.analysis import Analysis
+from parasol.analysis.filestructure import FileStructure
 
 # Set yaml name, load controller info
 MODULE_DIR = os.path.dirname(__file__)
@@ -22,7 +23,8 @@ class Grapher:
         self.rootdir = constants["root_dir"]
 
         # Load analysis package to manage JV files
-        self.analysis = Analysis()
+        # self.analysis = Analysis()
+        self.filestructure = FileStructure()
 
         self.variable_dict = {
             "Time": "Time (Epoch)",
@@ -99,7 +101,7 @@ class Grapher:
     # Plot JV scans for a single module
 
     def plot_module_jvs(self, jvfolder):
-        jv_dict = self.analysis.create_file_paths([jvfolder])
+        jv_dict = self.filestructure.map_test_files([jvfolder])
         jv_file_paths = jv_dict[jvfolder]
         self.plot_jvs(jv_file_paths)
 
