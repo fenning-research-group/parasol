@@ -427,6 +427,7 @@ class Controller:
 
         # Get last MPP, will be none if JV not filled
         last_vmpp = self.characterization.calc_last_vmp(d)
+        
         # if we dont have a vmpp, skip
         if last_vmpp is None:
             return

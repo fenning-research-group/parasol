@@ -4,7 +4,6 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import yaml
 import os
-import csv
 
 # from parasol.analysis.analysis import Analysis
 from parasol.analysis.filestructure import FileStructure

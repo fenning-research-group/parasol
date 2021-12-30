@@ -101,17 +101,53 @@ class FileStructure:
     def filepath_to_runinfo(self, file_path):
         """Returns runinfo from filepath using filename standardization"""
         file_name = os.path.basename(file_path)
+        print("I HAVE ARIVED")
+        name_len = (file_name.count("_") + 1) - 5
+        name = ""
+        i = 1
+        while i <= name_len:
+            name += file_name.split("_")[i] + "_"
+            i+= 1
+        name = name[:-1]
 
         run_info = {
             # "scan_number" : file_name.split("_")[-1],  scan number
             # "scan_type" : file_name.split("_")[-2],   scan type
             "module_id": file_name.split("_")[-3],  # module id
             "string_id": file_name.split("_")[-4],  # string id
-            "name": file_name.split("_")[1:-5],  # name
+            "name": name,  # name
             "date": file_name.split("_")[0],  # date
         }
 
         return run_info
+
+    # # returns JV folder, MPP folder, and filepaths for creating data
+
+    # def get_jv_folder_runtime(self, d, id, module):
+    #     jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
+    #     return jvfolder
+    
+    # def get_jv_file_runtime(self, d, id, module): 
+    #     jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
+    #     fpath = os.path.join(
+    #         jvfolder,
+    #         f"{d['start_date']}_{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
+    #     )
+    #     return fpath
+
+    # def get_mpp_folder_runtime(self, d, id):
+    #     mppfolder = os.path.join(d["_savedir"], "MPP")
+    #     return mppfolder
+    
+    # def get_mpp_file_runtime(self, d, id):
+    #     mppfolder = os.path.join(d["_savedir"], "MPP")
+    #     fpath = os.path.join(
+    #         mppfolder,
+    #         f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv",
+    #     )
+    #     return fpath
+
+
 
 
 # root
