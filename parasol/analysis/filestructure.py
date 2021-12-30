@@ -102,7 +102,6 @@ class FileStructure:
     def filepath_to_runinfo(self, file_path):
         """Returns runinfo from filepath using filename standardization"""
         file_name = os.path.basename(file_path)
-        print("I HAVE ARIVED")
         name_len = (file_name.count("_") + 1) - 5
         name = ""
         i = 1
@@ -122,7 +121,7 @@ class FileStructure:
 
         return run_info
 
-    # Get folder paths
+    # Get folder paths given inputs, make paths
 
     def get_root_dir(self):
         return self.root_folder
@@ -142,14 +141,10 @@ class FileStructure:
         mpp_folder = os.path.join(self.get_test_folder(startdate, name), "MPP")
         return mpp_folder
 
-    def get_jv_folders(self, startdate, name, module_channels):
+    def get_jv_folder(self, startdate, name, module_channel):
         """Returns the path to the JV folders"""
-        jv_folders = []
-        for i in module_channels:
-            jv_folders.append(
-                os.path.join(self.get_test_folder(startdate, name), "JV_" + str(i))
-            )
-        return jv_folders
+        jv_folder = os.path.join(self.get_test_folder(startdate, name), "JV_" + str(module_channel))
+        return jv_folder
 
     def get_analyzed_folder(self, startdate, name):
         """Returns the path to the analyzed folder"""
@@ -158,12 +153,11 @@ class FileStructure:
         )
         return analyzed_folder
 
-    # MAY HAVE AN ISSUE BELOW
     def make_module_subdir(self, name, module_channels, startdate):
         """Make subdirectory for saving"""
 
         # Add date folder
-        datefpath = self.get_date_folder(self, startdate)
+        datefpath = self.get_date_folder(startdate)
         if not os.path.exists(datefpath):
             os.mkdir(datefpath)
 
@@ -172,9 +166,7 @@ class FileStructure:
         basefpath = self.get_test_folder(startdate, name)
         while os.path.exists(basefpath):
             idx += 1
-            # basefpath = os.path.join(datefpath, f"{startdate}_{name}_{idx}")
-            # not sure if this works
-            basefpath += f"_{idx}"
+            basefpath = self.get_test_folder(startdate,name)+f"_{idx}"
         if idx != 0:
             name += f"_{idx}"
         os.mkdir(basefpath)
@@ -184,8 +176,8 @@ class FileStructure:
         os.mkdir(mppfpath)
 
         # Make subdirectory for each module
-        jvpaths = self.get_jv_folders(startdate, name, module_channels)
-        for jvpath in jvpaths:
+        for module in module_channels:
+            jvpath = self.get_jv_folder(startdate, name, module)
             os.mkdir(jvpath)
 
         return basefpath, name
@@ -199,44 +191,11 @@ class FileStructure:
 
     def get_mpp_file_name(self, startdate, name, id, scan_count):
         """Returns the path to the MPP file"""
-        mpp_file_path = f"{startdate}_{name}_{id}_all_MPP_{scan_count}.csv"
+        mpp_file_path = f"{startdate}_{name}_{id}_all_MPP_1.csv"
         return mpp_file_path
 
-    def get_analyzed_file_name(self, startdate, name, id, scan_count):
+    def get_analyzed_file_name(self, startdate, name, id):
         """Returns the path to the analyzed file"""
-        analyzed_file_path = f"{startdate}_{name}_{id}_all_Analyzed_{scan_count}.csv"
+        analyzed_file_path = f"{startdate}_{name}_{id}_all_Analyzed_1.csv"
         return analyzed_file_path
 
-    # # returns JV folder, MPP folder, and filepaths for creating data
-
-    # def get_jv_folder_runtime(self, d, id, module):
-    #     jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
-    #     return jvfolder
-
-    # def get_jv_file_runtime(self, d, id, module):
-    #     jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
-    #     fpath = os.path.join(
-    #         jvfolder,
-    #         f"{d['start_date']}_{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
-    #     )
-    #     return fpath
-
-    # def get_mpp_folder_runtime(self, d, id):
-    #     mppfolder = os.path.join(d["_savedir"], "MPP")
-    #     return mppfolder
-
-    # def get_mpp_file_runtime(self, d, id):
-    #     mppfolder = os.path.join(d["_savedir"], "MPP")
-    #     fpath = os.path.join(
-    #         mppfolder,
-    #         f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv",
-    #     )
-    #     return fpath
-
-
-# root
-# root:dates
-# root:dates:xdate_name:
-# root:dates:xdate_name:JV_strid:<date>_<Name>_<strid>_<modid>_JV_<scannum>.csv
-# root:dates:xdate_name:MPP:<date>_<Name>_<strid>_MPP_1.csv
-# root:dates:xdate_name:Analyzed:

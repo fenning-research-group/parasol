@@ -103,7 +103,6 @@ class Controller:
         mpp_future.add_done_callback(future_callback)
 
         # Setup string dict with important information for running the program
-
         self.strings[id] = {
             "name": name,
             "area": area,
@@ -122,7 +121,7 @@ class Controller:
                 "j_rev": [None for i in range(len(module_channels))],
             },
             "mpp": {
-                "mode": mpp_mode,  # 0 = perturb and observe for now
+                "mode": mpp_mode, 
                 "interval": mpp_interval,
                 "vmin": 0.1,
                 "vmax": jv_vmax,
@@ -168,35 +167,6 @@ class Controller:
         print("Analysis saved at ", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
 
-    # def _make_module_subdir(self, name, id, module_channels, startdate):
-    #     """Make subdirectory for saving"""
-
-    #     # Add date folder
-    #     datefpath = os.path.join(self.rootdir, startdate)
-    #     if not os.path.exists(datefpath):
-    #         os.mkdir(datefpath)
-
-    #     # Make base file path for saving
-    #     idx = 0
-    #     basefpath = os.path.join(datefpath, f"{startdate}_{name}")
-    #     while os.path.exists(basefpath):
-    #         idx += 1
-    #         basefpath = os.path.join(datefpath, f"{startdate}_{name}_{idx}")
-    #     if idx != 0:
-    #         name += f"_{idx}"
-    #     os.mkdir(basefpath)
-
-    #     # Make subdirectory for MMP
-    #     mppfpath = os.path.join(basefpath, "MPP")
-    #     os.mkdir(mppfpath)
-
-    #     # Make subdirectory for each module
-    #     for modulechannel in module_channels:
-    #         modulepath = os.path.join(basefpath, f"JV_{modulechannel}")
-    #         os.mkdir(modulepath)
-
-    #     return basefpath, name
-
     def _make_mpp_file(self, id):
         """Creates base file for MPP data"""
 
@@ -208,12 +178,8 @@ class Controller:
         epoch_str = time.time()
 
         # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
-        # mppfolder = os.path.join(d["_savedir"], "MPP")
-        # fpath = os.path.join(
-        #     mppfolder, f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv"
-        # )
         mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
-        mppfile = self.filestructure.get_jv_file_name(
+        mppfile = self.filestructure.get_mpp_file_name(
             d["start_date"], d["name"], id, d["jv"]["scan_count"]
         )
         fpath = os.path.join(mppfolder, mppfile)
@@ -371,13 +337,8 @@ class Controller:
                 epoch_str = time.time()
 
                 # Save in base filepath: stringname: JV_modulechannel: stringname_stringid_modulechannel_JV_scannumber
-                # jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
-                # fpath = os.path.join(
-                #     jvfolder,
-                #     f"{d['start_date']}_{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
-                # )
-                jvfolder = self.filestructure.get_jv_folders(
-                    d["start_date"], d["name"], d["module_channels"]
+                jvfolder = self.filestructure.get_jv_folder(
+                    d["start_date"], d["name"], module
                 )
                 jvfile = self.filestructure.get_jv_file_name(
                     d["start_date"], d["name"], id, module, d["jv"]["scan_count"]
@@ -470,12 +431,8 @@ class Controller:
             d["mpp"]["vmpp"] = v
 
             # Save in base filepath:MPP_stringID:
-            # mppfolder = os.path.join(d["_savedir"], "MPP")
-            # fpath = os.path.join(
-            #     mppfolder, f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv"
-            # )
             mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
-            mppfile = self.filestructure.get_jv_file_name(
+            mppfile = self.filestructure.get_mpp_file_name(
                 d["start_date"], d["name"], id, d["jv"]["scan_count"]
             )
             fpath = os.path.join(mppfolder, mppfile)

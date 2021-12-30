@@ -136,10 +136,9 @@ class Analysis:
             # create scalar dataframe, filter it, and save it in analyzed folder
             scalar_df = pd.DataFrame(scalardict)
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
-            save_loc = os.path.join(
-                self.analyzed_folder,
-                f"{d['date']}_{d['name']}_{d['string_id']}_{d['module_id']}_Scalars_1.csv",
-            )
+
+            analysis_file = self.filestructure.get_analyzed_file_name(d['date'], d['name'],d['string_id'])
+            save_loc = os.path.join(self.analyzed_folder, analysis_file)
             scalar_df_filtered.to_csv(save_loc, index=False)
             save_locations.append(save_loc)
 
@@ -325,3 +324,25 @@ class Analysis:
         p_rev = all_data[6]
 
         return t, v, j_fwd, p_fwd, j_rev, p_rev
+
+    def load_mpp_file(self, mpp_file_path):
+        with open(mpp_file_path) as f:
+            reader = csv.reader(f)
+            _ = next(reader)  # date
+            _ = next(reader)  # time
+            t_start = float(next(reader)[-1])  # epoch time
+            _ = next(reader)  # string
+            _ = next(reader)  # module
+            _ = next(reader)  # area
+
+        # load rest of dataframe and split
+        all_data = np.loadtxt(mpp_file_path, delimiter=",", skiprows=8)
+        all_data = np.transpose(all_data)
+        t = all_data[0]
+        v = all_data[1]
+        i = all_data[2]
+        j = all_data[3]
+        p = all_data[4]
+
+
+        return t, v, i, j, p
