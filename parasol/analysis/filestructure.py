@@ -100,7 +100,7 @@ class FileStructure:
 
     def filepath_to_runinfo(self, file_path):
         """Returns runinfo from filepath using filename standardization"""
-        file_name = file_path.split(":")[-1]
+        file_name = os.path.basename(file_path)
 
         run_info = {
             # "scan_number" : file_name.split("_")[-1],  scan number
