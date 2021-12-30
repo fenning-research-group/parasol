@@ -8,22 +8,16 @@ import os
 # from parasol.analysis.analysis import Analysis
 from parasol.analysis.filestructure import FileStructure
 
-# Set yaml name, load controller info
-MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
-
 
 class Grapher:
     def __init__(self):
         """Opens in root directory (same as parasol)"""
 
-        # Path to general data
-        self.rootdir = constants["root_dir"]
-
-        # Load analysis package to manage JV files
-        # self.analysis = Analysis()
+        # Load filstructure package to manage JV files
         self.filestructure = FileStructure()
+
+        # Path to general data
+        self.rootdir = self.filestructure.get_root_dir()
 
         self.variable_dict = {
             "Time": "Time (Epoch)",

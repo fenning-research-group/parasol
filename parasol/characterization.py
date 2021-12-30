@@ -98,7 +98,7 @@ class Characterization:
 
             # set the voltage
             v = vmpp_last + voltage_step
-            
+
             # Ensure voltage is between the easttesters max and min values
             if (v <= d["mpp"]["vmin"]) or (v >= d["mpp"]["vmax"]):
                 v = vmpp_last - 2 * voltage_step

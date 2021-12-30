@@ -15,6 +15,7 @@ from parasol.hardware.scanner import Scanner
 from parasol.hardware.easttester import EastTester
 from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
+from parasol.analysis.filestructure import FileStructure
 
 
 # Set yaml name, load controller info
@@ -26,14 +27,8 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 class Controller:
     """Create controller class to manage eastester, relay, and yokogawa"""
 
-    def __init__(self, rootdir=constants["root_dir"]):
+    def __init__(self):
         """Initialize controller"""
-
-        # Initialize running variable, create root directory
-        self.running = False
-        self.rootdir = rootdir
-        if not os.path.exists(rootdir):
-            os.mkdir(rootdir)
 
         # Connect to Relay, Scanner, 3 EastTesters, and Characterization files
         self.relay = Relay()
@@ -45,6 +40,13 @@ class Controller:
         }
         self.characterization = Characterization()
         self.analysis = Analysis()
+        self.filestructure = FileStructure()
+
+        # Initialize running variable, create root directory
+        self.running = False
+        self.rootdir = self.filestructure.get_root_dir()
+        if not os.path.exists(self.rootdir):
+            os.mkdir(self.rootdir)
 
         # Maps string ID to ET port (which of the 3 ET) and channel
         self.et_channels = {
@@ -135,7 +137,7 @@ class Controller:
         (
             self.strings[id]["_savedir"],
             self.strings[id]["name"],
-        ) = self._make_module_subdir(name, id, module_channels, startdate)
+        ) = self.filestructure.make_module_subdir(name, module_channels, startdate)
 
         # Create the base MPP file with header and no data (we will append to it)
         self._make_mpp_file(id)
@@ -166,34 +168,34 @@ class Controller:
         print("Analysis saved at ", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
 
-    def _make_module_subdir(self, name, id, module_channels, startdate):
-        """Make subdirectory for saving"""
+    # def _make_module_subdir(self, name, id, module_channels, startdate):
+    #     """Make subdirectory for saving"""
 
-        # Add date folder
-        datefpath = os.path.join(self.rootdir, startdate)
-        if not os.path.exists(datefpath):
-            os.mkdir(datefpath)
+    #     # Add date folder
+    #     datefpath = os.path.join(self.rootdir, startdate)
+    #     if not os.path.exists(datefpath):
+    #         os.mkdir(datefpath)
 
-        # Make base file path for saving
-        idx = 0
-        basefpath = os.path.join(datefpath, f"{startdate}_{name}")
-        while os.path.exists(basefpath):
-            idx += 1
-            basefpath = os.path.join(datefpath, f"{startdate}_{name}_{idx}")
-        if idx != 0:
-            name += f"_{idx}"
-        os.mkdir(basefpath)
+    #     # Make base file path for saving
+    #     idx = 0
+    #     basefpath = os.path.join(datefpath, f"{startdate}_{name}")
+    #     while os.path.exists(basefpath):
+    #         idx += 1
+    #         basefpath = os.path.join(datefpath, f"{startdate}_{name}_{idx}")
+    #     if idx != 0:
+    #         name += f"_{idx}"
+    #     os.mkdir(basefpath)
 
-        # Make subdirectory for MMP
-        mppfpath = os.path.join(basefpath, "MPP")
-        os.mkdir(mppfpath)
+    #     # Make subdirectory for MMP
+    #     mppfpath = os.path.join(basefpath, "MPP")
+    #     os.mkdir(mppfpath)
 
-        # Make subdirectory for each module
-        for modulechannel in module_channels:
-            modulepath = os.path.join(basefpath, f"JV_{modulechannel}")
-            os.mkdir(modulepath)
+    #     # Make subdirectory for each module
+    #     for modulechannel in module_channels:
+    #         modulepath = os.path.join(basefpath, f"JV_{modulechannel}")
+    #         os.mkdir(modulepath)
 
-        return basefpath, name
+    #     return basefpath, name
 
     def _make_mpp_file(self, id):
         """Creates base file for MPP data"""
@@ -206,10 +208,15 @@ class Controller:
         epoch_str = time.time()
 
         # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
-        mppfolder = os.path.join(d["_savedir"], "MPP")
-        fpath = os.path.join(
-            mppfolder, f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv"
+        # mppfolder = os.path.join(d["_savedir"], "MPP")
+        # fpath = os.path.join(
+        #     mppfolder, f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv"
+        # )
+        mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
+        mppfile = self.filestructure.get_jv_file_name(
+            d["start_date"], d["name"], id, d["jv"]["scan_count"]
         )
+        fpath = os.path.join(mppfolder, mppfile)
 
         # Open file, write header/column names then fill
         with open(fpath, "w", newline="") as f:
@@ -364,11 +371,18 @@ class Controller:
                 epoch_str = time.time()
 
                 # Save in base filepath: stringname: JV_modulechannel: stringname_stringid_modulechannel_JV_scannumber
-                jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
-                fpath = os.path.join(
-                    jvfolder,
-                    f"{d['start_date']}_{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
+                # jvfolder = os.path.join(d["_savedir"], f"JV_{module}")
+                # fpath = os.path.join(
+                #     jvfolder,
+                #     f"{d['start_date']}_{d['name']}_{id}_{module}_JV_{d['jv']['scan_count']}.csv",
+                # )
+                jvfolder = self.filestructure.get_jv_folders(
+                    d["start_date"], d["name"], d["module_channels"]
                 )
+                jvfile = self.filestructure.get_jv_file_name(
+                    d["start_date"], d["name"], id, module, d["jv"]["scan_count"]
+                )
+                fpath = os.path.join(jvfolder, jvfile)
 
                 # Open relay, scan device foward + reverse, turn off relay
                 self.relay.on(module)
@@ -427,7 +441,7 @@ class Controller:
 
         # Get last MPP, will be none if JV not filled
         last_vmpp = self.characterization.calc_last_vmp(d)
-        
+
         # if we dont have a vmpp, skip
         if last_vmpp is None:
             return
@@ -456,10 +470,15 @@ class Controller:
             d["mpp"]["vmpp"] = v
 
             # Save in base filepath:MPP_stringID:
-            mppfolder = os.path.join(d["_savedir"], "MPP")
-            fpath = os.path.join(
-                mppfolder, f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv"
+            # mppfolder = os.path.join(d["_savedir"], "MPP")
+            # fpath = os.path.join(
+            #     mppfolder, f"{d['start_date']}_{d['name']}_{id}_all_MPP_1.csv"
+            # )
+            mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
+            mppfile = self.filestructure.get_jv_file_name(
+                d["start_date"], d["name"], id, d["jv"]["scan_count"]
             )
+            fpath = os.path.join(mppfolder, mppfile)
 
             # Open file, append values to columns
             with open(fpath, "a", newline="") as f:

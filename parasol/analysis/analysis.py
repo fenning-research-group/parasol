@@ -17,7 +17,6 @@ class Analysis:
     def check_test(self, jvfolderpaths, mpppaths):
         """Returns FWD & REV Pmp v Time"""
 
-        # No need to create folder paths --> no saving for now
         self.jv_folders = jvfolderpaths
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
@@ -25,21 +24,12 @@ class Analysis:
 
         # calculate pmpps (1 array per module), stick in dictionary
         t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps()
-        # plot_dict = {
-        #     "Time Elapsed (s)": t_vals,
-        #     "FWD Pmp (mW/cm2)": pmp_fwd_vals,
-        #     "REV Pmp (mW/cm2)": pmp_rev_vals,
-        # }
 
         col_names = ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
         plot_df = pd.DataFrame(columns=col_names, data=data)
 
         return plot_df
-        # pass to grapher to graph
-        # self.grapher.plot_x_v_ys(
-        #     plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
-        # )
 
     def analyze_from_savepath(self, stringpath):
         """Initialize the Parasol_String class"""
@@ -120,7 +110,7 @@ class Analysis:
                 all_j_rev,
                 all_p_rev,
             ) = self.load_jv_files(jv_file_paths)
-            
+
             # make time data numpy array, calc time elapsed
             all_t = np.array(all_t)
             all_t_elapsed = all_t - all_t[0]
