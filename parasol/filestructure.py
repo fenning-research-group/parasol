@@ -26,7 +26,7 @@ class FileStructure:
         """
         return self.root_folder
 
-    def get_date_folder(self, startdate):
+    def get_date_folder(self, startdate: str):
         """Returns the path to the date folder
 
         Args:
@@ -39,7 +39,7 @@ class FileStructure:
         date_folder = os.path.join(self.root_folder, startdate)
         return date_folder
 
-    def get_test_folder(self, startdate, name):
+    def get_test_folder(self, startdate: str, name: str):
         """Returns the path to the test folder
 
         Args:
@@ -53,7 +53,7 @@ class FileStructure:
         test_folder = os.path.join(self.root_folder, startdate, f"{startdate}_{name}")
         return test_folder
 
-    def get_mpp_folder(self, startdate, name):
+    def get_mpp_folder(self, startdate: str, name: str):
         """Returns the path to the MPP folder
 
         Args:
@@ -67,7 +67,7 @@ class FileStructure:
         mpp_folder = os.path.join(self.get_test_folder(startdate, name), "MPP")
         return mpp_folder
 
-    def get_jv_folder(self, startdate, name, module_channel):
+    def get_jv_folder(self, startdate: str, name: str, module_channel: int):
         """Returns the path to the JV folder
 
         Args:
@@ -83,7 +83,7 @@ class FileStructure:
         )
         return jv_folder
 
-    def get_analyzed_folder(self, startdate, name):
+    def get_analyzed_folder(self, startdate: str, name: str):
         """Returns the path to the Analyzed folder
 
         Args:
@@ -100,7 +100,7 @@ class FileStructure:
 
     # Make test folders given inputs
 
-    def make_module_subdir(self, name, module_channels, startdate):
+    def make_module_subdir(self, name: str, module_channels: list, startdate: str):
         """Makes JV, MPP, and Analyzed subdirectories for a given test
 
         Args:
@@ -140,7 +140,9 @@ class FileStructure:
 
     # Get filenames given inputs, make paths
 
-    def get_jv_file_name(self, startdate, name, id, module_channel, scan_count):
+    def get_jv_file_name(
+        self, startdate: str, name: str, id: int, module_channel: int, scan_count: int
+    ):
         """Returns the JV file name
 
         Args:
@@ -157,7 +159,7 @@ class FileStructure:
         jv_file_path = f"{startdate}_{name}_{id}_{module_channel}_JV_{scan_count}.csv"
         return jv_file_path
 
-    def get_mpp_file_name(self, startdate, name, id, scan_count):
+    def get_mpp_file_name(self, startdate: str, name: str, id: int, scan_count: int):
         """Returns the JV file name
 
         Args:
@@ -173,7 +175,7 @@ class FileStructure:
         mpp_file_path = f"{startdate}_{name}_{id}_all_MPP_1.csv"
         return mpp_file_path
 
-    def get_analyzed_file_name(self, startdate, name, id):
+    def get_analyzed_file_name(self, startdate: str, name: str, id: int):
         """Returns the Analyzed file name
 
         Args:
@@ -189,7 +191,7 @@ class FileStructure:
 
     # Get useful save information from the file name, make runinfo dict
 
-    def filepath_to_runinfo(self, file_path):
+    def filepath_to_runinfo(self, file_path: str):
         """Returns runinfo from filepath using filename standardization
 
         Args:
@@ -221,7 +223,7 @@ class FileStructure:
 
     # Map files and folders in root directory, make file_dict and folder_dict
 
-    def get_subfolders(self, folder):
+    def get_subfolders(self, folder: str):
         """Returns list of subfolders in folder
 
         Args:
@@ -232,7 +234,7 @@ class FileStructure:
         """
         return [f.path for f in os.scandir(folder) if f.is_dir()]
 
-    def get_subfiles(self, folder):
+    def get_subfiles(self, folder: str):
         """Returns list of subfiles in folder
 
         Args:
@@ -259,7 +261,7 @@ class FileStructure:
 
         return test_folders
 
-    def get_test_subfolders(self, stringpath):
+    def get_test_subfolders(self, stringpath: str):
         """Returns list of subfolders in test folder
 
         Args:
@@ -284,7 +286,7 @@ class FileStructure:
 
         return mpp_folder, jv_folders, analyzed_folder
 
-    def map_test_folders(self, test_paths):
+    def map_test_folders(self, test_paths: list):
         """Creates a dictionary maping test folders to their subfolders
 
         Args:
@@ -308,7 +310,7 @@ class FileStructure:
 
         return test_dict
 
-    def map_test_files(self, test_folders):
+    def map_test_files(self, test_folders: list):
         """Creates a dictionary maping test subfolders to their subfiles
 
         Args:

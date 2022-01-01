@@ -9,7 +9,7 @@ from parasol.filestructure import FileStructure
 class Grapher:
     """Grapher package for PARASOL"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes Grapher class"""
 
         # Load filstructure package to manage JV files
@@ -61,7 +61,7 @@ class Grapher:
             10: "X",
         }
 
-    def plot_x_v_ys(self, df, x, ys):
+    def plot_x_v_ys(self, df: pd.DataFrame, x: str, ys: list) -> None:
         """Plots x vs. y for a set of ys (1 graph)
 
         Args:
@@ -95,7 +95,7 @@ class Grapher:
 
     # Plot JV scans for a single module
 
-    def plot_module_jvs(self, jvfolder):
+    def plot_module_jvs(self, jvfolder: str) -> None:
         """Plot JVs in given JV folder
 
         Args:
@@ -106,7 +106,7 @@ class Grapher:
         jv_file_paths = jv_dict[jvfolder]
         self.plot_jvs(jv_file_paths)
 
-    def plot_jvs(self, jvfiles):
+    def plot_jvs(self, jvfiles: list) -> None:
         """Plot JVs for input JV files
 
         Args:
@@ -141,7 +141,7 @@ class Grapher:
     # Plot x v y with color axis as different devices
     # Plot x v y with color axis another parameter (z)
 
-    def plot_xy_scalars(self, paramfiles, x, y):
+    def plot_xy_scalars(self, paramfiles: list, x: str, y: str) -> None:
         """Plot x vs. y for a set of scalar files
 
         Args:
@@ -169,7 +169,7 @@ class Grapher:
         # display
         plt.show()
 
-    def plot_xy2_scalars(self, paramfiles, x, ys):
+    def plot_xy2_scalars(self, paramfiles: list, x: str, ys: list) -> None:
         """Plots x vs. y for a set of scalar files
 
         Args:
@@ -204,7 +204,7 @@ class Grapher:
         # display
         plt.show()
 
-    def plot_xyz_scalar(self, paramfile, x, y, z):
+    def plot_xyz_scalar(self, paramfile: str, x: str, y: str, z: str) -> None:
         """Plots x vs. y with z colorbar for a set of scalar files
 
         Args:

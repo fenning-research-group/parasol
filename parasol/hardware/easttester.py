@@ -29,7 +29,7 @@ def et_lock(f):
 class EastTester:
     """EastTester package for PARASOL"""
 
-    def __init__(self, port):
+    def __init__(self, port: str) -> None:
         """Initliazes the Eastester class for EastTester 5420
 
         Args:
@@ -55,7 +55,7 @@ class EastTester:
         self.srcV_measI(1)
         self.srcV_measI(2)
 
-    def connect(self, port):
+    def connect(self, port: str) -> None:
         """Connects to the easttester at the given port
 
         Args:
@@ -66,7 +66,7 @@ class EastTester:
         self.et = serial.Serial(port, baudrate=115200, timeout=0.005)
 
     # untested
-    def srcI_measV(self, channel):
+    def srcI_measV(self, channel: int) -> None:
         """Setup source current and measure voltage
 
         Args:
@@ -117,7 +117,7 @@ class EastTester:
         self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
         time.sleep(self.et_delay)
 
-    def srcV_measI(self, channel):
+    def srcV_measI(self, channel: int) -> None:
         """Setup source voltage and measure current
 
         Args:
@@ -169,7 +169,7 @@ class EastTester:
         time.sleep(self.et_delay)
 
     @et_lock
-    def output_on(self, channel):
+    def output_on(self, channel: int) -> None:
         """Turns output on
 
         Args:
@@ -182,7 +182,7 @@ class EastTester:
         )  # if this delay reduced we get issues in measuring current (first point low)
 
     @et_lock
-    def output_off(self, channel):
+    def output_off(self, channel: int) -> None:
         """Turns output off
 
         Args:
@@ -195,7 +195,7 @@ class EastTester:
         )  # if this delay reduced we get issues in measuring current (first point low)
 
     @et_lock
-    def set_voltage(self, channel, voltage):
+    def set_voltage(self, channel: int, voltage: float) -> None:
         """Sets voltage
 
         Args:
@@ -213,7 +213,7 @@ class EastTester:
 
     # untested
     @et_lock
-    def set_current(self, channel, current):
+    def set_current(self, channel: int, current: float) -> None:
         """Sets current
 
         Args:
@@ -228,7 +228,7 @@ class EastTester:
         self.et.write(("CURR" + str(channel) + ":CC %f\n" % (current)).encode())
 
     @et_lock
-    def measure_current(self, channel) -> float:
+    def measure_current(self, channel: int) -> float:
         """Measures current several times and then averages (number defined in hardwareconstants.yaml)
 
         Args:
@@ -258,7 +258,7 @@ class EastTester:
 
     # untested
     @et_lock
-    def measure_voltage(self, channel) -> float:
+    def measure_voltage(self, channel: int) -> float:
         """Measures voltage several times and then averages (number defined in hardwareconstants.yaml)
 
         Args:
@@ -286,7 +286,7 @@ class EastTester:
         return volt_tot
 
     # untested
-    def voc(self, channel) -> float:
+    def voc(self, channel: int) -> float:
         """Gets open circut voltage: V where I = 0
 
         Args:
@@ -301,7 +301,7 @@ class EastTester:
         return voc
 
     # untested
-    def isc(self, channel) -> float:
+    def isc(self, channel: int) -> float:
         """Gets short circut current: I where V = 0
 
         Args:
@@ -317,7 +317,7 @@ class EastTester:
         return jsc
 
     # no et lock, it calls functions with them
-    def set_V_measure_I(self, channel, voltage) -> float:
+    def set_V_measure_I(self, channel: int, voltage: float) -> float:
         """Sets voltage and measures current
 
         Args:
@@ -331,7 +331,7 @@ class EastTester:
         curr = self.measure_current(channel)
         return curr
 
-    def set_I_measure_V(self, channel, voltage) -> float:
+    def set_I_measure_V(self, channel: int, voltage: float) -> float:
         """Sets current and measures voltage
 
         Args:

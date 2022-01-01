@@ -30,7 +30,7 @@ class Scanner:
         self._sourcing_current = False
         self.srcV_measI()
 
-    def connect(self, yoko_address: str):
+    def connect(self, yoko_address: str) -> None:
         """Connects to the yokogawa
 
         Args:
@@ -40,7 +40,7 @@ class Scanner:
         self.yoko = rm.open_resource(yoko_address)
         self.yoko.timeout = 10  # 10 seconds
 
-    def srcV_measI(self):
+    def srcV_measI(self) -> None:
         """Setup source voltage and measure current"""
 
         # Basic commands
@@ -72,7 +72,7 @@ class Scanner:
         # Turn output off
         self.yoko.write(":OUTP:STAT OFF")
 
-    def srcI_measV(self):
+    def srcI_measV(self) -> None:
         """Setup source current and measure voltage"""
         self.yoko.write("*RST")  # Reset Factory
         self.yoko.write(":SOUR:FUNC CURR")  # Source function Current
@@ -102,11 +102,11 @@ class Scanner:
         # Turn output off
         self.yoko.write(":OUTP:STAT OFF")
 
-    def output_on(self):
+    def output_on(self) -> None:
         """Turn output on"""
         self.yoko.write(":OUTP:STAT ON")
 
-    def output_off(self):
+    def output_off(self) -> None:
         """Turn output off"""
         self.yoko.write(":OUTP:STAT OFF")
 
@@ -119,7 +119,7 @@ class Scanner:
 
         return self.yoko.query(":INIT;*TRG;:FETC?")
 
-    def set_voltage(self, v):
+    def set_voltage(self, v: float) -> None:
         """Sets the voltage
 
         Args:
@@ -130,7 +130,7 @@ class Scanner:
         tempstr = ":SOUR:VOLT:LEV " + str(v) + "V"
         self.yoko.write(tempstr)
 
-    def set_current(self, i):
+    def set_current(self, i: float) -> None:
         """Sets the current
 
         Args:
@@ -167,7 +167,7 @@ class Scanner:
 
         return isc
 
-    def iv_sweep(self, vstart, vend, steps):
+    def iv_sweep(self, vstart: float, vend: float, steps: int):
         """Runs a single IV sweep and returns the data
 
         Args:
@@ -199,7 +199,7 @@ class Scanner:
 
         # set up jv mode where # shoud match the if statment below and "" should match name of that test
 
-    def iv_sweep_quadrant_fwd_rev(self, vstart, vend, steps):
+    def iv_sweep_quadrant_fwd_rev(self, vstart: float, vend: float, steps: int):
         """Runs FWD and then REV IV sweep in the power producing quadrant and returns the data
 
         Args:
@@ -256,7 +256,7 @@ class Scanner:
 
         return v, i_fwd, i_rev
 
-    def iv_sweep_quadrant_rev_fwd(self, vstart, vend, steps):
+    def iv_sweep_quadrant_rev_fwd(self, vstart: float, vend: float, steps: int):
         """Runs REV and then FWD IV sweep in the power producing quadrant and returns the data
 
         Args:

@@ -73,26 +73,26 @@ class Controller:
 
     def load_string(
         self,
-        id,
-        startdate,
-        name,
-        area,
-        jv_mode,
-        mpp_mode,
-        module_channels,
-        jv_interval,
-        mpp_interval,
-        jv_vmin,
-        jv_vmax,
-        jv_steps,
+        id: int,
+        startdate: datetime,
+        name: str,
+        area: float,
+        jv_modeL: int,
+        mpp_mode: int,
+        module_channels: list,
+        jv_interval: float,
+        mpp_interval: float,
+        jv_vmin: float,
+        jv_vmax: float,
+        jv_steps: int,
     ):
         """Loads a string of modules
 
         Args:
             id (int): string number
-            startdate (YYYYMMDD): start date for test
+            startdate (datetime): start date for test
             name (string): test name
-            area (fload): area of each module on string
+            area (float): area of each module on string
             jv_mode (int): JV mode (#'s correspond to option # in UI)
             mpp_mode (int): MPP mode (#'s correspond to option # in UI)
             module_channels (list[int]): modules connected
@@ -163,7 +163,7 @@ class Controller:
 
         return self.strings[id]["_savedir"]
 
-    def unload_string(self, id):
+    def unload_string(self, id: int):
         """Unloads a string of modules
 
         Args:
@@ -194,7 +194,7 @@ class Controller:
         print("Analysis saved at :", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
 
-    def _make_mpp_file(self, id):
+    def _make_mpp_file(self, id: int):
         """Creates base file for MPP data
 
         Args:
@@ -234,7 +234,7 @@ class Controller:
                 ]
             )
 
-    async def jv_worker(self, loop):
+    async def jv_worker(self, loop: asyncio.AbstractEventLoop):
         """Worker for JV sweeps
 
         Args:
@@ -262,7 +262,7 @@ class Controller:
             self.jv_queue.task_done()
             print(f"Done Scanning {id}")
 
-    async def mpp_worker(self, loop):
+    async def mpp_worker(self, loop: asyncio.AbstractEventLoop):
         """Worker for MPP scans
 
         Args:
@@ -289,7 +289,7 @@ class Controller:
             self.mpp_queue.task_done()
             print(f"Done Tracking {id}")
 
-    async def jv_timer(self, id):
+    async def jv_timer(self, id: int):
         """Manages timing for JV worker
 
         Args:
@@ -300,7 +300,7 @@ class Controller:
             self.jv_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["jv"]["interval"])
 
-    async def mpp_timer(self, id):
+    async def mpp_timer(self, id: int):
         """Manages scanning for MPP worker
 
         Args:
@@ -364,7 +364,7 @@ class Controller:
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
-    def scan_jv(self, id):
+    def scan_jv(self, id: int):
         """Conduct a JV scan using Scanner class
 
         Args:
@@ -449,7 +449,7 @@ class Controller:
                 et.output_on(ch)
                 et.set_voltage(ch, vmp)
 
-    def track_mpp(self, id):
+    def track_mpp(self, id: int):
         """Conduct an MPP scan using Easttester class
 
         Args:

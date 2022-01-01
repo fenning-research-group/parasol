@@ -453,7 +453,7 @@ class RUN_UI(QMainWindow):
             },
         }
 
-    def lock_values(self, stringid):
+    def lock_values(self, stringid: int):
         """Locks values for the string subsection of the UI
 
         Args:
@@ -473,7 +473,7 @@ class RUN_UI(QMainWindow):
         elif stringid == 6:
             self.lock_value6()
 
-    def unlock_values(self, stringid):
+    def unlock_values(self, stringid: int):
         """Unlocks values for the string subsection of the UI
 
         Args:
@@ -493,7 +493,7 @@ class RUN_UI(QMainWindow):
         elif stringid == 6:
             self.unlock_value6()
 
-    def load(self, stringid):
+    def load(self, stringid: int):
         """Loads the module using the command in controller.py and data from the dictionaries/UI
 
         Args:
@@ -563,7 +563,7 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
-    def unload(self, stringid):
+    def unload(self, stringid: int):
         """Unloads the module using the command in controller.py and the stringid
 
         Args:
@@ -606,7 +606,7 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
-    def checktest(self, stringid):
+    def checktest(self, stringid: int):
         """Checks the test using the string id with the commands in analysis.py & grapher.py
 
         Args:

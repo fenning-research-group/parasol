@@ -26,7 +26,7 @@ def relay_lock(f):
 class Relay:
     """Relay package for PARASOL"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initliazes the Relay class"""
 
         self.lock = Lock()
@@ -59,7 +59,7 @@ class Relay:
         }
         self.connect(constants["address"])
 
-    def connect(self, address: str):
+    def connect(self, address: str) -> None:
         """Connect to the relay
 
         Args:
@@ -68,7 +68,7 @@ class Relay:
         self.inst = serial.Serial(address)
 
     @relay_lock
-    def on(self, id: int):
+    def on(self, id: int) -> None:
         """Turn the relay on
 
         Args:
@@ -88,7 +88,7 @@ class Relay:
         time.sleep(self.RESPONSE_TIME)
 
     @relay_lock
-    def all_off(self):
+    def all_off(self) -> None:
         """Turn all relays off"""
         # print(f"Turning off all relays")
         self.inst.write((71).to_bytes(1, "big"))

@@ -16,7 +16,7 @@ class Analysis:
 
     # Main tests
 
-    def check_test(self, jvfolderpaths, mppfolderpaths):
+    def check_test(self, jvfolderpaths: list, mppfolderpaths: list) -> pd.DataFrame:
         """Calcualte FWD and REV Pmp versus time for given JV and MPP folder paths, returns dataframe with data
 
         Args:
@@ -40,7 +40,7 @@ class Analysis:
 
         return plot_df
 
-    def analyze_from_savepath(self, stringpath):
+    def analyze_from_savepath(self, stringpath: list) -> list:
         """Analyze data for given test path, create output x<date>_<name>_<string>_<module>_Scalar_1.csv file in Analysis folder
 
         Args:
@@ -117,7 +117,7 @@ class Analysis:
         return t_vals, pmp_fwd_vals, pmp_rev_vals
 
     # TODO: should take in jv_folders and jv_dict
-    def analyze_jv_files(self):
+    def analyze_jv_files(self) -> list:
         """Cycle through JV files, analyze, and make output file for parameters
 
         Returns:
@@ -177,7 +177,9 @@ class Analysis:
 
         return save_locations
 
-    def _calculate_jv_parameters(self, all_v, all_j, all_p, direction):
+    def _calculate_jv_parameters(
+        self, all_v: list, all_j: list, all_p: list, direction: str
+    ) -> dict:
         """Takes in voltage, current, and power vectors, calculates scalars and returns a dictionary of scalars
 
         Args:
@@ -303,7 +305,7 @@ class Analysis:
 
         return returndict
 
-    def filter_jv_parameters(self, df):
+    def filter_jv_parameters(self, df: pd.DataFrame) -> pd.DataFrame:
         """Lightly filters input Scalars dataframe to ensure values are reslistic
 
         Args:
@@ -332,7 +334,7 @@ class Analysis:
 
     # Loads jv files
 
-    def load_jv_files(self, jv_file_paths):
+    def load_jv_files(self, jv_file_paths: list):
         """Loads JV files contained in jv_file_paths, returns data
 
         Args:
@@ -366,7 +368,7 @@ class Analysis:
 
         return all_t, all_v, all_j_fwd, all_p_fwd, all_j_rev, all_p_rev
 
-    def load_jv_file(self, jv_file_path):
+    def load_jv_file(self, jv_file_path: str):
         """Loads data for a single JV file given by jv_file_path, returns data
 
         Args:
@@ -402,7 +404,7 @@ class Analysis:
 
         return t, v, j_fwd, p_fwd, j_rev, p_rev
 
-    def load_mpp_file(self, mpp_file_path):
+    def load_mpp_file(self, mpp_file_path: str):
         """Loads data for a single MPP file given by mpp_file_path, returns values
 
         Args:
