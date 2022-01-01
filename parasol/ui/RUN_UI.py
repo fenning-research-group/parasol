@@ -62,7 +62,7 @@ class RUN_UI(QMainWindow):
         self.savedir6 = None
 
         # Load the ui file
-        ui_path = os.path.join(MODULE_DIR, "PARASOL_UI.ui")
+        ui_path = os.path.join(MODULE_DIR, "RUN_UI.ui")
         uic.loadUi(ui_path, self)
         self.show()
 
