@@ -12,7 +12,7 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 class Characterization:
     """Characterization package for PARASOL"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initliazes the Characterization class"""
 
         self.et_voltage_step = constants["mppt_voltage_step"]
