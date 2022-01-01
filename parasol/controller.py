@@ -77,7 +77,7 @@ class Controller:
         startdate: str,
         name: str,
         area: float,
-        jv_modeL: int,
+        jv_mode: int,
         mpp_mode: int,
         module_channels: list,
         jv_interval: float,
