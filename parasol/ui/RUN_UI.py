@@ -1,4 +1,3 @@
-from datetime import date
 import PyQt5
 
 from PyQt5.QtWidgets import QMainWindow, QApplication, QCheckBox, QComboBox
@@ -10,13 +9,13 @@ import sys
 import os
 from datetime import datetime
 import yaml
-import numpy as np
 
 # Import Controller (call load, unload), characterization (know test types), and analysis (check on tests)
 from parasol.controller import Controller
 from parasol.characterization import Characterization
 from parasol.analysis.analysis import Analysis
 from parasol.analysis.grapher import Grapher
+from parasol.filestructure import FileStructure
 
 # get directry of this file, import YAML for controller
 MODULE_DIR = os.path.dirname(__file__)
@@ -31,19 +30,20 @@ if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 
-class PARASOL_UI(QMainWindow):
-    """
-    Launches PARASOL_UI.ui & passes variables to controller
-    """
+class RUN_UI(QMainWindow):
+    """Run UI package for PARASOL"""
 
     def __init__(self):
-        super(PARASOL_UI, self).__init__()
+        """Initliazes the RUN_UI class"""
+
+        super(RUN_UI, self).__init__()
 
         # Initialize Controller
         self.controller = Controller()
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.grapher = Grapher()
+        self.filestructure = FileStructure()
 
         # Make blank variables for the start date
         self.startdate1 = None
@@ -262,6 +262,7 @@ class PARASOL_UI(QMainWindow):
 
     def update_loaded_modules(self):
         """Uses checkboxes in UI to get list of active modules"""
+
         # Set all variables to None
         modules1 = [None] * 4
         modules2 = [None] * 4
@@ -334,7 +335,8 @@ class PARASOL_UI(QMainWindow):
         self.module6 = [i for i in modules6 if i is not None]
 
     def update_dictionaries(self):
-        """Updates dictionaries[string id num] with data from the UI"""
+        """Updates dictionaries[stringid] with data from the UI"""
+
         self.strings = {}
         # Make Dictionary for each channel
         self.strings[1] = {
@@ -452,7 +454,12 @@ class PARASOL_UI(QMainWindow):
         }
 
     def lock_values(self, stringid):
-        """Locks values for the string subsection of the UI"""
+        """Locks values for the string subsection of the UI
+
+        Args:
+            int: string id
+        """
+
         if stringid == 1:
             self.lock_value1()
         elif stringid == 2:
@@ -467,7 +474,12 @@ class PARASOL_UI(QMainWindow):
             self.lock_value6()
 
     def unlock_values(self, stringid):
-        """Unlocks values for the string subsection of the UI"""
+        """Unlocks values for the string subsection of the UI
+
+        Args:
+            int: string id
+        """
+
         if stringid == 1:
             self.unlock_value1()
         elif stringid == 2:
@@ -482,7 +494,12 @@ class PARASOL_UI(QMainWindow):
             self.unlock_value6()
 
     def load(self, stringid):
-        """Loads the module using the command in controller.py and data from the dictionaries/UI"""
+        """Loads the module using the command in controller.py and data from the dictionaries/UI
+
+        Args:
+            int: string id
+        """
+
         # Notify User
         print("Loading string: " + str(stringid))
 
@@ -547,7 +564,11 @@ class PARASOL_UI(QMainWindow):
             d["_savedir"] = saveloc
 
     def unload(self, stringid):
-        """Unloads the module using the command in controller.py and the stringid"""
+        """Unloads the module using the command in controller.py and the stringid
+
+        Args:
+            int: string id
+        """
 
         # Notify User
         print("Unloading string: " + str(stringid))
@@ -586,7 +607,11 @@ class PARASOL_UI(QMainWindow):
             d["_savedir"] = saveloc
 
     def checktest(self, stringid):
-        """Checks the test using the command in _______ and the stringid"""
+        """Checks the test using the string id with the commands in analysis.py & grapher.py
+
+        Args:
+            int: string id
+        """
 
         print("Checking string: " + str(stringid))
 
@@ -601,12 +626,21 @@ class PARASOL_UI(QMainWindow):
         # test_path = os.path.join(rootpath, startdate)
         # test_path = os.path.join(test_path, startdate + "_" + name)
 
-        test_path = self.strings[id]["_savedir"]
+        # test_path = self.strings[id]["_savedir"]
         jv_paths = []
         for module in module_channels:
-            jv_paths.append(os.path.join(test_path, "JV_" + str(module)))
+            jvfolder = self.filestructure.get_jv_folder(
+                self.strings[id]["start_date"], self.strings[id]["name"], module
+            )
+            jv_paths.append(jvfolder)
+            # jv_paths.append(os.path.join(test_path, "JV_" + str(module)))
 
-        mpp_paths = [os.path.join(test_path, "MPP")]
+        mpp_paths = [
+            self.filestructure.get_mpp_folder(
+                self.strings[id]["start_date"], self.strings[id]["name"]
+            )
+        ]
+        # mpp_paths = [os.path.join(test_path, "MPP")]
 
         # Send to analysis to give quick plot
         plot_df = self.analysis.check_test(jv_paths, mpp_paths)
@@ -620,26 +654,34 @@ class PARASOL_UI(QMainWindow):
     ################################################################################
 
     def checktest1(self):
+        """Checks test 1"""
         self.checktest(1)
 
     def checktest2(self):
+        """Checks test 2"""
         self.checktest(2)
 
     def checktest3(self):
+        """Checks test 3"""
         self.checktest(3)
 
     def checktest4(self):
+        """Checks test 4"""
         self.checktest(4)
 
     def checktest5(self):
+        """Checs test 5"""
         self.checktest(5)
 
     def checktest6(self):
+        """Checks test 6"""
         self.checktest(6)
 
     # Lock Values for Editing
 
     def lock_value1(self):
+        """Locks all changeable objects for test 1"""
+
         self.name1.setEnabled(False)
         self.area1.setEnabled(False)
         self.jvmode1.setEnabled(False)
@@ -659,6 +701,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton1.setEnabled(True)
 
     def lock_value2(self):
+        """Locks all changeable objects for test 2"""
+
         self.name2.setEnabled(False)
         self.area2.setEnabled(False)
         self.jvmode2.setEnabled(False)
@@ -678,6 +722,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton2.setEnabled(True)
 
     def lock_value3(self):
+        """Locks all changeable objects for test 3"""
+
         self.name3.setEnabled(False)
         self.area3.setEnabled(False)
         self.jvmode3.setEnabled(False)
@@ -697,6 +743,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton3.setEnabled(True)
 
     def lock_value4(self):
+        """Locks all changeable objects for test 4"""
+
         self.name4.setEnabled(False)
         self.area4.setEnabled(False)
         self.jvmode4.setEnabled(False)
@@ -716,6 +764,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton4.setEnabled(True)
 
     def lock_value5(self):
+        """Locks all changeable objects for test 5"""
+
         self.name5.setEnabled(False)
         self.area5.setEnabled(False)
         self.jvmode5.setEnabled(False)
@@ -735,6 +785,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton5.setEnabled(True)
 
     def lock_value6(self):
+        """Locks all changeable objects for test 6"""
+
         self.name6.setEnabled(False)
         self.area6.setEnabled(False)
         self.jvmode6.setEnabled(False)
@@ -756,6 +808,8 @@ class PARASOL_UI(QMainWindow):
     # Unlock Values For Editing
 
     def unlock_value1(self):
+        """Unlocks all changeable objects for test 1"""
+
         self.name1.setEnabled(True)
         self.area1.setEnabled(True)
         self.jvmode1.setEnabled(True)
@@ -775,6 +829,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton1.setEnabled(False)
 
     def unlock_value2(self):
+        """Unlocks all changeable objects for test 2"""
+
         self.name2.setEnabled(True)
         self.area2.setEnabled(True)
         self.jvmode2.setEnabled(True)
@@ -794,6 +850,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton2.setEnabled(False)
 
     def unlock_value3(self):
+        """Unlocks all changeable objects for test 3"""
+
         self.name3.setEnabled(True)
         self.area3.setEnabled(True)
         self.jvmode3.setEnabled(True)
@@ -813,6 +871,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton3.setEnabled(False)
 
     def unlock_value4(self):
+        """Unlocks all changeable objects for test 4"""
+
         self.name4.setEnabled(True)
         self.area4.setEnabled(True)
         self.jvmode4.setEnabled(True)
@@ -832,6 +892,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton4.setEnabled(False)
 
     def unlock_value5(self):
+        """Unlocks all changeable objects for test 5"""
+
         self.name5.setEnabled(True)
         self.area5.setEnabled(True)
         self.jvmode5.setEnabled(True)
@@ -851,6 +913,8 @@ class PARASOL_UI(QMainWindow):
         self.checktestbutton5.setEnabled(False)
 
     def unlock_value6(self):
+        """Unlocks all changeable objects for test 6"""
+
         self.name6.setEnabled(True)
         self.area6.setEnabled(True)
         self.jvmode6.setEnabled(True)
@@ -872,72 +936,90 @@ class PARASOL_UI(QMainWindow):
     # Load Buttons
 
     def load1(self):
+        """Loads test 1"""
         self.startdate1 = datetime.now().strftime("x%Y%m%d")
         self.load(1)
 
     def load2(self):
+        """Loads test 2"""
         self.startdate2 = datetime.now().strftime("x%Y%m%d")
         self.load(2)
 
     def load3(self):
+        """Loads test 3"""
         self.startdate3 = datetime.now().strftime("x%Y%m%d")
         self.load(3)
 
     def load4(self):
+        """Loads test 4"""
         self.startdate4 = datetime.now().strftime("x%Y%m%d")
         self.load(4)
 
     def load5(self):
+        """Loads test 5"""
         self.startdate5 = datetime.now().strftime("x%Y%m%d")
         self.load(5)
 
     def load6(self):
+        """Loads test 6"""
         self.startdate6 = datetime.now().strftime("x%Y%m%d")
         self.load(6)
 
     # Unload Buttons
 
     def unload1(self):
+        """Unloads test 1"""
         self.unload(1)
 
     def unload2(self):
+        """Unloads test 2"""
         self.unload(2)
 
     def unload3(self):
+        """Unloads test 3"""
         self.unload(3)
 
     def unload4(self):
+        """Unloads test 4"""
         self.unload(4)
 
     def unload5(self):
+        """Unloads test 5"""
         self.unload(5)
 
     def unload6(self):
+        """Unloads test 6"""
         self.unload(6)
 
     # Checktest Buttons
 
     def checktest1(self):
+        """Checks test 1"""
         self.checktest(1)
 
     def checktest2(self):
+        """Checks test 2"""
         self.checktest(2)
 
     def checktest3(self):
+        """Checks test 3"""
         self.checktest(3)
 
     def checktest4(self):
+        """Checks test 4"""
         self.checktest(4)
 
     def checktest5(self):
+        """Checks test 5"""
         self.checktest(5)
 
     def checktest6(self):
+        """Checks test 6"""
         self.checktest(6)
 
     # Launches GUI
 
     def launch_gui(self):
+        """Launches GUI"""
         app = QApplication(sys.argv)
-        # UIWindow = PARASOL_UI()
         app.exec_()

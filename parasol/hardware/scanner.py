@@ -14,10 +14,11 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
 
 
 class Scanner:
-    """Used for JV scanning"""
+    """Scanner package for PARASOL"""
 
     def __init__(self) -> None:
-        """Initialize Yokogawa"""
+        """Initliazes the Scanner class for Yokogawa ____"""  # TODO add yoko address
+
         self.lock = Lock()
         self.connect(constants["address"])
         self.sourcedelay = constants["source_delay"]
@@ -29,14 +30,18 @@ class Scanner:
         self._sourcing_current = False
         self.srcV_measI()
 
-    def connect(self, yoko_address):
-        """Connect to Yokogawa"""
+    def connect(self, yoko_address: str):
+        """Connects to the yokogawa
+
+        Args:
+            yoko_address (string): GPIB connection address
+        """
         rm = pyvisa.ResourceManager()
         self.yoko = rm.open_resource(yoko_address)
         self.yoko.timeout = 10  # 10 seconds
 
     def srcV_measI(self):
-        """Turn measurment on: Init settings for source V, measure I"""
+        """Setup source voltage and measure current"""
 
         # Basic commands
         self.yoko.write("*RST")  # Reset Factory
@@ -68,7 +73,7 @@ class Scanner:
         self.yoko.write(":OUTP:STAT OFF")
 
     def srcI_measV(self):
-        """Turn measurment on: Init settings for source I, measure V"""
+        """Setup source current and measure voltage"""
         self.yoko.write("*RST")  # Reset Factory
         self.yoko.write(":SOUR:FUNC CURR")  # Source function Current
         self.yoko.write(":SOUR:VOLT:PROT:LINK ON")  # Limiter tracking ON
@@ -106,25 +111,42 @@ class Scanner:
         self.yoko.write(":OUTP:STAT OFF")
 
     def _trig_read(self) -> str:
-        """Read the last output value"""
+        """Reads the last output
+
+        Returns:
+            str: last output value
+        """
+
         return self.yoko.query(":INIT;*TRG;:FETC?")
 
     def set_voltage(self, v):
-        """Set voltage"""
+        """Sets the voltage
+
+        Args:
+            v (float): desired voltage (V)
+        """
         if self._sourcing_current:
             self.srcV_measI()
         tempstr = ":SOUR:VOLT:LEV " + str(v) + "V"
         self.yoko.write(tempstr)
 
     def set_current(self, i):
-        """Set current"""
+        """Sets the current
+
+        Args:
+            i (float): desired current (A)
+        """
         if not self._sourcing_current:
             self.srcI_measV()
         tempstr = ":SOUR:CURR:LEV " + str(i) + "A"
         self.yoko.write(tempstr)
 
     def voc(self) -> float:
-        """Measures the open circuit voltage (V)"""
+        """Measures the open circuit voltage
+
+        Returns:
+            float: open circut voltage (V)
+        """
         self.set_current(0)
         self.output_on()
         voc = float(self._trig_read())
@@ -133,7 +155,11 @@ class Scanner:
         return voc
 
     def isc(self) -> float:
-        """Measures the short circuit current (A)"""
+        """Measures the short circuit current
+
+        Returns:
+            float: short circuit current (A)
+        """
         self.set_voltage(0)
         self.output_on()
         isc = float(self._trig_read)
@@ -142,7 +168,18 @@ class Scanner:
         return isc
 
     def iv_sweep(self, vstart, vend, steps):
-        """Runs a single IV sweep"""
+        """Runs a single IV sweep and returns the data
+
+        Args:
+            vstart (float): FWD sweep start voltage (V)
+            vend (float): FWD sweep end voltage (V)
+            steps (float): number of voltage steps in the sweep
+
+        Returns:
+            np.array: voltage (V) array
+            np.array: current (A) array
+        """
+
         # Make empty numpy arrays for data
         v = np.linspace(vstart, vend, steps)
         i = np.zeros(v.shape)
@@ -163,7 +200,23 @@ class Scanner:
         # set up jv mode where # shoud match the if statment below and "" should match name of that test
 
     def iv_sweep_quadrant_fwd_rev(self, vstart, vend, steps):
-        """Runs fwd then rev IV sweep in just 1 quadrant"""
+        """Runs FWD and then REV IV sweep in the power producing quadrant and returns the data
+
+        Args:
+            vstart (float): FWD sweep start voltage (V)
+            vend (float): FWD sweep end voltage (V)
+            steps (float): number of voltage steps in the sweep
+
+        Returns:
+            vstart (float): sweep start voltage (V)
+            vend (float): sweep end voltage (V)
+            steps (float): number of voltage steps in the sweep
+
+        Returns:
+            np.array: voltage (V) array
+            np.array: current (A) array
+        """
+
         # Make empty numpy arrays for data
         v = np.linspace(vstart, vend, steps)
         i_fwd = np.zeros(v.shape)
@@ -204,7 +257,23 @@ class Scanner:
         return v, i_fwd, i_rev
 
     def iv_sweep_quadrant_rev_fwd(self, vstart, vend, steps):
-        """Runs rev then fwd IV sweep in just 1 quadrant"""
+        """Runs REV and then FWD IV sweep in the power producing quadrant and returns the data
+
+        Args:
+            vstart (float): FWD sweep start voltage (V)
+            vend (float): FWD sweep end voltage (V)
+            steps (float): number of voltage steps in the sweep
+
+        Returns:
+            vstart (float): sweep start voltage (V)
+            vend (float): sweep end voltage (V)
+            steps (float): number of voltage steps in the sweep
+
+        Returns:
+            np.array: voltage (V) array
+            np.array: current (A) array
+        """
+
         # Make empty numpy arrays for data
         v = np.linspace(vstart, vend, steps)
         i_fwd = np.zeros(v.shape)

@@ -2,16 +2,15 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import yaml
-import os
 
-# from parasol.analysis.analysis import Analysis
-from parasol.analysis.filestructure import FileStructure
+from parasol.filestructure import FileStructure
 
 
 class Grapher:
+    """Grapher package for PARASOL"""
+
     def __init__(self):
-        """Opens in root directory (same as parasol)"""
+        """Initializes Grapher class"""
 
         # Load filstructure package to manage JV files
         self.filestructure = FileStructure()
@@ -63,10 +62,13 @@ class Grapher:
         }
 
     def plot_x_v_ys(self, df, x, ys):
-        """Plots x vs multiple ys for one dataframe"""
+        """Plots x vs. y for a set of ys (1 graph)
 
-        # make dataframe for datafolder dictionary
-        # df = pd.DataFrame.from_dict(df_dict)
+        Args:
+            df (pd.DataFrame): dataframe containing x and y values to plot
+            x (string): x header name
+            ys (list[string]): y header names
+        """
 
         # get x list
         x_vals = df[x]
@@ -94,11 +96,22 @@ class Grapher:
     # Plot JV scans for a single module
 
     def plot_module_jvs(self, jvfolder):
+        """Plot JVs in given JV folder
+
+        Args:
+            jvfolder (string): path to JV folder
+        """
+
         jv_dict = self.filestructure.map_test_files([jvfolder])
         jv_file_paths = jv_dict[jvfolder]
         self.plot_jvs(jv_file_paths)
 
     def plot_jvs(self, jvfiles):
+        """Plot JVs for input JV files
+
+        Args:
+            jvfiles (list[string]): paths to JV files
+        """
 
         # load jv files
         (
@@ -129,7 +142,13 @@ class Grapher:
     # Plot x v y with color axis another parameter (z)
 
     def plot_xy_scalars(self, paramfiles, x, y):
-        """Plots x vs y for set of paramfiles"""
+        """Plot x vs. y for a set of scalar files
+
+        Args:
+            paramfiles (list[string]): path to file containing x and y values (scalars)
+            x (string): x header name
+            y (string): y header name
+        """
 
         mpl.rcParams["axes.linewidth"] = 1.75
 
@@ -151,7 +170,13 @@ class Grapher:
         plt.show()
 
     def plot_xy2_scalars(self, paramfiles, x, ys):
-        """Plots x vs ys (assumed to be fwd/rev) for set of paramfiles"""
+        """Plots x vs. y for a set of scalar files
+
+        Args:
+            paramfiles (list[string]): paths to file containing x and y values (scalars)
+            x (string): x header name
+            ys (list[string]): y header names
+        """
 
         mpl.rcParams["axes.linewidth"] = 1.75
 
@@ -180,7 +205,14 @@ class Grapher:
         plt.show()
 
     def plot_xyz_scalar(self, paramfile, x, y, z):
-        """Plots x vs y with z colorbar for paramfile"""
+        """Plots x vs. y with z colorbar for a set of scalar files
+
+        Args:
+            paramfile (string): path to file containing x, y, and z values (scalars)
+            x (string): x header name
+            y (string): y header name
+            z (string): z header name
+        """
 
         # load datafolder path
         df = pd.read_csv(paramfile)

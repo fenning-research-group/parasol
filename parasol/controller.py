@@ -1,6 +1,5 @@
 import time
 import asyncio
-import numpy as np
 from threading import Thread, Lock
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures._base import CancelledError
@@ -15,7 +14,7 @@ from parasol.hardware.scanner import Scanner
 from parasol.hardware.easttester import EastTester
 from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
-from parasol.analysis.filestructure import FileStructure
+from parasol.filestructure import FileStructure
 
 
 # Set yaml name, load controller info
@@ -25,10 +24,10 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 
 
 class Controller:
-    """Create controller class to manage eastester, relay, and yokogawa"""
+    """Controller package for PARASOL"""
 
     def __init__(self):
-        """Initialize controller"""
+        """Initializes the Controller class"""
 
         # Connect to Relay, Scanner, 3 EastTesters, and Characterization files
         self.relay = Relay()
@@ -87,8 +86,29 @@ class Controller:
         jv_vmax,
         jv_steps,
     ):
+        """Loads a string of modules
 
-        """Master command used to load a string of modules"""
+        Args:
+            id (int): string number
+            startdate (YYYYMMDD): start date for test
+            name (string): test name
+            area (fload): area of each module on string
+            jv_mode (int): JV mode (#'s correspond to option # in UI)
+            mpp_mode (int): MPP mode (#'s correspond to option # in UI)
+            module_channels (list[int]): modules connected
+            jv_interval (float): time between JV sweeps (s)
+            mpp_interval (float): time between MPP sweeps (s)
+            jv_vmin (float): minimum JV sweep voltage (V)
+            jv_vmax (float): maximum JV sweep voltage (V)
+            jv_steps (int): number of voltage steps
+
+        Raises:
+            ValueError: String is already loaded
+            ValueError: String ID does not exist
+
+        Returns:
+            string: path to save directory
+        """
 
         # Ensure id is not already in use and can be used
         if id in self.strings:
@@ -121,7 +141,7 @@ class Controller:
                 "j_rev": [None for i in range(len(module_channels))],
             },
             "mpp": {
-                "mode": mpp_mode, 
+                "mode": mpp_mode,
                 "interval": mpp_interval,
                 "vmin": 0.1,
                 "vmax": jv_vmax,
@@ -144,7 +164,14 @@ class Controller:
         return self.strings[id]["_savedir"]
 
     def unload_string(self, id):
-        """Master command used to unload a string of modules"""
+        """Unloads a string of modules
+
+        Args:
+            id (int): string number
+
+        Raises:
+            ValueError: string ID not loaded
+        """
 
         # get string saveloc
         d = self.strings.get(id, None)
@@ -164,11 +191,15 @@ class Controller:
             self.mpp_queue._queue.remove(id)
 
         # analyze the saveloc
-        print("Analysis saved at ", saveloc)
+        print("Analysis saved at :", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
 
     def _make_mpp_file(self, id):
-        """Creates base file for MPP data"""
+        """Creates base file for MPP data
+
+        Args:
+            id (int): string number
+        """
 
         d = self.strings.get(id, None)
 
@@ -204,7 +235,12 @@ class Controller:
             )
 
     async def jv_worker(self, loop):
-        """Uses Yokogawa to conudct a JV scan by calling scan_jv"""
+        """Worker for JV sweeps
+
+        Args:
+            loop (asyncio loop): timer loop to insert JV worker into
+        """
+
         # We need a sleep here or it never gets added to the queue
         time.sleep(0.5)
         # While the loop is running, add jv scans to queue
@@ -227,7 +263,12 @@ class Controller:
             print(f"Done Scanning {id}")
 
     async def mpp_worker(self, loop):
-        """Uses EastTester to conudct a MPP scan by calling track_mpp"""
+        """Worker for MPP scans
+
+        Args:
+            loop (asyncio loop): timeer loop to insert MPP worker into
+        """
+
         # We need a sleep here or it never gets added to the queue
         time.sleep(0.5)
         # While the loop is running, add mpp scans to queue
@@ -249,14 +290,23 @@ class Controller:
             print(f"Done Tracking {id}")
 
     async def jv_timer(self, id):
-        """Manages timing for JV worker"""
+        """Manages timing for JV worker
+
+        Args:
+            id (int): string number
+        """
         await asyncio.sleep(1)
         while self.running:
             self.jv_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["jv"]["interval"])
 
     async def mpp_timer(self, id):
-        """Manages scanning for MPP worker"""
+        """Manages scanning for MPP worker
+
+        Args:
+            id (int): string number
+        """
+
         await asyncio.sleep(1)
         while self.running:
             self.mpp_queue.put_nowait(id)
@@ -294,7 +344,7 @@ class Controller:
         self.running = True
 
     def stop(self):
-        """Delete workers / stop queue / reset hardware"""
+        """Delete workers,  stop queue, and reset hardware"""
 
         # close all channels
         self.relay.all_off()
@@ -315,7 +365,11 @@ class Controller:
         self.thread.join()
 
     def scan_jv(self, id):
-        """Uses Yokogawa to conudct a JV scan"""
+        """Conduct a JV scan using Scanner class
+
+        Args:
+            id (int): string number
+        """
 
         # get dictionary information
         d = self.strings.get(id, None)
@@ -396,7 +450,11 @@ class Controller:
                 et.set_voltage(ch, vmp)
 
     def track_mpp(self, id):
-        """Uses Easttester to track MPP with a perturb and observe algorithm"""
+        """Conduct an MPP scan using Easttester class
+
+        Args:
+            id (int): string number
+        """
 
         d = self.strings.get(id, None)
 

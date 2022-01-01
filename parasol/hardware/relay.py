@@ -10,7 +10,11 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
 
 
 def relay_lock(f):
-    """Lock Relay"""
+    """Locks relay
+
+    Args:
+        f (function): any function that needs to be locked
+    """
 
     def inner(self, *args, **kwargs):
         with self.lock:
@@ -20,8 +24,11 @@ def relay_lock(f):
 
 
 class Relay:
+    """Relay package for PARASOL"""
+
     def __init__(self):
-        """Intialize relay"""
+        """Initliazes the Relay class"""
+
         self.lock = Lock()
         self.RESPONSE_TIME = constants["response_time"]  # sec to complete command
         self.relay_commands = {
@@ -53,12 +60,23 @@ class Relay:
         self.connect(constants["address"])
 
     def connect(self, address: str):
-        """Connect to relay board through GPIB"""
+        """Connect to the relay
+
+        Args:
+            address (str): GPIB connection address
+        """
         self.inst = serial.Serial(address)
 
     @relay_lock
     def on(self, id: int):
-        """Open given relay"""
+        """Turn the relay on
+
+        Args:
+            id (int): relay ID (1-24)
+
+        Raises:
+            ValueError: ID is not valid
+        """
         if id not in self.relay_commands:
             raise ValueError(f"Invalid relay id")
 
@@ -71,7 +89,7 @@ class Relay:
 
     @relay_lock
     def all_off(self):
-        """Close all relays"""
+        """Turn all relays off"""
         # print(f"Turning off all relays")
         self.inst.write((71).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)

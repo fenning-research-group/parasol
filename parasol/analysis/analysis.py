@@ -3,20 +3,29 @@ import numpy as np
 import os
 import csv
 
-from parasol.analysis.filestructure import FileStructure
+from parasol.filestructure import FileStructure
 
 
 class Analysis:
-    def __init__(self):
+    """Analysis package for PARASOL"""
 
+    def __init__(self):
+        """Initializes Analysis class"""
         self.NUM_MODULES = 24
         self.filestructure = FileStructure()
 
     # Main tests
 
-    def check_test(self, jvfolderpaths, mpppaths):
-        """Returns FWD & REV Pmp v Time"""
+    def check_test(self, jvfolderpaths, mppfolderpaths):
+        """Calcualte FWD and REV Pmp versus time for given JV and MPP folder paths, returns dataframe with data
 
+        Args:
+            jvfolderpaths (list): paths to the JV folders for the test
+            mppfolderpaths (list): paths to the MPP folders for the test
+
+        Returns:
+            pd.DataFrame: ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+        """
         self.jv_folders = jvfolderpaths
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
@@ -32,7 +41,14 @@ class Analysis:
         return plot_df
 
     def analyze_from_savepath(self, stringpath):
-        """Initialize the Parasol_String class"""
+        """Analyze data for given test path, create output x<date>_<name>_<string>_<module>_Scalar_1.csv file in Analysis folder
+
+        Args:
+            stringpath (string): path to test folder
+
+        Returns:
+            list[string]: path to output file
+        """
 
         # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder
         self.stringpath = stringpath
@@ -49,9 +65,19 @@ class Analysis:
         # Analyze JV files: For each module export scalars_{module}.csv
         analyzed_waves = self.analyze_jv_files()
 
+        return analyzed_waves
+
     # Workhorse functions for check_test and analyze_from_savepath
 
+    # TODO: EDIT NO JVDICT
     def check_pmps(self):
+        """Loads the JV files, calculates and returns time, FWD Pmp, and REV Pmp
+
+        Returns:
+            numpy: time values for each scan
+            list[np.array]: forward pmp values for each scan
+            list[np.array]: reverse pmp values for each scan
+        """
 
         t_vals = []
         pmp_fwd_vals = []
@@ -90,8 +116,13 @@ class Analysis:
 
         return t_vals, pmp_fwd_vals, pmp_rev_vals
 
+    # TODO: should take in jv_folders and jv_dict
     def analyze_jv_files(self):
-        """Cycle through JV files, analyze, and make output file for parameters"""
+        """Cycle through JV files, analyze, and make output file for parameters
+
+        Returns:
+            list[string]: path to analyzed files
+        """
 
         # Make blank array to keep save locations
         save_locations = []
@@ -137,7 +168,9 @@ class Analysis:
             scalar_df = pd.DataFrame(scalardict)
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
 
-            analysis_file = self.filestructure.get_analyzed_file_name(d['date'], d['name'],d['string_id'])
+            analysis_file = self.filestructure.get_analyzed_file_name(
+                d["date"], d["name"], d["string_id"]
+            )
             save_loc = os.path.join(self.analyzed_folder, analysis_file)
             scalar_df_filtered.to_csv(save_loc, index=False)
             save_locations.append(save_loc)
@@ -145,7 +178,17 @@ class Analysis:
         return save_locations
 
     def _calculate_jv_parameters(self, all_v, all_j, all_p, direction):
-        """Calculate parameters for each jv file"""
+        """Takes in voltage, current, and power vectors, calculates scalars and returns a dictionary of scalars
+
+        Args:
+            all_v (list[np.array]): list of voltage vectors
+            all_j (list[np.array]): list of current vectors
+            all_p (list[np.array]): list of power vectors
+            direction (list[np.array]): direction -- either FWD or REV
+
+        Returns:
+            dictionary: dictionary of parameter values over time
+        """
 
         # create lists to hold data
         jsc_vals = []
@@ -261,7 +304,14 @@ class Analysis:
         return returndict
 
     def filter_jv_parameters(self, df):
-        """Filter parameters dataframe"""
+        """Lightly filters input Scalars dataframe to ensure values are reslistic
+
+        Args:
+            df (pd.DataFrame): dataframe of JV scalars over time
+
+        Returns:
+            pd.DataFrame: filtered dataframe with 0<FF<100 and 0<Voc<10
+        """
 
         # Ensure we dont have crazy numbers
         df_filtered = df[
@@ -283,6 +333,19 @@ class Analysis:
     # Loads jv files
 
     def load_jv_files(self, jv_file_paths):
+        """Loads JV files contained in jv_file_paths, returns data
+
+        Args:
+            jv_file_paths (list[string]): list of paths to jv files
+
+        Returns:
+            list[np.array]: list of time vectors
+            list[np.array]: list of voltage vectors
+            list[np.array]: list of FWD current vectors
+            list[np.array]: list of FWD power vectors
+            list[np.array]: list of REV current vectors
+            list[np.array]: list of REV power vectors
+        """
 
         all_t = []
         all_v = []
@@ -304,6 +367,20 @@ class Analysis:
         return all_t, all_v, all_j_fwd, all_p_fwd, all_j_rev, all_p_rev
 
     def load_jv_file(self, jv_file_path):
+        """Loads data for a single JV file given by jv_file_path, returns data
+
+        Args:
+            jv_file_path (string): path to JV file
+
+        Returns:
+           np.array: time vector
+           np.array: voltage vector
+           np.array: FWD current vector
+           np.array: FWD power vector
+           np.array: REV current vector
+           np.array: REV power vector
+        """
+
         # get time information
         with open(jv_file_path) as f:
             reader = csv.reader(f)
@@ -326,6 +403,19 @@ class Analysis:
         return t, v, j_fwd, p_fwd, j_rev, p_rev
 
     def load_mpp_file(self, mpp_file_path):
+        """Loads data for a single MPP file given by mpp_file_path, returns values
+
+        Args:
+            mpp_file_path (string): path to MPP file
+
+        Returns:
+            np.array: time vector
+            np.array: voltage vector
+            np.array: current vector
+            np.array: current denisty vector
+            np.array: power denisty vector
+        """
+
         with open(mpp_file_path) as f:
             reader = csv.reader(f)
             _ = next(reader)  # date
@@ -343,6 +433,5 @@ class Analysis:
         i = all_data[2]
         j = all_data[3]
         p = all_data[4]
-
 
         return t, v, i, j, p

@@ -10,7 +10,10 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 
 
 class Characterization:
+    """Characterization package for PARASOL"""
+
     def __init__(self):
+        """Initliazes the Characterization class"""
 
         self.et_voltage_step = constants["mppt_voltage_step"]
 
@@ -29,9 +32,18 @@ class Characterization:
         }
 
     def scan_jv(self, d, scanner):
+        """Conducts JV scan
+
+        Args:
+            d (dictionary): dictionary containing all neccsiary information (defined in controller.py)
+            scanner (class): pointer to the controller for the scanner
+
+        Returns:
+            np.array: voltage (V) values
+            np.array: FWD current (A) values
+            np.array: REV current (A) values
         """
-        Takes in dictionary and scanner, scans JV, returns v, i fwd, and i rev
-        """
+
         # Get JV mode
         jv_mode = d["jv"]["mode"]
 
@@ -76,7 +88,19 @@ class Characterization:
         return v, fwd_i, rev_i
 
     def track_mpp(self, d, easttester, ch, vmpp_last):
-        """Takes last vmpp, dictionary, et, and ch, tracks vmpp for next point, returns t, v, o"""
+        """Tracks Vmpp for next point
+
+        Args:
+            d (dictionary): dictionary containing all neccsiary information (defined in controller.py)
+            easttester (class): pointer to the contoller for the eastester
+            ch (int): eastester channel
+            vmpp_last (float): last maximum power point tracking voltage (V)
+
+        Returns:
+            np.array: time (epoch) values
+            np.array: voltage (V) values
+            np.array: current (A) values
+        """
 
         mpp_mode = d["mpp"]["mode"]
         # MPP mode 0 is constant perturb and observe
@@ -138,7 +162,14 @@ class Characterization:
         return t, v, i
 
     def calc_last_vmp(self, d):
-        """Grabs last vmpp from tracking if it exists. If not, calculates from JV curves"""
+        """Gets last vmpp from tracking if it exists. If not, calculates from JV curves
+
+        Args:
+            d (dictionary): dictionary containing all neccsiary information (defined in controller.py)
+
+        Returns:
+            float: last maximum power point tracking voltage (V)
+        """
 
         vmpp = 0
         num_modules = len(d["module_channels"])

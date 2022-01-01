@@ -13,7 +13,11 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
 
 # We have several workers managing east tester so we need to make sure two dont try to work at the same time
 def et_lock(f):
-    """Locks Easttester"""
+    """Locks easttester
+
+    Args:
+        f (function): any function that needs to be locked
+    """
 
     def inner(self, *args, **kwargs):
         with self.lock:
@@ -23,10 +27,15 @@ def et_lock(f):
 
 
 class EastTester:
-    """used for MPP tracking"""
+    """EastTester package for PARASOL"""
 
     def __init__(self, port):
-        """initialize and set bounds for measurement (see srcV_measI for bounds)"""
+        """Initliazes the Eastester class for EastTester 5420
+
+        Args:
+            port (string): COM port connection to easttester
+        """
+
         self.lock = Lock()
         self.connect(port=port)
 
@@ -47,12 +56,22 @@ class EastTester:
         self.srcV_measI(2)
 
     def connect(self, port):
-        """Connect to Easttester"""
+        """Connects to the easttester at the given port
+
+        Args:
+            port (string): COM port connection to easttester
+        """
+
         # Connect using serial, use highest transferrate and shortest timeout
         self.et = serial.Serial(port, baudrate=115200, timeout=0.005)
 
     # untested
     def srcI_measV(self, channel):
+        """Setup source current and measure voltage
+
+        Args:
+            channel (int or string): eastester channel to alter
+        """
 
         # Set to constant voltage, and continuous operation
         self.et.write(("CH" + str(channel) + ":MODE CC\n").encode())
@@ -99,7 +118,12 @@ class EastTester:
         time.sleep(self.et_delay)
 
     def srcV_measI(self, channel):
-        """Setup source voltage and measure I"""
+        """Setup source voltage and measure current
+
+        Args:
+            channel (int or string): eastester channel to alter
+        """
+
         # Set to constant voltage, and continuous operation
         self.et.write(("CH" + str(channel) + ":MODE CV\n").encode())
         time.sleep(self.et_delay)
@@ -146,7 +170,12 @@ class EastTester:
 
     @et_lock
     def output_on(self, channel):
-        """Turns on output"""
+        """Turns output on
+
+        Args:
+            channel (int or string): eastester channel to alter
+        """
+
         self.et.write(("CH" + str(channel) + ":SW ON\n").encode())
         time.sleep(
             self.source_delay
@@ -154,7 +183,12 @@ class EastTester:
 
     @et_lock
     def output_off(self, channel):
-        """Turns off output"""
+        """Turns output off
+
+        Args:
+            channel (int or string): eastester channel to alter
+        """
+
         self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
         time.sleep(
             self.source_delay
@@ -162,7 +196,12 @@ class EastTester:
 
     @et_lock
     def set_voltage(self, channel, voltage):
-        """Sets voltage"""
+        """Sets voltage
+
+        Args:
+            channel (int or string): eastester channel to alter
+            voltage (float): desired voltage (V)
+        """
 
         # New
         if self._sourcing_current[channel] == True:
@@ -175,6 +214,12 @@ class EastTester:
     # untested
     @et_lock
     def set_current(self, channel, current):
+        """Sets current
+
+        Args:
+            channel (int or string): eastester channel to alter
+            current (float): desired current (A)
+        """
 
         if self._sourcing_current[channel] == False:
             self.srcI_measV(channel)
@@ -184,7 +229,15 @@ class EastTester:
 
     @et_lock
     def measure_current(self, channel) -> float:
-        """Measure current several times and average"""
+        """Measures current several times and then averages (number defined in hardwareconstants.yaml)
+
+        Args:
+            channel (int or string): eastester channel to alter
+
+        Returns:
+            float: current (A) reading
+        """
+
         i = 0
         curr_tot = 0
         # To avoid marching in the wrong direction we need to average here
@@ -206,7 +259,14 @@ class EastTester:
     # untested
     @et_lock
     def measure_voltage(self, channel) -> float:
-        """Measure current several times and average"""
+        """Measures voltage several times and then averages (number defined in hardwareconstants.yaml)
+
+        Args:
+            channel (int or string): eastester channel to alter
+
+        Returns:
+            float: voltage (V) reading
+        """
         i = 0
         volt_tot = 0
         # To avoid marching in the wrong direction we need to average here
@@ -227,6 +287,14 @@ class EastTester:
 
     # untested
     def voc(self, channel) -> float:
+        """Gets open circut voltage: V where I = 0
+
+        Args:
+            channel (int or string): eastester channel to alter
+
+        Returns:
+            float: open circut voltage (V)
+        """
         self.set_current(channel, 0)
         voc = self.measure_voltage(channel)
 
@@ -234,6 +302,15 @@ class EastTester:
 
     # untested
     def isc(self, channel) -> float:
+        """Gets short circut current: I where V = 0
+
+        Args:
+            channel (int or string): eastester channel to alter
+
+        Returns:
+            float: short circut current (A)
+        """
+
         self.set_voltage(channel, 0)
         jsc = self.measure_current(channel)
 
@@ -241,7 +318,30 @@ class EastTester:
 
     # no et lock, it calls functions with them
     def set_V_measure_I(self, channel, voltage) -> float:
-        """Set voltage and measure current"""
+        """Sets voltage and measures current
+
+        Args:
+            channel (int or string): eastester channel to alter
+            voltage (float): voltage (V)
+
+        Returns:
+            float: current (A) reading
+        """
         self.set_voltage(channel, voltage)
         curr = self.measure_current(channel)
         return curr
+
+    def set_I_measure_V(self, channel, voltage) -> float:
+        """Sets current and measures voltage
+
+        Args:
+            channel (int or string): eastester channel to alter
+            voltage (float): current (A)
+
+        Returns:
+            float: voltage (V) reading
+        """
+
+        self.set_current(channel, voltage)
+        volt = self.measure_voltage(channel)
+        return volt
