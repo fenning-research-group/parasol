@@ -10,7 +10,7 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 class FileStructure:
     """FileStructure package for PARASOL"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the FileStructure class"""
 
         self.root_folder = constants["root_dir"]
@@ -18,80 +18,80 @@ class FileStructure:
 
     # Get folder paths given inputs, make paths
 
-    def get_root_dir(self):
+    def get_root_dir(self) -> str:
         """Returns the root directory
 
         Returns:
-            string: path to root directory
+            str: path to root directory
         """
         return self.root_folder
 
-    def get_date_folder(self, startdate: str):
+    def get_date_folder(self, startdate: str) -> str:
         """Returns the path to the date folder
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
+            startdate (str): startdate in YYYYMMDD format
 
         Returns:
-            string: path to date folder
+            str: path to date folder
         """
 
         date_folder = os.path.join(self.root_folder, startdate)
         return date_folder
 
-    def get_test_folder(self, startdate: str, name: str):
+    def get_test_folder(self, startdate: str, name: str) -> str:
         """Returns the path to the test folder
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
-            name (string): name of test
+            startdate (str): startdate in YYYYMMDD format
+            name (str): name of test
 
         Returns:
-            string: path to test folder
+            str: path to test folder
         """
 
         test_folder = os.path.join(self.root_folder, startdate, f"{startdate}_{name}")
         return test_folder
 
-    def get_mpp_folder(self, startdate: str, name: str):
+    def get_mpp_folder(self, startdate: str, name: str) -> str:
         """Returns the path to the MPP folder
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
-            name (string): name of test
+            startdate (str): startdate in YYYYMMDD format
+            name (str): name of test
 
         Returns:
-            string: path to MPP folder
+            str: path to MPP folder
         """
 
         mpp_folder = os.path.join(self.get_test_folder(startdate, name), "MPP")
         return mpp_folder
 
-    def get_jv_folder(self, startdate: str, name: str, module_channel: int):
+    def get_jv_folder(self, startdate: str, name: str, module_channel: int) -> str:
         """Returns the path to the JV folder
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
-            name (string): name of test
+            startdate (str): startdate in YYYYMMDD format
+            name (str): name of test
             module_channel (int): module channel
 
         Returns:
-            string: path to JV folder
+            str: path to JV folder
         """
         jv_folder = os.path.join(
             self.get_test_folder(startdate, name), "JV_" + str(module_channel)
         )
         return jv_folder
 
-    def get_analyzed_folder(self, startdate: str, name: str):
+    def get_analyzed_folder(self, startdate: str, name: str) -> str:
         """Returns the path to the Analyzed folder
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
-            name (string): name of test
+            startdate (str): startdate in YYYYMMDD format
+            name (str): name of test
 
         Returns:
-            string: path to Analyzed folder
+            str: path to Analyzed folder
         """
         analyzed_folder = os.path.join(
             self.get_test_folder(startdate, name), "Analyzed"
@@ -100,16 +100,18 @@ class FileStructure:
 
     # Make test folders given inputs
 
-    def make_module_subdir(self, name: str, module_channels: list, startdate: str):
+    def make_module_subdir(
+        self, name: str, module_channels: list, startdate: str
+    ) -> str:
         """Makes JV, MPP, and Analyzed subdirectories for a given test
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
-            name (string): name of test
+            startdate (str): startdate in YYYYMMDD format
+            name (str): name of test
             module_channels (list[int]): module channels
 
         Returns:
-            list[string]: paths to JV folders
+            list[str]: paths to JV folders
         """
 
         # Add date folder
@@ -142,60 +144,62 @@ class FileStructure:
 
     def get_jv_file_name(
         self, startdate: str, name: str, id: int, module_channel: int, scan_count: int
-    ):
+    ) -> str:
         """Returns the JV file name
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
-            name (string): name of test
+            startdate (str): startdate in YYYYMMDD format
+            name (str): name of test
             id (int): test id
             module_channel (int): module channel
             scan_count (int): scan count
 
         Returns:
-            string: name of JV file
+            str: name of JV file
         """
 
         jv_file_path = f"{startdate}_{name}_{id}_{module_channel}_JV_{scan_count}.csv"
         return jv_file_path
 
-    def get_mpp_file_name(self, startdate: str, name: str, id: int, scan_count: int):
+    def get_mpp_file_name(
+        self, startdate: str, name: str, id: int, scan_count: int
+    ) -> str:
         """Returns the JV file name
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
-            name (string): name of test
+            startdate (str): startdate in YYYYMMDD format
+            name (str): name of test
             id (int): test id
             scan_count (int): scan count
 
         Returns:
-            string: name of MPP file
+            str: name of MPP file
         """
 
         mpp_file_path = f"{startdate}_{name}_{id}_all_MPP_1.csv"
         return mpp_file_path
 
-    def get_analyzed_file_name(self, startdate: str, name: str, id: int):
+    def get_analyzed_file_name(self, startdate: str, name: str, id: int) -> str:
         """Returns the Analyzed file name
 
         Args:
-            startdate (string): startdate in YYYYMMDD format
-            name (string): name of test
+            startdate (str): startdate in YYYYMMDD format
+            name (str): name of test
             id (int): test id
 
         Returns:
-            string: name of Analyed file
+            str: name of Analyed file
         """
         analyzed_file_path = f"{startdate}_{name}_{id}_all_Analyzed_1.csv"
         return analyzed_file_path
 
     # Get useful save information from the file name, make runinfo dict
 
-    def filepath_to_runinfo(self, file_path: str):
+    def filepath_to_runinfo(self, file_path: str) -> dict:
         """Returns runinfo from filepath using filename standardization
 
         Args:
-            file_path (string): filepath to file
+            file_path (str): filepath to file
 
         Returns:
             dict: runinfo ["module_id", "string_id", "name", "date"]
@@ -223,33 +227,33 @@ class FileStructure:
 
     # Map files and folders in root directory, make file_dict and folder_dict
 
-    def get_subfolders(self, folder: str):
+    def get_subfolders(self, folder: str) -> list:
         """Returns list of subfolders in folder
 
         Args:
-            folder (string): path to folder
+            folder (str): path to folder
 
         Returns:
-            list[string]: paths to subfolders
+            list[str]: paths to subfolders
         """
         return [f.path for f in os.scandir(folder) if f.is_dir()]
 
-    def get_subfiles(self, folder: str):
+    def get_subfiles(self, folder: str) -> list:
         """Returns list of subfiles in folder
 
         Args:
-            folder (string): path to folder
+            folder (str): path to folder
 
         Returns:
-            list[string]: paths to subfiles
+            list[str]: paths to subfiles
         """
         return [f.path for f in os.scandir(folder) if f.is_file()]
 
-    def get_tests(self):
+    def get_tests(self) -> list:
         """Returns a list of all test paths in root directory
 
         Returns:
-            list[string]: paths to all test folders
+            list[str]: paths to all test folders
         """
         # get date folders
         self.date_folders = self.get_subfolders(self.root_folder)
@@ -261,16 +265,16 @@ class FileStructure:
 
         return test_folders
 
-    def get_test_subfolders(self, stringpath: str):
+    def get_test_subfolders(self, stringpath: str) -> str:
         """Returns list of subfolders in test folder
 
         Args:
-            stringpath (string): path to test folder
+            stringpath (str): path to test folder
 
         Returns:
-            string: path to MPP folder
-            list[string]: paths to JV folders
-            string: path to analyzed folder
+            str: path to MPP folder
+            list[str]: paths to JV folders
+            str: path to analyzed folder
         """
         mpp_folder = [os.path.join(stringpath, "MPP")]
 
@@ -286,14 +290,14 @@ class FileStructure:
 
         return mpp_folder, jv_folders, analyzed_folder
 
-    def map_test_folders(self, test_paths: list):
+    def map_test_folders(self, test_paths: list) -> dict:
         """Creates a dictionary maping test folders to their subfolders
 
         Args:
-            test_paths (list[string]): paths to test folders
+            test_paths (list[str]): paths to test folders
 
         Returns:
-            dictionary: test_dict[test_path] = [mpp_path, jv_paths, analyzed_path]
+            dict: test_dict[test_path] = [mpp_path, jv_paths, analyzed_path]
         """
 
         test_dict = {}
@@ -310,14 +314,14 @@ class FileStructure:
 
         return test_dict
 
-    def map_test_files(self, test_folders: list):
+    def map_test_files(self, test_folders: list) -> dict:
         """Creates a dictionary maping test subfolders to their subfiles
 
         Args:
-            test_folders (list[string]): path to a given subfolder (e.g. JV)
+            test_folders (list[str]): path to a given subfolder (e.g. JV)
 
         Returns:
-            dictionary: file_dict[folder] = [file_paths]
+            dict: file_dict[folder] = [file_paths]
         """
 
         # create blank dictionary to hold folder: file_paths

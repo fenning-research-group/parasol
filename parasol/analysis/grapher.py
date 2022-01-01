@@ -66,8 +66,8 @@ class Grapher:
 
         Args:
             df (pd.DataFrame): dataframe containing x and y values to plot
-            x (string): x header name
-            ys (list[string]): y header names
+            x (str): x header name
+            ys (list[str]): y header names
         """
 
         # get x list
@@ -99,7 +99,7 @@ class Grapher:
         """Plot JVs in given JV folder
 
         Args:
-            jvfolder (string): path to JV folder
+            jvfolder (str): path to JV folder
         """
 
         jv_dict = self.filestructure.map_test_files([jvfolder])
@@ -110,7 +110,7 @@ class Grapher:
         """Plot JVs for input JV files
 
         Args:
-            jvfiles (list[string]): paths to JV files
+            jvfiles (list[str]): paths to JV files
         """
 
         # load jv files
@@ -145,9 +145,9 @@ class Grapher:
         """Plot x vs. y for a set of scalar files
 
         Args:
-            paramfiles (list[string]): path to file containing x and y values (scalars)
-            x (string): x header name
-            y (string): y header name
+            paramfiles (list[str]): path to file containing x and y values (scalars)
+            x (str): x header name
+            y (str): y header name
         """
 
         mpl.rcParams["axes.linewidth"] = 1.75
@@ -173,9 +173,9 @@ class Grapher:
         """Plots x vs. y for a set of scalar files
 
         Args:
-            paramfiles (list[string]): paths to file containing x and y values (scalars)
-            x (string): x header name
-            ys (list[string]): y header names
+            paramfiles (list[str]): paths to file containing x and y values (scalars)
+            x (str): x header name
+            ys (list[str]): y header names
         """
 
         mpl.rcParams["axes.linewidth"] = 1.75
@@ -208,10 +208,10 @@ class Grapher:
         """Plots x vs. y with z colorbar for a set of scalar files
 
         Args:
-            paramfile (string): path to file containing x, y, and z values (scalars)
-            x (string): x header name
-            y (string): y header name
-            z (string): z header name
+            paramfile (str): path to file containing x, y, and z values (scalars)
+            x (str): x header name
+            y (str): y header name
+            z (str): z header name
         """
 
         # load datafolder path

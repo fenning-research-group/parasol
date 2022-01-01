@@ -9,7 +9,7 @@ from parasol.filestructure import FileStructure
 class Analysis:
     """Analysis package for PARASOL"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes Analysis class"""
         self.NUM_MODULES = 24
         self.filestructure = FileStructure()
@@ -20,8 +20,8 @@ class Analysis:
         """Calcualte FWD and REV Pmp versus time for given JV and MPP folder paths, returns dataframe with data
 
         Args:
-            jvfolderpaths (list): paths to the JV folders for the test
-            mppfolderpaths (list): paths to the MPP folders for the test
+            jvfolderpaths (list[str]): paths to the JV folders for the test
+            mppfolderpaths (list[str]): paths to the MPP folders for the test
 
         Returns:
             pd.DataFrame: ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
@@ -40,14 +40,14 @@ class Analysis:
 
         return plot_df
 
-    def analyze_from_savepath(self, stringpath: list) -> list:
+    def analyze_from_savepath(self, stringpath: str) -> list:
         """Analyze data for given test path, create output x<date>_<name>_<string>_<module>_Scalar_1.csv file in Analysis folder
 
         Args:
-            stringpath (string): path to test folder
+            stringpath (str): path to test folder
 
         Returns:
-            list[string]: path to output file
+            list[str]: path to output file
         """
 
         # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder
@@ -70,7 +70,7 @@ class Analysis:
     # Workhorse functions for check_test and analyze_from_savepath
 
     # TODO: EDIT NO JVDICT
-    def check_pmps(self):
+    def check_pmps(self) -> float:
         """Loads the JV files, calculates and returns time, FWD Pmp, and REV Pmp
 
         Returns:
@@ -121,7 +121,7 @@ class Analysis:
         """Cycle through JV files, analyze, and make output file for parameters
 
         Returns:
-            list[string]: path to analyzed files
+            list[str]: path to analyzed files
         """
 
         # Make blank array to keep save locations
@@ -183,13 +183,13 @@ class Analysis:
         """Takes in voltage, current, and power vectors, calculates scalars and returns a dictionary of scalars
 
         Args:
-            all_v (list[np.array]): list of voltage vectors
-            all_j (list[np.array]): list of current vectors
-            all_p (list[np.array]): list of power vectors
-            direction (list[np.array]): direction -- either FWD or REV
+            all_v (list[np.ndarray]): list of voltage vectors
+            all_j (list[np.ndarray]): list of current vectors
+            all_p (list[np.ndarray]): list of power vectors
+            direction (str): direction -- either FWD or REV
 
         Returns:
-            dictionary: dictionary of parameter values over time
+            dict: dictionary of parameter values over time
         """
 
         # create lists to hold data
@@ -334,19 +334,19 @@ class Analysis:
 
     # Loads jv files
 
-    def load_jv_files(self, jv_file_paths: list):
+    def load_jv_files(self, jv_file_paths: list) -> list:
         """Loads JV files contained in jv_file_paths, returns data
 
         Args:
-            jv_file_paths (list[string]): list of paths to jv files
+            jv_file_paths (list[str]): list of paths to jv files
 
         Returns:
-            list[np.array]: list of time vectors
-            list[np.array]: list of voltage vectors
-            list[np.array]: list of FWD current vectors
-            list[np.array]: list of FWD power vectors
-            list[np.array]: list of REV current vectors
-            list[np.array]: list of REV power vectors
+            list[np.ndarray]: list of time vectors
+            list[np.ndarray]: list of voltage vectors
+            list[np.ndarray]: list of FWD current vectors
+            list[np.ndarray]: list of FWD power vectors
+            list[np.ndarray]: list of REV current vectors
+            list[np.ndarray]: list of REV power vectors
         """
 
         all_t = []
@@ -368,19 +368,19 @@ class Analysis:
 
         return all_t, all_v, all_j_fwd, all_p_fwd, all_j_rev, all_p_rev
 
-    def load_jv_file(self, jv_file_path: str):
+    def load_jv_file(self, jv_file_path: str) -> np.ndarray:
         """Loads data for a single JV file given by jv_file_path, returns data
 
         Args:
             jv_file_path (string): path to JV file
 
         Returns:
-           np.array: time vector
-           np.array: voltage vector
-           np.array: FWD current vector
-           np.array: FWD power vector
-           np.array: REV current vector
-           np.array: REV power vector
+           np.ndarray: time vector
+           np.ndarray: voltage vector
+           np.ndarray: FWD current vector
+           np.ndarray: FWD power vector
+           np.ndarray: REV current vector
+           np.ndarray: REV power vector
         """
 
         # get time information
@@ -404,18 +404,18 @@ class Analysis:
 
         return t, v, j_fwd, p_fwd, j_rev, p_rev
 
-    def load_mpp_file(self, mpp_file_path: str):
+    def load_mpp_file(self, mpp_file_path: str) -> np.ndarray:
         """Loads data for a single MPP file given by mpp_file_path, returns values
 
         Args:
             mpp_file_path (string): path to MPP file
 
         Returns:
-            np.array: time vector
-            np.array: voltage vector
-            np.array: current vector
-            np.array: current denisty vector
-            np.array: power denisty vector
+            np.ndarray: time vector
+            np.ndarray: voltage vector
+            np.ndarray: current vector
+            np.ndarray: current denisty vector
+            np.ndarray: power denisty vector
         """
 
         with open(mpp_file_path) as f:

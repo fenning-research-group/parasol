@@ -33,7 +33,7 @@ class EastTester:
         """Initliazes the Eastester class for EastTester 5420
 
         Args:
-            port (string): COM port connection to easttester
+            port (str): COM port connection to easttester
         """
 
         self.lock = Lock()
@@ -59,7 +59,7 @@ class EastTester:
         """Connects to the easttester at the given port
 
         Args:
-            port (string): COM port connection to easttester
+            port (str): COM port connection to easttester
         """
 
         # Connect using serial, use highest transferrate and shortest timeout

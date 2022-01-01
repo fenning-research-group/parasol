@@ -33,7 +33,7 @@ if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
 class RUN_UI(QMainWindow):
     """Run UI package for PARASOL"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initliazes the RUN_UI class"""
 
         super(RUN_UI, self).__init__()
@@ -260,7 +260,7 @@ class RUN_UI(QMainWindow):
         # Create GUI
         self.launch_gui()
 
-    def update_loaded_modules(self):
+    def update_loaded_modules(self) -> None:
         """Uses checkboxes in UI to get list of active modules"""
 
         # Set all variables to None
@@ -334,7 +334,7 @@ class RUN_UI(QMainWindow):
         self.module5 = [i for i in modules5 if i is not None]
         self.module6 = [i for i in modules6 if i is not None]
 
-    def update_dictionaries(self):
+    def update_dictionaries(self) -> None:
         """Updates dictionaries[stringid] with data from the UI"""
 
         self.strings = {}
@@ -453,11 +453,11 @@ class RUN_UI(QMainWindow):
             },
         }
 
-    def lock_values(self, stringid: int):
+    def lock_values(self, stringid: int) -> None:
         """Locks values for the string subsection of the UI
 
         Args:
-            int: string id
+            stringid(int): string id
         """
 
         if stringid == 1:
@@ -473,11 +473,11 @@ class RUN_UI(QMainWindow):
         elif stringid == 6:
             self.lock_value6()
 
-    def unlock_values(self, stringid: int):
+    def unlock_values(self, stringid: int) -> None:
         """Unlocks values for the string subsection of the UI
 
         Args:
-            int: string id
+            stringid (int): string id
         """
 
         if stringid == 1:
@@ -493,11 +493,11 @@ class RUN_UI(QMainWindow):
         elif stringid == 6:
             self.unlock_value6()
 
-    def load(self, stringid: int):
+    def load(self, stringid: int) -> None:
         """Loads the module using the command in controller.py and data from the dictionaries/UI
 
         Args:
-            int: string id
+            stringid (int): string id
         """
 
         # Notify User
@@ -563,11 +563,11 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
-    def unload(self, stringid: int):
+    def unload(self, stringid: int) -> None:
         """Unloads the module using the command in controller.py and the stringid
 
         Args:
-            int: string id
+            stringid (int): string id
         """
 
         # Notify User
@@ -606,11 +606,11 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
-    def checktest(self, stringid: int):
+    def checktest(self, stringid: int) -> None:
         """Checks the test using the string id with the commands in analysis.py & grapher.py
 
         Args:
-            int: string id
+            stringid (int): string id
         """
 
         print("Checking string: " + str(stringid))
@@ -653,33 +653,33 @@ class RUN_UI(QMainWindow):
     # Buttons / Duplicated Functions
     ################################################################################
 
-    def checktest1(self):
+    def checktest1(self) -> None:
         """Checks test 1"""
         self.checktest(1)
 
-    def checktest2(self):
+    def checktest2(self) -> None:
         """Checks test 2"""
         self.checktest(2)
 
-    def checktest3(self):
+    def checktest3(self) -> None:
         """Checks test 3"""
         self.checktest(3)
 
-    def checktest4(self):
+    def checktest4(self) -> None:
         """Checks test 4"""
         self.checktest(4)
 
-    def checktest5(self):
+    def checktest5(self) -> None:
         """Checs test 5"""
         self.checktest(5)
 
-    def checktest6(self):
+    def checktest6(self) -> None:
         """Checks test 6"""
         self.checktest(6)
 
     # Lock Values for Editing
 
-    def lock_value1(self):
+    def lock_value1(self) -> None:
         """Locks all changeable objects for test 1"""
 
         self.name1.setEnabled(False)
@@ -700,7 +700,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton1.setEnabled(True)
         self.checktestbutton1.setEnabled(True)
 
-    def lock_value2(self):
+    def lock_value2(self) -> None:
         """Locks all changeable objects for test 2"""
 
         self.name2.setEnabled(False)
@@ -721,7 +721,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton2.setEnabled(True)
         self.checktestbutton2.setEnabled(True)
 
-    def lock_value3(self):
+    def lock_value3(self) -> None:
         """Locks all changeable objects for test 3"""
 
         self.name3.setEnabled(False)
@@ -742,7 +742,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton3.setEnabled(True)
         self.checktestbutton3.setEnabled(True)
 
-    def lock_value4(self):
+    def lock_value4(self) -> None:
         """Locks all changeable objects for test 4"""
 
         self.name4.setEnabled(False)
@@ -763,7 +763,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton4.setEnabled(True)
         self.checktestbutton4.setEnabled(True)
 
-    def lock_value5(self):
+    def lock_value5(self) -> None:
         """Locks all changeable objects for test 5"""
 
         self.name5.setEnabled(False)
@@ -784,7 +784,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton5.setEnabled(True)
         self.checktestbutton5.setEnabled(True)
 
-    def lock_value6(self):
+    def lock_value6(self) -> None:
         """Locks all changeable objects for test 6"""
 
         self.name6.setEnabled(False)
@@ -807,7 +807,7 @@ class RUN_UI(QMainWindow):
 
     # Unlock Values For Editing
 
-    def unlock_value1(self):
+    def unlock_value1(self) -> None:
         """Unlocks all changeable objects for test 1"""
 
         self.name1.setEnabled(True)
@@ -828,7 +828,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton1.setEnabled(False)
         self.checktestbutton1.setEnabled(False)
 
-    def unlock_value2(self):
+    def unlock_value2(self) -> None:
         """Unlocks all changeable objects for test 2"""
 
         self.name2.setEnabled(True)
@@ -849,7 +849,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton2.setEnabled(False)
         self.checktestbutton2.setEnabled(False)
 
-    def unlock_value3(self):
+    def unlock_value3(self) -> None:
         """Unlocks all changeable objects for test 3"""
 
         self.name3.setEnabled(True)
@@ -870,7 +870,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton3.setEnabled(False)
         self.checktestbutton3.setEnabled(False)
 
-    def unlock_value4(self):
+    def unlock_value4(self) -> None:
         """Unlocks all changeable objects for test 4"""
 
         self.name4.setEnabled(True)
@@ -891,7 +891,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton4.setEnabled(False)
         self.checktestbutton4.setEnabled(False)
 
-    def unlock_value5(self):
+    def unlock_value5(self) -> None:
         """Unlocks all changeable objects for test 5"""
 
         self.name5.setEnabled(True)
@@ -912,7 +912,7 @@ class RUN_UI(QMainWindow):
         self.unloadbutton5.setEnabled(False)
         self.checktestbutton5.setEnabled(False)
 
-    def unlock_value6(self):
+    def unlock_value6(self) -> None:
         """Unlocks all changeable objects for test 6"""
 
         self.name6.setEnabled(True)
@@ -935,91 +935,91 @@ class RUN_UI(QMainWindow):
 
     # Load Buttons
 
-    def load1(self):
+    def load1(self) -> None:
         """Loads test 1"""
         self.startdate1 = datetime.now().strftime("x%Y%m%d")
         self.load(1)
 
-    def load2(self):
+    def load2(self) -> None:
         """Loads test 2"""
         self.startdate2 = datetime.now().strftime("x%Y%m%d")
         self.load(2)
 
-    def load3(self):
+    def load3(self) -> None:
         """Loads test 3"""
         self.startdate3 = datetime.now().strftime("x%Y%m%d")
         self.load(3)
 
-    def load4(self):
+    def load4(self) -> None:
         """Loads test 4"""
         self.startdate4 = datetime.now().strftime("x%Y%m%d")
         self.load(4)
 
-    def load5(self):
+    def load5(self) -> None:
         """Loads test 5"""
         self.startdate5 = datetime.now().strftime("x%Y%m%d")
         self.load(5)
 
-    def load6(self):
+    def load6(self) -> None:
         """Loads test 6"""
         self.startdate6 = datetime.now().strftime("x%Y%m%d")
         self.load(6)
 
     # Unload Buttons
 
-    def unload1(self):
+    def unload1(self) -> None:
         """Unloads test 1"""
         self.unload(1)
 
-    def unload2(self):
+    def unload2(self) -> None:
         """Unloads test 2"""
         self.unload(2)
 
-    def unload3(self):
+    def unload3(self) -> None:
         """Unloads test 3"""
         self.unload(3)
 
-    def unload4(self):
+    def unload4(self) -> None:
         """Unloads test 4"""
         self.unload(4)
 
-    def unload5(self):
+    def unload5(self) -> None:
         """Unloads test 5"""
         self.unload(5)
 
-    def unload6(self):
+    def unload6(self) -> None:
         """Unloads test 6"""
         self.unload(6)
 
     # Checktest Buttons
 
-    def checktest1(self):
+    def checktest1(self) -> None:
         """Checks test 1"""
         self.checktest(1)
 
-    def checktest2(self):
+    def checktest2(self) -> None:
         """Checks test 2"""
         self.checktest(2)
 
-    def checktest3(self):
+    def checktest3(self) -> None:
         """Checks test 3"""
         self.checktest(3)
 
-    def checktest4(self):
+    def checktest4(self) -> None:
         """Checks test 4"""
         self.checktest(4)
 
-    def checktest5(self):
+    def checktest5(self) -> None:
         """Checks test 5"""
         self.checktest(5)
 
-    def checktest6(self):
+    def checktest6(self) -> None:
         """Checks test 6"""
         self.checktest(6)
 
     # Launches GUI
 
-    def launch_gui(self):
+    def launch_gui(self) -> None:
         """Launches GUI"""
         app = QApplication(sys.argv)
         app.exec_()

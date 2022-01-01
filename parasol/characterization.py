@@ -31,7 +31,7 @@ class Characterization:
             1: "75% of Voc --> Untested",
         }
 
-    def scan_jv(self, d: dict, scanner: object):
+    def scan_jv(self, d: dict, scanner: object) -> np.ndarray:
         """Conducts JV scan
 
         Args:
@@ -39,9 +39,9 @@ class Characterization:
             scanner (object): pointer to the controller for the scanner
 
         Returns:
-            np.array: voltage (V) values
-            np.array: FWD current (A) values
-            np.array: REV current (A) values
+            np.ndarray: voltage (V) values
+            np.ndarray: FWD current (A) values
+            np.ndarray: REV current (A) values
         """
 
         # Get JV mode
@@ -87,7 +87,9 @@ class Characterization:
 
         return v, fwd_i, rev_i
 
-    def track_mpp(self, d: dict, easttester: object, ch: int, vmpp_last: float):
+    def track_mpp(
+        self, d: dict, easttester: object, ch: int, vmpp_last: float
+    ) -> np.ndarray:
         """Tracks Vmpp for next point
 
         Args:
@@ -97,9 +99,9 @@ class Characterization:
             vmpp_last (float): last maximum power point tracking voltage (V)
 
         Returns:
-            np.array: time (epoch) values
-            np.array: voltage (V) values
-            np.array: current (A) values
+            np.ndarray: time (epoch) values
+            np.ndarray: voltage (V) values
+            np.ndarray: current (A) values
         """
 
         mpp_mode = d["mpp"]["mode"]

@@ -34,7 +34,7 @@ class Scanner:
         """Connects to the yokogawa
 
         Args:
-            yoko_address (string): GPIB connection address
+            yoko_address (str): GPIB connection address
         """
         rm = pyvisa.ResourceManager()
         self.yoko = rm.open_resource(yoko_address)
@@ -114,7 +114,7 @@ class Scanner:
         """Reads the last output
 
         Returns:
-            str: last output value
+            str : last output value
         """
 
         return self.yoko.query(":INIT;*TRG;:FETC?")
@@ -167,7 +167,7 @@ class Scanner:
 
         return isc
 
-    def iv_sweep(self, vstart: float, vend: float, steps: int):
+    def iv_sweep(self, vstart: float, vend: float, steps: int) -> np.ndarray:
         """Runs a single IV sweep and returns the data
 
         Args:
@@ -176,8 +176,8 @@ class Scanner:
             steps (float): number of voltage steps in the sweep
 
         Returns:
-            np.array: voltage (V) array
-            np.array: current (A) array
+            np.ndarray: voltage (V) array
+            np.ndarray: current (A) array
         """
 
         # Make empty numpy arrays for data
@@ -199,7 +199,9 @@ class Scanner:
 
         # set up jv mode where # shoud match the if statment below and "" should match name of that test
 
-    def iv_sweep_quadrant_fwd_rev(self, vstart: float, vend: float, steps: int):
+    def iv_sweep_quadrant_fwd_rev(
+        self, vstart: float, vend: float, steps: int
+    ) -> np.ndarray:
         """Runs FWD and then REV IV sweep in the power producing quadrant and returns the data
 
         Args:
@@ -213,8 +215,8 @@ class Scanner:
             steps (float): number of voltage steps in the sweep
 
         Returns:
-            np.array: voltage (V) array
-            np.array: current (A) array
+            np.ndarray: voltage (V) array
+            np.ndarray: current (A) array
         """
 
         # Make empty numpy arrays for data
@@ -256,7 +258,9 @@ class Scanner:
 
         return v, i_fwd, i_rev
 
-    def iv_sweep_quadrant_rev_fwd(self, vstart: float, vend: float, steps: int):
+    def iv_sweep_quadrant_rev_fwd(
+        self, vstart: float, vend: float, steps: int
+    ) -> np.ndarray:
         """Runs REV and then FWD IV sweep in the power producing quadrant and returns the data
 
         Args:
@@ -270,8 +274,8 @@ class Scanner:
             steps (float): number of voltage steps in the sweep
 
         Returns:
-            np.array: voltage (V) array
-            np.array: current (A) array
+            np.ndarray: voltage (V) array
+            np.ndarray: current (A) array
         """
 
         # Make empty numpy arrays for data

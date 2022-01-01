@@ -26,7 +26,7 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 class Controller:
     """Controller package for PARASOL"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the Controller class"""
 
         # Connect to Relay, Scanner, 3 EastTesters, and Characterization files
@@ -74,7 +74,7 @@ class Controller:
     def load_string(
         self,
         id: int,
-        startdate: datetime,
+        startdate: str,
         name: str,
         area: float,
         jv_modeL: int,
@@ -85,7 +85,7 @@ class Controller:
         jv_vmin: float,
         jv_vmax: float,
         jv_steps: int,
-    ):
+    ) -> str:
         """Loads a string of modules
 
         Args:
@@ -163,7 +163,7 @@ class Controller:
 
         return self.strings[id]["_savedir"]
 
-    def unload_string(self, id: int):
+    def unload_string(self, id: int) -> None:
         """Unloads a string of modules
 
         Args:
@@ -194,7 +194,7 @@ class Controller:
         print("Analysis saved at :", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
 
-    def _make_mpp_file(self, id: int):
+    def _make_mpp_file(self, id: int) -> None:
         """Creates base file for MPP data
 
         Args:
@@ -234,11 +234,11 @@ class Controller:
                 ]
             )
 
-    async def jv_worker(self, loop: asyncio.AbstractEventLoop):
+    async def jv_worker(self, loop: asyncio.AbstractEventLoop) -> None:
         """Worker for JV sweeps
 
         Args:
-            loop (asyncio loop): timer loop to insert JV worker into
+            loop (asyncio.AbstractEventLoop): timer loop to insert JV worker into
         """
 
         # We need a sleep here or it never gets added to the queue
@@ -262,11 +262,11 @@ class Controller:
             self.jv_queue.task_done()
             print(f"Done Scanning {id}")
 
-    async def mpp_worker(self, loop: asyncio.AbstractEventLoop):
+    async def mpp_worker(self, loop: asyncio.AbstractEventLoop) -> None:
         """Worker for MPP scans
 
         Args:
-            loop (asyncio loop): timeer loop to insert MPP worker into
+            loop (asyncio.AbstractEventLoop): timeer loop to insert MPP worker into
         """
 
         # We need a sleep here or it never gets added to the queue
@@ -289,7 +289,7 @@ class Controller:
             self.mpp_queue.task_done()
             print(f"Done Tracking {id}")
 
-    async def jv_timer(self, id: int):
+    async def jv_timer(self, id: int) -> None:
         """Manages timing for JV worker
 
         Args:
@@ -300,7 +300,7 @@ class Controller:
             self.jv_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["jv"]["interval"])
 
-    async def mpp_timer(self, id: int):
+    async def mpp_timer(self, id: int) -> None:
         """Manages scanning for MPP worker
 
         Args:
@@ -312,7 +312,7 @@ class Controller:
             self.mpp_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["mpp"]["interval"])
 
-    def __make_background_event_loop(self):
+    def __make_background_event_loop(self) -> None:
         """Setup background event loop for schedueling tasks"""
 
         def exception_handler(loop, context):
@@ -325,7 +325,7 @@ class Controller:
         self.mpp_queue = asyncio.Queue()
         self.loop.run_forever()
 
-    def start(self):
+    def start(self) -> None:
         """Create workers / start queue"""
         self.thread = Thread(target=self.__make_background_event_loop)
         self.thread.start()
@@ -343,7 +343,7 @@ class Controller:
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         self.running = True
 
-    def stop(self):
+    def stop(self) -> None:
         """Delete workers,  stop queue, and reset hardware"""
 
         # close all channels
@@ -364,7 +364,7 @@ class Controller:
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
-    def scan_jv(self, id: int):
+    def scan_jv(self, id: int) -> None:
         """Conduct a JV scan using Scanner class
 
         Args:
@@ -449,7 +449,7 @@ class Controller:
                 et.output_on(ch)
                 et.set_voltage(ch, vmp)
 
-    def track_mpp(self, id: int):
+    def track_mpp(self, id: int) -> None:
         """Conduct an MPP scan using Easttester class
 
         Args:
@@ -500,7 +500,7 @@ class Controller:
                 writer = csv.writer(f, delimiter=",")
                 writer.writerow([t, v, i, j, p])
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Stops que and program on exit"""
         self.stop()
 
