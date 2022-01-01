@@ -31,12 +31,12 @@ class Characterization:
             1: "75% of Voc --> Untested",
         }
 
-    def scan_jv(self, d, scanner):
+    def scan_jv(self, d: dict, scanner: object):
         """Conducts JV scan
 
         Args:
-            d (dictionary): dictionary containing all neccsiary information (defined in controller.py)
-            scanner (class): pointer to the controller for the scanner
+            d (dict): dictionary containing all neccsiary information (defined in controller.py)
+            scanner (object): pointer to the controller for the scanner
 
         Returns:
             np.array: voltage (V) values
@@ -87,12 +87,12 @@ class Characterization:
 
         return v, fwd_i, rev_i
 
-    def track_mpp(self, d, easttester, ch, vmpp_last):
+    def track_mpp(self, d: dict, easttester: object, ch: int, vmpp_last: float):
         """Tracks Vmpp for next point
 
         Args:
-            d (dictionary): dictionary containing all neccsiary information (defined in controller.py)
-            easttester (class): pointer to the contoller for the eastester
+            d (dict): dictionary containing all neccsiary information (defined in controller.py)
+            easttester (object): pointer to the contoller for the eastester
             ch (int): eastester channel
             vmpp_last (float): last maximum power point tracking voltage (V)
 
@@ -161,11 +161,11 @@ class Characterization:
         # send back vmpp
         return t, v, i
 
-    def calc_last_vmp(self, d):
+    def calc_last_vmp(self, d: dict) -> float:
         """Gets last vmpp from tracking if it exists. If not, calculates from JV curves
 
         Args:
-            d (dictionary): dictionary containing all neccsiary information (defined in controller.py)
+            d (dict): dictionary containing all neccsiary information (defined in controller.py)
 
         Returns:
             float: last maximum power point tracking voltage (V)
