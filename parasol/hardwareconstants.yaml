@@ -1,10 +1,8 @@
-# TODO Optimize timings on east tester and yokogawa 
 filestructure:
   root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location
 
 characterization:
   mppt_voltage_step: 0.01 # Volts
-
 
 controller:
   ET_1_PORT: 'COM4' # Port for ET1
@@ -21,8 +19,8 @@ yokogawa:
   sense_delay: 0.05 # ms for sense to settle
   command_delay: 0 # ms between commands (built in on yoko)
   integration_time: 10 # ms for integration time
-  max_voltage: 1.5 # Max volts
-  max_current: 1 # Max amps
+  max_voltage: 5 # Max volts
+  max_current: 3.3 # Max amps
 
 easttester:
   # Adress is stored in 'controller'
@@ -30,11 +28,14 @@ easttester:
   sense_delay: 0.25 # Seconds for sense to return value
   command_delay: 0.05 # Seconds between commands
   avg_num: 5 # Number of currents to avg for reading --> ~integration time
-  max_voltage: 21 # Max voltage of 'low' range, 155 V for high range
+  max_voltage: 5 # Max voltage of 'low' range, 155 V for high range
   max_current: 3.3 # Max current of 'low' range, 22 A for high range
   
   v_min: 0.1 # Min voltage registered by ET
   voltage_range: "LOW" # "LOW" or "HIGH"
   current_range: "LOW" # "LOW" or "HIGH"
+
+analysis:
+  derivative_v_step : 0.05 # Voltage step for derivative (Rs, Rsh, Rch) in JV analysis
 
 

@@ -15,9 +15,10 @@ class Grapher:
         # Load filstructure package to manage JV files
         self.filestructure = FileStructure()
 
-        # Path to general data
+        # Get path to root directory (test folder)
         self.rootdir = self.filestructure.get_root_dir()
 
+        # Define dictionaries for plotting
         self.variable_dict = {
             "Time": "Time (Epoch)",
             "Time Elapsed": "Time Elapsed (s)",
@@ -42,12 +43,10 @@ class Grapher:
             "REV Jmp": "REV Jmp (mA/cm2)",
             "REV Pmp": "REV Pmp (mW/cm2)",
         }
-
         self.fwd_rev_cursor_dict = {
             0: ">",
             1: "<",
         }
-
         self.cursor_dict = {
             1: "o",
             2: "s",
@@ -70,27 +69,25 @@ class Grapher:
             ys (list[str]): y header names
         """
 
-        # get x list
+        # Get x values
         x_vals = df[x]
 
-        # get y labels
+        # Get y labels
         y_label = ""
 
-        # cycle through the multiple y parameters
+        # Cycle through y labels
         for y_param in ys:
 
-            y_vals = df[y_param]
-
             # for each parameter, plot all data
+            y_vals = df[y_param]
             for i in range(len(y_vals)):
                 plt.scatter(x_vals[i], y_vals[i])
                 y_label += str(y_param) + " / "
 
-        # label axes
+        # label axes, show plot
         y_label = y_label[:-3]
         plt.ylabel(y_label, weight="black")
         plt.xlabel(x, weight="black")
-
         plt.show()
 
     # Plot JV scans for a single module
@@ -101,9 +98,13 @@ class Grapher:
         Args:
             jvfolder (str): path to JV folder
         """
-
+        # create dictionary where dict[testfolder] = list of jv files
         jv_dict = self.filestructure.map_test_files([jvfolder])
+
+        # Feed file into the dictionary to get a list of JV files
         jv_file_paths = jv_dict[jvfolder]
+
+        # Plot JVs for each module
         self.plot_jvs(jv_file_paths)
 
     def plot_jvs(self, jvfiles: list) -> None:
@@ -113,7 +114,7 @@ class Grapher:
             jvfiles (list[str]): paths to JV files
         """
 
-        # load jv files
+        # Load JV files
         (
             all_t,
             all_v,
@@ -123,17 +124,19 @@ class Grapher:
             all_p_rev,
         ) = self.analysis.load_jv_files(jvfiles)
 
+        # Create linear colormap that spans the number of files
         colors = plt.cm.viridis(np.linspace(0, 1, len(jvfiles)))
 
-        # make time data numpy array, calc time elapsed
+        # Make time data numpy array, calc time elapsed
         all_t = np.array(all_t)
         all_t_elapsed = all_t - all_t[0]
 
+        # Plot FWD and REV curves, REV with --
         for jvpair in range(len(all_t_elapsed)):
             plt.plot(all_v[jvpair], all_j_fwd[jvpair], color=colors[jvpair])
             plt.plot(all_v[jvpair], all_j_rev[jvpair], "--", color=colors[jvpair])
 
-        # label axes
+        # Label axes and show plot
         plt.ylabel("J (mA/cm2)", weight="black")
         plt.xlabel("V (V)", weight="black")
         plt.show()
@@ -150,23 +153,22 @@ class Grapher:
             y (str): y header name
         """
 
-        mpl.rcParams["axes.linewidth"] = 1.75
+        # mpl.rcParams["axes.linewidth"] = 1.75
 
+        # Cycle through paramfiles
         for paramfile in paramfiles:
 
-            # read in dataframe
+            # Read in dataframe
             df = pd.read_csv(paramfile)
 
-            # get x and y vals, add to plot
+            # Get x and y values, add to plot
             x_vals = df[x]
             y_vals = df[y]
             plt.scatter(x_vals, y_vals)
 
-        # label axes
+        # Label axes and show plot
         plt.ylabel(y, weight="black")
         plt.xlabel(x, weight="black")
-
-        # display
         plt.show()
 
     def plot_xy2_scalars(self, paramfiles: list, x: str, ys: list) -> None:
@@ -178,30 +180,29 @@ class Grapher:
             ys (list[str]): y header names
         """
 
-        mpl.rcParams["axes.linewidth"] = 1.75
+        # mpl.rcParams["axes.linewidth"] = 1.75
 
+        # Cycle through paramfiles
         for paramfile in paramfiles:
 
-            # read in dataframe
+            # Read in dataframe
             df = pd.read_csv(paramfile)
 
-            # get x and y vals, add to plot
+            # Get x values
             x_vals = df[x]
 
+            # Cycle through y values, and add (x,y) to plot
             for idx, y in enumerate(ys):
                 y_vals = df[y]
                 plt.scatter(x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx])
 
-        # label axes
+        # Label axes and show plot
         ylab = ""
         for y in ys:
             ylab += str(y) + " / "
         ylab = ylab[:-3]
-
         plt.ylabel(ylab, weight="black")
         plt.xlabel(x, weight="black")
-
-        # display
         plt.show()
 
     def plot_xyz_scalar(self, paramfile: str, x: str, y: str, z: str) -> None:
@@ -214,12 +215,12 @@ class Grapher:
             z (str): z header name
         """
 
-        # load datafolder path
+        # Load datafolder path
         df = pd.read_csv(paramfile)
 
-        # plot preferences
-        mpl.rcParams["axes.linewidth"] = 1.75
+        # mpl.rcParams["axes.linewidth"] = 1.75
 
+        # cycle through # of points in each array
         for n in range(df.shape[0]):
 
             # Get values for x and y
@@ -233,10 +234,10 @@ class Grapher:
             )
             colors = plt.cm.viridis(znorm.astype(float))
 
-            # Plot
+            # Plot (x,y) with colorbar
             plt.scatter(xval, yval, color=colors[n])
 
-        # manage colorbar
+        # Manage colorbar
         norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
         objs = plt.colorbar(
             mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
@@ -252,9 +253,7 @@ class Grapher:
             position=(1, 0),
         )
 
-        # label axes
+        # Label axes and show plot
         plt.ylabel(y, weight="black")
         plt.xlabel(x, weight="black")
-
-        # display
         plt.show()

@@ -2,8 +2,14 @@ import pandas as pd
 import numpy as np
 import os
 import csv
+import yaml
 
 from parasol.filestructure import FileStructure
+
+# Set module directory, import constants from yaml file
+MODULE_DIR = os.path.dirname(__file__)
+with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
+    constants = yaml.load(f, Loader=yaml.FullLoader)["analysis"]
 
 
 class Analysis:
@@ -11,11 +17,17 @@ class Analysis:
 
     def __init__(self) -> None:
         """Initializes Analysis class"""
-        self.NUM_MODULES = 24
+
+        # Get file structure
         self.filestructure = FileStructure()
+
+        # Get constants
+        self.derivative_v_step = constants["derivative_v_step"]
 
     # Main tests
 
+    # Note that right now we cant run analysis on MPP file incase we are trying to save to it
+    # TODO change this and below to not use self.___ variables
     def check_test(self, jvfolderpaths: list, mppfolderpaths: list) -> pd.DataFrame:
         """Calcualte FWD and REV Pmp versus time for given JV and MPP folder paths, returns dataframe with data
 
@@ -26,6 +38,7 @@ class Analysis:
         Returns:
             pd.DataFrame: ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         """
+
         self.jv_folders = jvfolderpaths
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
@@ -69,8 +82,9 @@ class Analysis:
 
     # Workhorse functions for check_test and analyze_from_savepath
 
-    # TODO: EDIT NO JVDICT
-    def check_pmps(self) -> float:
+    # TODO: EDIT NO JVDICT or folder
+    # def check_pmps(self, jv_dict, jv_folders) -> list:
+    def check_pmps(self) -> list:
         """Loads the JV files, calculates and returns time, FWD Pmp, and REV Pmp
 
         Returns:
@@ -79,15 +93,16 @@ class Analysis:
             list[np.array]: reverse pmp values for each scan
         """
 
+        # Initialize empty lists to fill with numpy arrays
         t_vals = []
         pmp_fwd_vals = []
         pmp_rev_vals = []
 
-        # cycle through each folder/module
+        # Cycle through each folder/module
         for jv_folder in self.jv_folders:
             jv_file_paths = self.jv_dict[jv_folder]
 
-            # load jv files
+            # Load jv files
             (
                 all_t,
                 all_v,
@@ -97,11 +112,11 @@ class Analysis:
                 all_p_rev,
             ) = self.analysis.load_jv_files(jv_file_paths)
 
-            # make time data numpy array, calc time elapsed
+            # Make time data numpy array, calc time elapsed
             all_t = np.array(all_t)
             all_t_elapsed = all_t - all_t[0]
 
-            # calc pmp
+            # Calc pmp
             pmp_fwd = []
             pmp_rev = []
 
@@ -109,7 +124,7 @@ class Analysis:
                 pmp_fwd.append(np.max(all_p_fwd[index]))
                 pmp_rev.append(np.max(all_p_rev[index]))
 
-            # append to list
+            # Append to list
             t_vals.append(all_t_elapsed)
             pmp_fwd_vals.append(pmp_fwd)
             pmp_rev_vals.append(pmp_rev)
@@ -117,6 +132,7 @@ class Analysis:
         return t_vals, pmp_fwd_vals, pmp_rev_vals
 
     # TODO: should take in jv_folders and jv_dict
+    # def analyze_jv_files(self, jv_dict, jv_folders) -> list:
     def analyze_jv_files(self) -> list:
         """Cycle through JV files, analyze, and make output file for parameters
 
@@ -127,11 +143,10 @@ class Analysis:
         # Make blank array to keep save locations
         save_locations = []
 
-        # cycle through every module/folder in jv dict
+        # Cycle through every module/folder in jv dict
         for jv_folder in self.jv_folders:
-            # Get Module Number
-            module_num = jv_folder.split("_")[-1]
 
+            # Get data from JV files
             jv_file_paths = self.jv_dict[jv_folder]
             (
                 all_t,
@@ -142,18 +157,18 @@ class Analysis:
                 all_p_rev,
             ) = self.load_jv_files(jv_file_paths)
 
-            # make time data numpy array, calc time elapsed
+            # Make time data numpy array, calc time elapsed
             all_t = np.array(all_t)
             all_t_elapsed = all_t - all_t[0]
 
-            # pass all vectors to function to calculate scalars
+            # Pass all vectors to function to calculate scalars
             scalardict_fwd = self._calculate_jv_parameters(
                 all_v, all_j_fwd, all_p_fwd, "FWD"
             )
             scalardict_rev = self._calculate_jv_parameters(
                 all_v, all_j_rev, all_p_rev, "REV"
             )
-            # create scalardict, append time values and results from each scalardict
+            # Create scalardict, append time values and results from each scalardict
             scalardict = {}
             scalardict["Time (Epoch)"] = [t_epoch for t_epoch in all_t]
             scalardict["Time Elapsed (s)"] = [t_ for t_ in all_t_elapsed]
@@ -162,12 +177,16 @@ class Analysis:
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
 
-            # get info from jv file name
+            # Get info from JV file name
             d = self.filestructure.filepath_to_runinfo(jv_file_paths[-1])
-            # create scalar dataframe, filter it, and save it in analyzed folder
+
+            # Create scalar dataframe
             scalar_df = pd.DataFrame(scalardict)
+
+            # Filter dataframe
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
 
+            # Save dataframe to csv
             analysis_file = self.filestructure.get_analyzed_file_name(
                 d["date"], d["name"], d["string_id"]
             )
@@ -192,7 +211,7 @@ class Analysis:
             dict: dictionary of parameter values over time
         """
 
-        # create lists to hold data
+        # Create lists to hold data
         jsc_vals = []
         rsh_vals = []
         voc_vals = []
@@ -204,15 +223,15 @@ class Analysis:
         ff_vals = []
         pce_vals = []
 
-        # cycle through v, j, p values
+        # Cycle through v, j, p values
         for v, j, p in zip(all_v, all_j, all_p):
 
-            # try to calculate scalars
+            # Try to calculate scalars
             try:
 
-                # calculate jsc and rsh using J(v=0) to J(v=0.05)
+                # Calculate Jsc and Rsh using J(v=0) to J(v = v_dir)
                 wherevis0 = np.nanargmin(np.abs(v))
-                wherevis0_1 = np.nanargmin(np.abs(v - 0.05))
+                wherevis0_1 = np.nanargmin(np.abs(v - self.derivative_v_step))
                 j1 = j[wherevis0]
                 j2 = j[wherevis0_1]
                 v1 = v[wherevis0]
@@ -226,8 +245,8 @@ class Analysis:
                     rsh = np.inf
                     jsc = float(b)
 
-                # calculate voc and rs from J(J=0) to 0.05 V before
-                v_iter = max(int(0.05 / (v[2] - v[1])), 1)
+                # Calculate voc and rs from J(J=0) to derivative_v_step V before
+                v_iter = max(int(self.derivative_v_step / (v[2] - v[1])), 1)
                 wherejis0 = np.nanargmin(np.abs(j))
                 wherejis0_1 = wherejis0 - int(v_iter)
                 j1 = j[wherejis0]
@@ -239,31 +258,31 @@ class Analysis:
                 rs = float(abs(1 / m))
                 voc = float(-b / m)
 
-                # calculate Pmp, Vmp, Jmp
+                # Calculate Pmp, Vmp, Jmp
                 pmp = np.nanmax(p)
                 pmaxloc = np.nanargmax(p)
                 vmp = v[pmaxloc]
                 jmp = j[pmaxloc]
 
-                # calculate Rch using vmpp-0.05V to vmpp+0.05V
-                j1 = j[pmaxloc - v_iter]
-                j2 = j[pmaxloc + v_iter]
-                v1 = v[pmaxloc - v_iter]
-                v2 = v[pmaxloc + v_iter]
+                # Calculate Rch using vmpp-(derivative_v_step/2) V to vmpp+(derivative_v_step/2) V
+                j1 = j[pmaxloc - np.floor(v_iter / 2)]
+                j2 = j[pmaxloc + np.floor(v_iter / 2)]
+                v1 = v[pmaxloc - np.floor(v_iter / 2)]
+                v2 = v[pmaxloc + np.floor(v_iter / 2)]
                 if j1 != j2 and v1 != v2:
                     m = (j2 - j1) / (v2 - v1)
                     rch = float(abs(1 / m))
                 else:
                     rch = np.nan
 
-                # calculate FF and PCE if its not going to throw an error, else flag FF as NaN
+                # Calculate FF and PCE if its not going to throw an error, else flag FF as NaN
                 if pmp > 0 and voc > 0 and jsc > 0:
                     ff = 100 * pmp / (voc * jsc)
                     pce = ff * jsc * voc / 100
                 else:
                     ff = np.nan
 
-            # if we run into any issues, just make values for time NaN
+            # If we run into any issues, just make values for time NaN
             except:
                 jsc = np.nan
                 rsh = np.nan
@@ -276,7 +295,7 @@ class Analysis:
                 ff = np.nan
                 pce = np.nan
 
-            # append values to lists
+            # Append values to lists
             finally:
                 jsc_vals.append(jsc)
                 rsh_vals.append(rsh)
@@ -289,7 +308,7 @@ class Analysis:
                 ff_vals.append(ff)
                 pce_vals.append(pce)
 
-        # create dict to hold data
+        # Create dict to hold data
         returndict = {
             direction + " PCE (%)": pce_vals,
             direction + " Jsc (mA/cm2)": jsc_vals,
@@ -332,7 +351,7 @@ class Analysis:
 
         return df_filtered_2
 
-    # Loads jv files
+    # Loads JV files
 
     def load_jv_files(self, jv_file_paths: list) -> list:
         """Loads JV files contained in jv_file_paths, returns data
@@ -349,6 +368,7 @@ class Analysis:
             list[np.ndarray]: list of REV power vectors
         """
 
+        # Create blank lists to fill with numpy arrays
         all_t = []
         all_v = []
         all_j_fwd = []
@@ -383,7 +403,7 @@ class Analysis:
            np.ndarray: REV power vector
         """
 
-        # get time information
+        # Get time information
         with open(jv_file_path) as f:
             reader = csv.reader(f)
             _ = next(reader)  # date
@@ -393,7 +413,7 @@ class Analysis:
             _ = next(reader)  # module
             _ = next(reader)  # area
 
-        # load rest of dataframe and split
+        # Load rest of dataframe, split into paramters, and return
         all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
         all_data = np.transpose(all_data)
         v = all_data[0]
@@ -418,6 +438,7 @@ class Analysis:
             np.ndarray: power denisty vector
         """
 
+        # Get the time information
         with open(mpp_file_path) as f:
             reader = csv.reader(f)
             _ = next(reader)  # date
@@ -427,7 +448,7 @@ class Analysis:
             _ = next(reader)  # module
             _ = next(reader)  # area
 
-        # load rest of dataframe and split
+        # Load rest of dataframe, split into paramters, and return
         all_data = np.loadtxt(mpp_file_path, delimiter=",", skiprows=8)
         all_data = np.transpose(all_data)
         t = all_data[0]
@@ -437,3 +458,7 @@ class Analysis:
         p = all_data[4]
 
         return t, v, i, j, p
+
+
+# TODO: should be able to fit between two points near jsc, mpp, voc to get values
+# TODO: should be able to fit to ideal diode equation to get values

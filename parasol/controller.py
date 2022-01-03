@@ -17,7 +17,7 @@ from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
 
 
-# Set yaml name, load controller info
+# Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
@@ -29,7 +29,7 @@ class Controller:
     def __init__(self) -> None:
         """Initializes the Controller class"""
 
-        # Connect to Relay, Scanner, 3 EastTesters, and Characterization files
+        # Connect to other modules
         self.relay = Relay()
         self.scanner = Scanner()
         self.easttester = {
@@ -116,7 +116,7 @@ class Controller:
         if id not in self.et_channels:
             raise ValueError(f"{id} not valid string id!")
 
-        # Setup jv and mpp timers in main loop
+        # Setup JV and MPP timers in main loop
         jv_future = asyncio.run_coroutine_threadsafe(self.jv_timer(id=id), self.loop)
         jv_future.add_done_callback(future_callback)
         mpp_future = asyncio.run_coroutine_threadsafe(self.mpp_timer(id=id), self.loop)
@@ -173,24 +173,24 @@ class Controller:
             ValueError: string ID not loaded
         """
 
-        # get string saveloc
+        # Get string saveloc
         d = self.strings.get(id, None)
         saveloc = d["_savedir"]
 
-        # destroy all future tasks for the string
+        # Destroy all future tasks for the string
         if id not in self.strings:
             raise ValueError(f"String {id} not loaded!")
         self.strings[id]["jv"]["_future"].cancel()
         self.strings[id]["mpp"]["_future"].cancel()
 
-        # delete the stringid from the dict, remove from queue
+        # Delete the stringid from the dict, remove from queue
         del self.strings[id]
         while id in self.jv_queue._queue:
             self.jv_queue._queue.remove(id)
         while id in self.mpp_queue._queue:
             self.mpp_queue._queue.remove(id)
 
-        # analyze the saveloc
+        # Analyze the saveloc
         print("Analysis saved at :", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
 
@@ -201,6 +201,7 @@ class Controller:
             id (int): string number
         """
 
+        # Get dictionary for test string
         d = self.strings.get(id, None)
 
         # Get date/time and make filepath
@@ -295,6 +296,7 @@ class Controller:
         Args:
             id (int): string number
         """
+        # Add worker to que and start when possible
         await asyncio.sleep(1)
         while self.running:
             self.jv_queue.put_nowait(id)
@@ -307,6 +309,7 @@ class Controller:
             id (int): string number
         """
 
+        # Add worker to que and start when possible
         await asyncio.sleep(1)
         while self.running:
             self.mpp_queue.put_nowait(id)
@@ -315,9 +318,11 @@ class Controller:
     def __make_background_event_loop(self) -> None:
         """Setup background event loop for schedueling tasks"""
 
+        # If we have an issue in the loop, alter the user
         def exception_handler(loop, context):
             print("Exception raised in Controller loop")
 
+        # Start event loop, add jv workers and mpp workers
         self.loop = asyncio.new_event_loop()
         self.loop.set_exception_handler(exception_handler)
         asyncio.set_event_loop(self.loop)
@@ -327,6 +332,8 @@ class Controller:
 
     def start(self) -> None:
         """Create workers / start queue"""
+
+        # Start background event loops
         self.thread = Thread(target=self.__make_background_event_loop)
         self.thread.start()
         time.sleep(0.5)
@@ -341,26 +348,34 @@ class Controller:
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+
+        # Set to running
         self.running = True
 
     def stop(self) -> None:
         """Delete workers,  stop queue, and reset hardware"""
 
-        # close all channels
+        # Close all channels
         self.relay.all_off()
-        # turn off yokogawa
+
+        # Turn off yokogawa
         self.scanner.srcV_measI()
 
+        # Turn off running
         self.running = False
+
+        # Cycle through all tests
         ids = list(self.strings.keys())
         for id in ids:
             # Unload all strings
             self.unload_string(id)
-            # Reset east tester
+            # Reset east tester and yokogawa
+            # TODO: reset yokogawa
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
             et.srcV_measI(ch)
 
+        # Stop event loop
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
@@ -371,7 +386,7 @@ class Controller:
             id (int): string number
         """
 
-        # get dictionary information
+        # Get dictionary information
         d = self.strings.get(id, None)
 
         # Emsure MPP isn't running.
@@ -382,7 +397,7 @@ class Controller:
             et = self.easttester[et_key]
             et.output_off(ch)
 
-            # cycle through each device on the string
+            # Cycle through each device on the string
             for index, module in enumerate(d["module_channels"]):
 
                 # Get date/time and make filepath
@@ -404,7 +419,7 @@ class Controller:
                 v, fwd_i, rev_i = self.characterization.scan_jv(d, self.scanner)
                 self.relay.all_off()
 
-                # flip the current density, convert to mA, calculate parameters
+                # Flip the current density, convert to mA, calculate parameters
                 fwd_i *= -1 * 1000
                 rev_i *= -1 * 1000
                 fwd_j = fwd_i / d["area"]
@@ -435,15 +450,15 @@ class Controller:
                     for line in zip(v, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
                         writer.writerow(line)
 
-                # save any useful raw data to the string dictionary
+                # Save any useful raw data to the string dictionary
                 d["jv"]["v"][index] = v
                 d["jv"]["j_fwd"][index] = fwd_j
                 d["jv"]["j_rev"][index] = rev_j
 
-            # increase jv scan count
+            # Increase jv scan count
             d["jv"]["scan_count"] += 1
 
-            # Turn on easttester output at old vmpp if we have one --> will need to change
+            # Turn on easttester output at old vmpp if we have one
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 et.output_on(ch)
@@ -461,7 +476,7 @@ class Controller:
         # Get last MPP, will be none if JV not filled
         last_vmpp = self.characterization.calc_last_vmp(d)
 
-        # if we dont have a vmpp, skip
+        # If we dont have a Vmpp, skip
         if last_vmpp is None:
             return
 
@@ -472,7 +487,7 @@ class Controller:
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
 
-            # scan mpp
+            # Scan mpp
             t, v, i = self.characterization.track_mpp(d, et, ch, last_vmpp)
 
             # Convert current to mA and calc j and p
@@ -480,7 +495,7 @@ class Controller:
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
 
-            # Update d[] by moving last value to first and append new values
+            # Update dictionary by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = p
             d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]

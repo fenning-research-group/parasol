@@ -1,7 +1,7 @@
 import os
 import yaml
 
-# Set yaml name, load controller info
+# Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["filestructure"]
@@ -10,9 +10,11 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 class FileStructure:
     """FileStructure package for PARASOL"""
 
+    # TODO pull modules from yaml file
     def __init__(self) -> None:
         """Initializes the FileStructure class"""
 
+        # get root directory and number of modules
         self.root_folder = constants["root_dir"]
         self.NUM_MODULES = 24
 
@@ -204,7 +206,7 @@ class FileStructure:
         Returns:
             dict: runinfo ["module_id", "string_id", "name", "date"]
         """
-
+        # Get file name, pull out name of file (account for _#), then other info
         file_name = os.path.basename(file_path)
         name_len = (file_name.count("_") + 1) - 5
         name = ""
@@ -276,9 +278,11 @@ class FileStructure:
             list[str]: paths to JV folders
             str: path to analyzed folder
         """
+
+        # Get path to MPP folders
         mpp_folder = [os.path.join(stringpath, "MPP")]
 
-        # path to jv folders --> rootfolder:JV_{module}:
+        # Get path to jv folders --> rootfolder:JV_{module}:
         jv_folders = []
         for i in range(1, self.NUM_MODULES + 1):
             jv_folder = os.path.join(stringpath, "JV_" + str(int(i)))
@@ -300,8 +304,8 @@ class FileStructure:
             dict: test_dict[test_path] = [mpp_path, jv_paths, analyzed_path]
         """
 
+        # create dictionary mapping MPP, JV, and Anlayzed folders to test folder
         test_dict = {}
-
         for test_path in test_paths:
             mpp_folder, jv_folders, analyzed_folder = self.get_test_subfolders(
                 test_path

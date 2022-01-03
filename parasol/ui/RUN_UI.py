@@ -1,9 +1,7 @@
 import PyQt5
-
 from PyQt5.QtWidgets import QMainWindow, QApplication, QCheckBox, QComboBox
 from PyQt5.QtWidgets import QPushButton, QLineEdit
 from PyQt5 import QtCore
-
 from PyQt5 import uic
 import sys
 import os
@@ -17,17 +15,15 @@ from parasol.analysis.analysis import Analysis
 from parasol.analysis.grapher import Grapher
 from parasol.filestructure import FileStructure
 
-# get directry of this file, import YAML for controller
+# Set module directory
 MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
 
-# Ensure resolution/dpi is correct
+# Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 
 if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
-    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    PyQt5.conQtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 
 class RUN_UI(QMainWindow):
@@ -38,7 +34,7 @@ class RUN_UI(QMainWindow):
 
         super(RUN_UI, self).__init__()
 
-        # Initialize Controller
+        # Initialize packages
         self.controller = Controller()
         self.characterization = Characterization()
         self.analysis = Analysis()
@@ -337,8 +333,8 @@ class RUN_UI(QMainWindow):
     def update_dictionaries(self) -> None:
         """Updates dictionaries[stringid] with data from the UI"""
 
-        self.strings = {}
         # Make Dictionary for each channel
+        self.strings = {}
         self.strings[1] = {
             "start_date": self.startdate1,
             "_savedir": self.savedir1,
@@ -460,6 +456,7 @@ class RUN_UI(QMainWindow):
             stringid(int): string id
         """
 
+        # Call subfunctions to lock all changeable values in string subsection of the UI as well as unlock 'unload' and 'check test' buttons
         if stringid == 1:
             self.lock_value1()
         elif stringid == 2:
@@ -480,6 +477,7 @@ class RUN_UI(QMainWindow):
             stringid (int): string id
         """
 
+        # Call subfunctions to unlock all changeable values in string subsection of the UI as well as lock 'unload' and 'check test' buttons
         if stringid == 1:
             self.unlock_value1()
         elif stringid == 2:
@@ -576,7 +574,7 @@ class RUN_UI(QMainWindow):
         # Get ID
         id = int(stringid)
 
-        # Unlock values
+        # Unlock user inputs
         self.unlock_values(id)
 
         # Call Unload String from controller
@@ -616,35 +614,24 @@ class RUN_UI(QMainWindow):
         print("Checking string: " + str(stringid))
 
         # Get useful info from wave
-        # rootpath = constants["_savedir"]
         id = int(stringid)
-        # startdate = self.strings[id]["start_date"]
-        # name = self.strings[id]["name"]
         module_channels = self.strings[id]["module_channels"]
 
-        # # Create folderpaths to folders that contain data
-        # test_path = os.path.join(rootpath, startdate)
-        # test_path = os.path.join(test_path, startdate + "_" + name)
-
-        # test_path = self.strings[id]["_savedir"]
+        # Create folderpaths to folders that contain data
         jv_paths = []
         for module in module_channels:
             jvfolder = self.filestructure.get_jv_folder(
                 self.strings[id]["start_date"], self.strings[id]["name"], module
             )
             jv_paths.append(jvfolder)
-            # jv_paths.append(os.path.join(test_path, "JV_" + str(module)))
-
         mpp_paths = [
             self.filestructure.get_mpp_folder(
                 self.strings[id]["start_date"], self.strings[id]["name"]
             )
         ]
-        # mpp_paths = [os.path.join(test_path, "MPP")]
 
-        # Send to analysis to give quick plot
+        # Send to analysis & grapher to plot MPP from JV curves
         plot_df = self.analysis.check_test(jv_paths, mpp_paths)
-
         self.grapher.plot_x_v_ys(
             plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         )
@@ -1021,5 +1008,7 @@ class RUN_UI(QMainWindow):
 
     def launch_gui(self) -> None:
         """Launches GUI"""
+
+        # exexcutes the GUI
         app = QApplication(sys.argv)
         app.exec_()

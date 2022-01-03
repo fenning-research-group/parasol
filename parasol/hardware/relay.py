@@ -4,6 +4,7 @@ import yaml
 import os
 from threading import Lock
 
+# Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["relay"]
@@ -29,8 +30,11 @@ class Relay:
     def __init__(self) -> None:
         """Initliazes the Relay class"""
 
+        # Get lock and constants
         self.lock = Lock()
-        self.RESPONSE_TIME = constants["response_time"]  # sec to complete command
+        self.RESPONSE_TIME = constants["response_time"]
+
+        # Relay commands: [string id] = command to open relay
         self.relay_commands = {
             1: (65, 1),
             2: (65, 2),
@@ -57,6 +61,8 @@ class Relay:
             23: (70, 23),
             24: (70, 24),
         }
+
+        # Connect to relayboard
         self.connect(constants["address"])
 
     def connect(self, address: str) -> None:
@@ -65,6 +71,8 @@ class Relay:
         Args:
             address (str): GPIB connection address
         """
+
+        # Connect to relay using serial (GPIB)
         self.inst = serial.Serial(address)
 
     @relay_lock
@@ -77,11 +85,13 @@ class Relay:
         Raises:
             ValueError: ID is not valid
         """
+
+        # If relay ID does not exist, raise error
         if id not in self.relay_commands:
             raise ValueError(f"Invalid relay id")
 
+        # If it does, open it
         cmd0, cmd1 = self.relay_commands[id]
-        # print(f"Turning on relay {id}")
         self.inst.write((cmd0).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
         self.inst.write((cmd1).to_bytes(1, "big"))
@@ -90,6 +100,7 @@ class Relay:
     @relay_lock
     def all_off(self) -> None:
         """Turn all relays off"""
-        # print(f"Turning off all relays")
+
+        # Close all relay IDs
         self.inst.write((71).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)

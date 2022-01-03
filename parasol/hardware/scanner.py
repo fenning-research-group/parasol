@@ -7,7 +7,7 @@ from threading import Lock
 
 mpl.rcParams.update(mpl.rcParamsDefault)
 
-# Set yaml name, load yokogawa info
+# Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["yokogawa"]
@@ -19,6 +19,7 @@ class Scanner:
     def __init__(self) -> None:
         """Initliazes the Scanner class for Yokogawa ____"""  # TODO add yoko address
 
+        # Load constants and lock
         self.lock = Lock()
         self.connect(constants["address"])
         self.sourcedelay = constants["source_delay"]
@@ -27,6 +28,8 @@ class Scanner:
         self.inttime = constants["integration_time"]
         self.max_voltage = constants["max_voltage"]
         self.max_current = constants["max_current"]
+
+        # Set to source voltage measure current and set sourcing current to false
         self._sourcing_current = False
         self.srcV_measI()
 
@@ -36,6 +39,8 @@ class Scanner:
         Args:
             yoko_address (str): GPIB connection address
         """
+
+        # connect to the yokogawa using pyvisa (GPIB)
         rm = pyvisa.ResourceManager()
         self.yoko = rm.open_resource(yoko_address)
         self.yoko.timeout = 10  # 10 seconds
@@ -74,6 +79,8 @@ class Scanner:
 
     def srcI_measV(self) -> None:
         """Setup source current and measure voltage"""
+
+        # Basic commands
         self.yoko.write("*RST")  # Reset Factory
         self.yoko.write(":SOUR:FUNC CURR")  # Source function Current
         self.yoko.write(":SOUR:VOLT:PROT:LINK ON")  # Limiter tracking ON
@@ -104,10 +111,14 @@ class Scanner:
 
     def output_on(self) -> None:
         """Turn output on"""
+
+        # Turn output on
         self.yoko.write(":OUTP:STAT ON")
 
     def output_off(self) -> None:
         """Turn output off"""
+
+        # Turn output off
         self.yoko.write(":OUTP:STAT OFF")
 
     def _trig_read(self) -> str:
@@ -117,6 +128,7 @@ class Scanner:
             str : last output value
         """
 
+        # Read last measurement from  machine
         return self.yoko.query(":INIT;*TRG;:FETC?")
 
     def set_voltage(self, v: float) -> None:
@@ -125,8 +137,12 @@ class Scanner:
         Args:
             v (float): desired voltage (V)
         """
+
+        # Ensure we are sourcing voltage
         if self._sourcing_current:
             self.srcV_measI()
+
+        # Set voltage
         tempstr = ":SOUR:VOLT:LEV " + str(v) + "V"
         self.yoko.write(tempstr)
 
@@ -136,8 +152,12 @@ class Scanner:
         Args:
             i (float): desired current (A)
         """
+
+        # Ensure we are sourcing current
         if not self._sourcing_current:
             self.srcI_measV()
+
+        # Set current
         tempstr = ":SOUR:CURR:LEV " + str(i) + "A"
         self.yoko.write(tempstr)
 
@@ -147,6 +167,8 @@ class Scanner:
         Returns:
             float: open circut voltage (V)
         """
+
+        # Set current to 0, measure voltage
         self.set_current(0)
         self.output_on()
         voc = float(self._trig_read())
@@ -160,6 +182,8 @@ class Scanner:
         Returns:
             float: short circuit current (A)
         """
+
+        # Set voltage to 0, measure current
         self.set_voltage(0)
         self.output_on()
         isc = float(self._trig_read)
@@ -197,8 +221,6 @@ class Scanner:
 
         return v, i
 
-        # set up jv mode where # shoud match the if statment below and "" should match name of that test
-
     def iv_sweep_quadrant_fwd_rev(
         self, vstart: float, vend: float, steps: int
     ) -> np.ndarray:
@@ -226,13 +248,11 @@ class Scanner:
         i_fwd[:] = np.nan
         i_rev[:] = np.nan
 
-        # Turn on output, set voltage, measure current, turn off output
+        # Turn on output
         self.output_on()
 
-        # Scan forward until we get out of the quadrant
+        # Find point before 1st point in quadrant
         index = 0
-
-        # find point before 1st point in quadrant
         for v_point in v:
             if v_point >= 0:
                 break
@@ -240,7 +260,7 @@ class Scanner:
         index -= 1
         start_index = index
 
-        # cycle from there until we get out of the quadrant
+        # Cycle from there until we get out of the quadrant
         while index <= len(v):
             self.set_voltage(v[index])
             i_fwd[index] = float(self._trig_read())
@@ -254,6 +274,7 @@ class Scanner:
             i_rev[index] = float(self._trig_read())
             index -= 1
 
+        # Turn output off
         self.output_off()
 
         return v, i_fwd, i_rev
@@ -300,7 +321,7 @@ class Scanner:
         index -= 1
         start_index = index
 
-        # Turn on output, set voltage, measure current, turn off output
+        # Turn on output
         self.output_on()
 
         # Scan rev until we get back to starting point
@@ -310,13 +331,14 @@ class Scanner:
             i_rev[index] = float(self._trig_read())
             index -= 1
 
-        # cycle from there until we get out of the quadrant
+        # Cycle from there until we get out of the quadrant
         index = start_index
         while index <= end_index:
             self.set_voltage(v[index])
             i_fwd[index] = float(self._trig_read())
             index += 1
 
+        # Turn output off
         self.output_off()
 
         return v, i_fwd, i_rev

@@ -6,7 +6,7 @@ import time
 from threading import Lock
 
 
-# Set yaml name, load yokogawa info
+# Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.load(f, Loader=yaml.FullLoader)["easttester"]
@@ -36,6 +36,7 @@ class EastTester:
             port (str): COM port connection to easttester
         """
 
+        # Connect and setup lock
         self.lock = Lock()
         self.connect(port=port)
 
@@ -50,7 +51,7 @@ class EastTester:
         self.voltage_range = constants["voltage_range"]
         self.current_range = constants["current_range"]
 
-        # Set both channels to source voltage and measure current when initialized
+        # Set both channels to source voltage and measure current when initialized (1st is dummy index)
         self._sourcing_current = [None, False, False]
         self.srcV_measI(1)
         self.srcV_measI(2)
@@ -73,11 +74,9 @@ class EastTester:
             channel (int or string): eastester channel to alter
         """
 
-        # Set to constant voltage, and continuous operation
+        # Set to constant current
         self.et.write(("CH" + str(channel) + ":MODE CC\n").encode())
         time.sleep(self.et_delay)
-        # self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())
-        # time.sleep(self.et_delay)
 
         # Set ranges for voltage, as well as max and min
         # "NAME" : RANGE (MAX/SHUTOFF)
@@ -124,11 +123,9 @@ class EastTester:
             channel (int or string): eastester channel to alter
         """
 
-        # Set to constant voltage, and continuous operation
+        # Set to constant voltage
         self.et.write(("CH" + str(channel) + ":MODE CV\n").encode())
         time.sleep(self.et_delay)
-        # self.et.write(("TRAN" + str(channel) + ":MODE COUT\n").encode())
-        # time.sleep(self.et_delay)
 
         # Set ranges for voltage, as well as max and min
         # "NAME" : RANGE (MAX/SHUTOFF)
@@ -202,12 +199,12 @@ class EastTester:
             channel (int or string): eastester channel to alter
             voltage (float): desired voltage (V)
         """
-
-        # New
+        # If we are in wrong mode, switch
         if self._sourcing_current[channel] == True:
             self.srcV_measI(channel)
             self._sourcing_current[channel] = False
 
+        # Set voltage and wait
         self.et.write(("VOLT" + str(channel) + ":CV %f\n" % (voltage)).encode())
         time.sleep(self.source_delay)
 
@@ -221,11 +218,14 @@ class EastTester:
             current (float): desired current (A)
         """
 
+        # If we are in wrong mode, switch
         if self._sourcing_current[channel] == False:
             self.srcI_measV(channel)
             self._sourcing_current[channel] = True
 
+        # set current and wait
         self.et.write(("CURR" + str(channel) + ":CC %f\n" % (current)).encode())
+        time.sleep(self.source_delay)
 
     @et_lock
     def measure_current(self, channel: int) -> float:
@@ -240,7 +240,7 @@ class EastTester:
 
         i = 0
         curr_tot = 0
-        # To avoid marching in the wrong direction we need to average here
+        # Average over avg_num (set in hardwareconstants.yaml) times for stats
         while i < self.et_avg_num:
 
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
@@ -269,7 +269,7 @@ class EastTester:
         """
         i = 0
         volt_tot = 0
-        # To avoid marching in the wrong direction we need to average here
+        # Average over avg_num (set in hardwareconstants.yaml) times for stats
         while i < self.et_avg_num:
 
             self.et.write(("MEAS" + str(channel) + ":VOLT?\n").encode())
@@ -295,6 +295,8 @@ class EastTester:
         Returns:
             float: open circut voltage (V)
         """
+
+        # Set current to 0, measure voltage
         self.set_current(channel, 0)
         voc = self.measure_voltage(channel)
 
@@ -311,10 +313,11 @@ class EastTester:
             float: short circut current (A)
         """
 
+        # Set voltage to 0, measure current
         self.set_voltage(channel, 0)
-        jsc = self.measure_current(channel)
+        isc = self.measure_current(channel)
 
-        return jsc
+        return isc
 
     # no et lock, it calls functions with them
     def set_V_measure_I(self, channel: int, voltage: float) -> float:
@@ -327,6 +330,8 @@ class EastTester:
         Returns:
             float: current (A) reading
         """
+
+        # Set voltage, wait, measure current
         self.set_voltage(channel, voltage)
         curr = self.measure_current(channel)
         return curr
@@ -342,6 +347,7 @@ class EastTester:
             float: voltage (V) reading
         """
 
+        # Set current, wait, measure voltage
         self.set_current(channel, voltage)
         volt = self.measure_voltage(channel)
         return volt
