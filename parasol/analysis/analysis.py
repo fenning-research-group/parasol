@@ -26,11 +26,9 @@ class Analysis:
         # Get constants
         self.derivative_v_step = constants["derivative_v_step"]
 
-    # Main tests
+    # Main analysis --> check_test runs from RUN_UI and analyze_from_savepath on string unload
 
-    # Note that right now we cant run analysis on MPP file incase we are trying to save to it
-    # TODO change this and below to not use self.___ variables
-    def check_test(self, jvfolderpaths: list, mppfolderpaths: list) -> pd.DataFrame:
+    def check_test(self, jv_folders: list, mppfolderpaths: list) -> pd.DataFrame:
         """Calcualte FWD and REV Pmp versus time for given JV and MPP folder paths, returns dataframe with data
 
         Args:
@@ -41,15 +39,16 @@ class Analysis:
             pd.DataFrame: ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         """
 
-        self.jv_folders = jvfolderpaths
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
-        self.jv_dict = self.filestructure.map_test_files(self.jv_folders)
+        jv_dict = self.filestructure.map_test_files(jv_folders)
 
-        # calculate pmpps (1 array per module), stick in dictionary
-        t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps()
+        # Calculate pmpps (1 array per module), stick in dataframe and return to plot
+        t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps(jv_folders, jv_dict)
         col_names = ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
         plot_df = pd.DataFrame(columns=col_names, data=data)
+
+        # Note that right now we cant run analysis on MPP file incase we are trying to save to it
 
         return plot_df
 
@@ -64,28 +63,29 @@ class Analysis:
         """
 
         # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder
-        self.stringpath = stringpath
         (
-            self.mpp_folder,
-            self.jv_folders,
-            self.analyzed_folder,
+            mpp_folder,
+            jv_folders,
+            analyzed_folder,
         ) = self.filestructure.get_test_subfolders(stringpath)
-        os.mkdir(self.analyzed_folder)
+        os.mkdir(analyzed_folder)
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
-        self.jv_dict = self.filestructure.map_test_files(self.jv_folders)
+        jv_dict = self.filestructure.map_test_files(jv_folders)
 
         # Analyze JV files: For each module export scalars_{module}.csv
-        analyzed_waves = self.analyze_jv_files()
+        analyzed_waves = self.analyze_jv_files(jv_folders, jv_dict, analyzed_folder)
 
         return analyzed_waves
 
     # Workhorse functions for check_test and analyze_from_savepath
 
-    # TODO: EDIT NO JVDICT or folder
-    # def check_pmps(self, jv_dict, jv_folders) -> list:
-    def check_pmps(self) -> list:
+    def check_pmps(self, jv_folders: list, jv_dict: dict) -> list:
         """Loads the JV files, calculates and returns time, FWD Pmp, and REV Pmp
+
+        Args:
+            jv_folders (list[str]): list of jv folders
+            jv_dict (dict): dictionary mapping jv folders to file paths
 
         Returns:
             numpy: time values for each scan
@@ -99,8 +99,8 @@ class Analysis:
         pmp_rev_vals = []
 
         # Cycle through each folder/module
-        for jv_folder in self.jv_folders:
-            jv_file_paths = self.jv_dict[jv_folder]
+        for jv_folder in jv_folders:
+            jv_file_paths = jv_dict[jv_folder]
 
             # Load jv files
             (
@@ -131,23 +131,28 @@ class Analysis:
 
         return t_vals, pmp_fwd_vals, pmp_rev_vals
 
-    # TODO: should take in jv_folders and jv_dict
-    # def analyze_jv_files(self, jv_dict, jv_folders) -> list:
-    def analyze_jv_files(self) -> list:
+    def analyze_jv_files(
+        self, jv_folders: list, jv_dict: dict, analyzed_folder: list
+    ) -> list:
         """Cycle through JV files, analyze, and make output file for parameters
 
-        Returns:
-            list[str]: path to analyzed files
+        Args:
+             jv_folders (list[str]): list of jv folders
+             jv_dict (dict): dictionary mapping jv folders to file paths
+             analyzed_folder (str): analyzed folder path
+
+         Returns:
+             list[str]: path to analyzed files
         """
 
         # Make blank array to keep save locations
         save_locations = []
 
         # Cycle through every module/folder in jv dict
-        for jv_folder in self.jv_folders:
+        for jv_folder in jv_folders:
 
             # Get data from JV files
-            jv_file_paths = self.jv_dict[jv_folder]
+            jv_file_paths = jv_dict[jv_folder]
             (
                 all_t,
                 all_v,
@@ -177,21 +182,21 @@ class Analysis:
                 scalardict[k] = v
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
-            
+
             # Get info from JV file name
             d = self.filestructure.filepath_to_runinfo(jv_file_paths[-1])
 
             # Create scalar dataframe
             scalar_df = pd.DataFrame(scalardict)
-            
+
             # Filter dataframe
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
-            
+
             # Save dataframe to csv
             analysis_file = self.filestructure.get_analyzed_file_name(
                 d["date"], d["name"], d["string_id"]
             )
-            save_loc = os.path.join(self.analyzed_folder, analysis_file)
+            save_loc = os.path.join(analyzed_folder, analysis_file)
             scalar_df_filtered.to_csv(save_loc, index=False)
             save_locations.append(save_loc)
 
