@@ -21,7 +21,7 @@ yokogawa:
   command_delay: 0 # ms between commands (built in on yoko)
   integration_time: 10 # ms for integration time
   max_voltage: 5 # Max volts
-  max_current: 3.3 # Max amps
+  max_current: 1 # Max amps #TODO LOWER
 
 easttester:
   # Adress is stored in 'controller'

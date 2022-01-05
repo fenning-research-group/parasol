@@ -191,7 +191,7 @@ class FileStructure:
         Returns:
             str: name of Analyed file
         """
-        analyzed_file_path = f"{startdate}_{name}_{id}_all_Analyzed_1.csv"
+        analyzed_file_path = f"{startdate}_{name}_{id}_all_Scalars_1.csv"
         return analyzed_file_path
 
     # Get useful save information from the file name, make runinfo dict

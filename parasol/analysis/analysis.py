@@ -4,6 +4,8 @@ import os
 import csv
 import yaml
 
+import math
+
 from parasol.filestructure import FileStructure
 
 # Set module directory, import constants from yaml file
@@ -40,7 +42,6 @@ class Analysis:
         """
 
         self.jv_folders = jvfolderpaths
-
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         self.jv_dict = self.filestructure.map_test_files(self.jv_folders)
 
@@ -109,7 +110,7 @@ class Analysis:
                 all_p_fwd,
                 all_j_rev,
                 all_p_rev,
-            ) = self.analysis.load_jv_files(jv_file_paths)
+            ) = self.load_jv_files(jv_file_paths)
 
             # Make time data numpy array, calc time elapsed
             all_t = np.array(all_t)
@@ -167,6 +168,7 @@ class Analysis:
             scalardict_rev = self._calculate_jv_parameters(
                 all_v, all_j_rev, all_p_rev, "REV"
             )
+
             # Create scalardict, append time values and results from each scalardict
             scalardict = {}
             scalardict["Time (Epoch)"] = [t_epoch for t_epoch in all_t]
@@ -175,16 +177,16 @@ class Analysis:
                 scalardict[k] = v
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
-
+            
             # Get info from JV file name
             d = self.filestructure.filepath_to_runinfo(jv_file_paths[-1])
 
             # Create scalar dataframe
             scalar_df = pd.DataFrame(scalardict)
-
+            
             # Filter dataframe
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
-
+            
             # Save dataframe to csv
             analysis_file = self.filestructure.get_analyzed_file_name(
                 d["date"], d["name"], d["string_id"]
@@ -245,7 +247,7 @@ class Analysis:
                     jsc = float(b)
 
                 # Calculate voc and rs from J(J=0) to derivative_v_step V before
-                v_iter = max(int(self.derivative_v_step / (v[2] - v[1])), 1)
+                v_iter = max(math.ceil(self.derivative_v_step / (v[2] - v[1])), 1)
                 wherejis0 = np.nanargmin(np.abs(j))
                 wherejis0_1 = wherejis0 - int(v_iter)
                 j1 = j[wherejis0]
@@ -264,10 +266,10 @@ class Analysis:
                 jmp = j[pmaxloc]
 
                 # Calculate Rch using vmpp-(derivative_v_step/2) V to vmpp+(derivative_v_step/2) V
-                j1 = j[pmaxloc - np.floor(v_iter / 2)]
-                j2 = j[pmaxloc + np.floor(v_iter / 2)]
-                v1 = v[pmaxloc - np.floor(v_iter / 2)]
-                v2 = v[pmaxloc + np.floor(v_iter / 2)]
+                j1 = j[pmaxloc - math.floor(v_iter / 2)]
+                j2 = j[pmaxloc + math.floor(v_iter / 2)]
+                v1 = v[pmaxloc - math.floor(v_iter / 2)]
+                v2 = v[pmaxloc + math.floor(v_iter / 2)]
                 if j1 != j2 and v1 != v2:
                     m = (j2 - j1) / (v2 - v1)
                     rch = float(abs(1 / m))

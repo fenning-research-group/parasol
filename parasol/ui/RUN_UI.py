@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 import yaml
 
+
 # Import Controller (call load, unload), characterization (know test types), and analysis (check on tests)
 from parasol.controller import Controller
 from parasol.characterization import Characterization
@@ -23,7 +24,7 @@ if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 
 if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
-    PyQt5.conQtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 
 class RUN_UI(QMainWindow):
