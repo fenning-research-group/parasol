@@ -358,19 +358,20 @@ class Controller:
         # Close all channels
         self.relay.all_off()
 
-        # Turn off yokogawa
-        self.scanner.srcV_measI()
-
         # Turn off running
         self.running = False
+
+        # Reset yokogawa
+        self.scanner.srcV_measI()
 
         # Cycle through all tests
         ids = list(self.strings.keys())
         for id in ids:
+
             # Unload all strings
             self.unload_string(id)
-            # Reset east tester and yokogawa
-            # TODO: reset yokogawa
+
+            # Reset east tester
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
             et.srcV_measI(ch)

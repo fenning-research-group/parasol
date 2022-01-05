@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
+import math
+
 from parasol.filestructure import FileStructure
 
 
@@ -98,7 +100,7 @@ class Grapher:
         Args:
             jvfolder (str): path to JV folder
         """
-        # create dictionary where dict[testfolder] = list of jv files
+        # Create dictionary where dict[testfolder] = list of jv files
         jv_dict = self.filestructure.map_test_files([jvfolder])
 
         # Feed file into the dictionary to get a list of JV files
@@ -124,21 +126,108 @@ class Grapher:
             all_p_rev,
         ) = self.analysis.load_jv_files(jvfiles)
 
-        # Create linear colormap that spans the number of files
-        colors = plt.cm.viridis(np.linspace(0, 1, len(jvfiles)))
-
         # Make time data numpy array, calc time elapsed
         all_t = np.array(all_t)
         all_t_elapsed = all_t - all_t[0]
+
+        # Create linear colormap that spans the number of files
+        colors = plt.cm.viridis(np.linspace(0, 1, len(jvfiles)))
+
+        # Get testname for title
+        testname = self.filestructure.filepath_to_runinfo(jvfiles[0])["name"]
+        testdate = self.filestructure.filepath_to_runinfo(jvfiles[0])["date"]
+        titlestr = testname + "( " + testdate + " )"
 
         # Plot FWD and REV curves, REV with --
         for jvpair in range(len(all_t_elapsed)):
             plt.plot(all_v[jvpair], all_j_fwd[jvpair], color=colors[jvpair])
             plt.plot(all_v[jvpair], all_j_rev[jvpair], "--", color=colors[jvpair])
 
-        # Label axes and show plot
+        # Create legend for 4 files to show change over time
+        if len(jvfiles) >= 4:
+            l1 = 0
+            l2 = math.floor((1 / 3) * (len(all_j_fwd) - 1))
+            l3 = math.ceil((2 / 3) * (len(all_j_fwd) - 1))
+            l4 = len(all_j_fwd) - 1
+            plt.legend(
+                [all_j_fwd[l1], all_j_fwd[l2], all_j_fwd[l3], all_j_fwd[l4]],
+                [
+                    all_t_elapsed[l1],
+                    all_t_elapsed[l2],
+                    all_t_elapsed[l3],
+                    all_t_elapsed[l4],
+                ],
+                loc="upper left",
+            )
+
+        # Customize plot and show
         plt.ylabel("J (mA/cm2)", weight="black")
         plt.xlabel("V (V)", weight="black")
+        plt.title(titlestr)
+        plt.show()
+
+    # Plot MPP Tracking for a single string
+
+    def plot_string_mpp(self, mppfolder: str) -> None:
+        """Plot MPP information in given MPP folder
+
+        Args:
+            mppfolder (str): path to MPP folder
+        """
+
+        # Create dictionary where dict[testfolder] = list of mpp files
+        mpp_dict = self.filestructure.map_test_files([mppfolder])
+
+        # Feed file into the dictionary to get a list of MPP files
+        mpp_file_paths = mpp_dict[mppfolder]
+
+        self.plot_mpps(self, mpp_file_paths)
+
+    def plot_mpps(self, mppfiles: list) -> None:
+        """Plots MPPs for input MPP files
+
+        Args:
+            mppfiles (list[str]): list of MPP files
+        """
+
+        # Load MPP Files
+        (
+            all_t,
+            all_v,
+            all_i,
+            all_j,
+            all_p,
+        ) = self.analysis.load_mpp_files(mppfiles)
+
+        # Make time data numpy array, calc time elapsed
+        all_t = np.array(all_t)
+        all_t_elapsed = all_t - all_t[0]
+
+        # Create linear colormap that spans the number of files
+        colors = plt.cm.viridis(np.linspace(0, 1, len(mppfiles)))
+
+        # Get testname and list of modules for title and lengend
+        testname = self.filestructure.filepath_to_runinfo(mppfiles[0])["name"]
+        testdate = self.filestructure.filepath_to_runinfo(mppfiles[0])["date"]
+        titlestr = testname + "( " + testdate + " )"
+        module_ids = []
+        for file in mppfiles:
+            module_ids.append(self.filestructure.filepath_to_runinfo(file)["module_id"])
+
+        # Plot time versus power, add legends for every trace
+        for idx in range(len(all_t_elapsed)):
+            plt.plot(
+                all_t_elapsed[idx],
+                all_p[idx],
+                color=colors[idx],
+                legend="Module #" + str(module_ids[idx]),
+            )
+
+        # Customize plot and show
+        plt.ylabel("MPPT MPP (mW/cm2)", weight="black")
+        plt.xlabel("Time Elapsed (sec)", weight="black")
+        plt.title(titlestr)
+        plt.legend(loc="lower left", frameon=False)
         plt.show()
 
     # Plot x v y with color axis as different devices

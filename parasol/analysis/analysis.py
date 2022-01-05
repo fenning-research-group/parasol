@@ -46,7 +46,6 @@ class Analysis:
 
         # calculate pmpps (1 array per module), stick in dictionary
         t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps()
-
         col_names = ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
         plot_df = pd.DataFrame(columns=col_names, data=data)

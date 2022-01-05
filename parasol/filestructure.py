@@ -10,13 +10,12 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 class FileStructure:
     """FileStructure package for PARASOL"""
 
-    # TODO pull modules from yaml file
     def __init__(self) -> None:
         """Initializes the FileStructure class"""
 
         # get root directory and number of modules
         self.root_folder = constants["root_dir"]
-        self.NUM_MODULES = 24
+        self.NUM_MODULES = constants["num_modules"]
 
     # Get folder paths given inputs, make paths
 

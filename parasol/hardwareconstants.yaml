@@ -1,5 +1,6 @@
 filestructure:
   root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location
+  num_modules: 24 # Number of modules
 
 characterization:
   mppt_voltage_step: 0.01 # Volts

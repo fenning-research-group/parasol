@@ -17,7 +17,7 @@ class Scanner:
     """Scanner package for PARASOL"""
 
     def __init__(self) -> None:
-        """Initliazes the Scanner class for Yokogawa ____"""  # TODO add yoko address
+        """Initliazes the Scanner class for Yokogawa GS610"""
 
         # Load constants and lock
         self.lock = Lock()
