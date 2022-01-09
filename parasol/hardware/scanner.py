@@ -5,6 +5,9 @@ import numpy as np
 import matplotlib as mpl
 from threading import Lock
 
+from parasol.hardware.port_finder import get_port
+
+
 mpl.rcParams.update(mpl.rcParamsDefault)
 
 # Set module directory, import constants from yaml file
@@ -19,9 +22,9 @@ class Scanner:
     def __init__(self) -> None:
         """Initliazes the Scanner class for Yokogawa GS610"""
 
-        # Load constants and lock
+        # Load constants, connect, and lock
         self.lock = Lock()
-        self.connect(constants["address"])
+        self.connect()
         self.sourcedelay = constants["source_delay"]
         self.sensedelay = constants["sense_delay"]
         self.command_delay = constants["command_delay"]  # None, built in on yoko
@@ -33,17 +36,16 @@ class Scanner:
         self._sourcing_current = False
         self.srcV_measI()
 
-    def connect(self, yoko_address: str) -> None:
-        """Connects to the yokogawa
+    def connect(self) -> None:
+        """Connects to the yokogawa"""
 
-        Args:
-            yoko_address (str): GPIB connection address
-        """
+        # get address
+        yoko_address = constants["address"]
 
         # connect to the yokogawa using pyvisa (GPIB)
         rm = pyvisa.ResourceManager()
         self.yoko = rm.open_resource(yoko_address)
-        self.yoko.timeout = 10  # 10 seconds
+        self.yoko.timeout = constants['timeout'] 
 
     def srcV_measI(self) -> None:
         """Setup source voltage and measure current"""

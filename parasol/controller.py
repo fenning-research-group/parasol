@@ -17,12 +17,6 @@ from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
 
 
-# Set module directory, import constants from yaml file
-MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.load(f, Loader=yaml.FullLoader)["controller"]
-
-
 class Controller:
     """Controller package for PARASOL"""
 
@@ -33,9 +27,9 @@ class Controller:
         self.relay = Relay()
         self.scanner = Scanner()
         self.easttester = {
-            "12": EastTester(port=constants["ET_1_PORT"]),
-            #        "34": EastTester(port=constants["ET_2_PORT"]),
-            #        "56": EastTester(port=constants["ET_3_PORT"]),
+            "12": EastTester(et_num = 1),
+            "34": EastTester(et_num = 2),
+            "56": EastTester(et_num = 3),
         }
         self.characterization = Characterization()
         self.analysis = Analysis()

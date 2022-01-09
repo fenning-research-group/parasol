@@ -4,6 +4,9 @@ import yaml
 import os
 from threading import Lock
 
+from parasol.hardware.port_finder import get_port
+
+
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
@@ -63,17 +66,17 @@ class Relay:
         }
 
         # Connect to relayboard
-        self.connect(constants["address"])
+        self.connect()
 
-    def connect(self, address: str) -> None:
-        """Connect to the relay
+    def connect(self) -> None:
+        """Connect to the relay"""
+        
+        # Get port information
+        port = constants["address"]
+        # port = get_port(constants["device_identifiers"])
 
-        Args:
-            address (str): GPIB connection address
-        """
-
-        # Connect to relay using serial (GPIB)
-        self.inst = serial.Serial(address)
+        # Connect to relay using serial
+        self.inst = serial.Serial(port)
 
     @relay_lock
     def on(self, id: int) -> None:

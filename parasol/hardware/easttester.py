@@ -5,6 +5,9 @@ import serial
 import time
 from threading import Lock
 
+from parasol.hardware.port_finder import get_port
+
+
 
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
@@ -29,16 +32,16 @@ def et_lock(f):
 class EastTester:
     """EastTester package for PARASOL"""
 
-    def __init__(self, port: str) -> None:
+    def __init__(self, et_num: int) -> None:
         """Initliazes the Eastester class for EastTester 5420
 
         Args:
-            port (str): COM port connection to easttester
+            et_num (int): Easttester number
         """
 
         # Connect and setup lock
         self.lock = Lock()
-        self.connect(port=port)
+        self.connect(et_num=et_num)
 
         # Get constants from hardwareconstants
         self.source_delay = constants["source_delay"]
@@ -56,12 +59,27 @@ class EastTester:
         self.srcV_measI(1)
         self.srcV_measI(2)
 
-    def connect(self, port: str) -> None:
+    def connect(self, et_num: int) -> None:
         """Connects to the easttester at the given port
 
         Args:
-            port (str): COM port connection to easttester
+            et_num (int): Easttester number
         """
+
+        # Get port information
+        if et_num == 1:
+            port = constants['ET_1_PORT']
+            #port = get_port(constants["device_identifiers"]["ET_1"])
+
+        elif et_num == 2:
+            port = constants['ET_2_PORT']
+            #port = get_port(constants["device_identifiers"]["ET_2"])
+
+        elif et_num == 3:
+            port = constants['ET_3_PORT']
+            #port = get_port(constants["device_identifiers"]["ET_3"])
+        
+
 
         # Connect using serial, use highest transferrate and shortest timeout
         self.et = serial.Serial(port, baudrate=115200, timeout=0.005)

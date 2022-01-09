@@ -2,16 +2,13 @@ filestructure:
   root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location
   num_modules: 24 # Number of modules
 
-characterization:
-  mppt_voltage_step: 0.01 # Volts
-
-controller:
-  ET_1_PORT: 'COM4' # Port for ET1
-  ET_2_PORT: 'COM5' # Port for ET2 --> need to confirm
-  ET_3_PORT: 'COM6' # Port for ET3 --> need to confirm
-
 relay:
+  # device_identifiers:
+  #   pid: 24577
+  #   vid: 1027
+  #   location: None
   address: 'COM3'
+
   response_time: 0.1 # Seconds for relay switch to settle
 
 yokogawa:
@@ -21,10 +18,27 @@ yokogawa:
   command_delay: 0 # ms between commands (built in on yoko)
   integration_time: 10 # ms for integration time
   max_voltage: 5 # Max volts
-  max_current: 1 # Max amps #TODO LOWER
+  max_current: 1 # Max amps 
+  timeout : 10 # sec
 
 easttester:
-  # Adress is stored in 'controller'
+  # device_idenitifiers:
+    # ET_1:
+      # pid: 29987
+      # vid: 6790
+      # location: "1-4.2"
+    # ET_2:
+      # pid: 29987
+      # vid: 6790
+      # location: "1-4.3"
+    # ET_3:
+      # pid: 29987
+      # vid: 6790
+      # location: "1-4.4"
+  ET_1_PORT: 'COM10'
+  ET_2_PORT: 'COM11'
+  ET_3_PORT: 'COM9'
+
   source_delay: 0.5 # Seconds for source to settle (voltage stabilization) [0.25,0.25,0.5 had lag]
   sense_delay: 0.25 # Seconds for sense to return value
   command_delay: 0.05 # Seconds between commands
@@ -35,6 +49,9 @@ easttester:
   v_min: 0.1 # Min voltage registered by ET
   voltage_range: "LOW" # "LOW" or "HIGH"
   current_range: "LOW" # "LOW" or "HIGH"
+
+characterization:
+  mppt_voltage_step: 0.01 # Volts
 
 analysis:
   derivative_v_step : 0.05 # Voltage step for derivative (Rs, Rsh, Rch) in JV analysis

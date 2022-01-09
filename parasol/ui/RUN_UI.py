@@ -6,8 +6,6 @@ from PyQt5 import uic
 import sys
 import os
 from datetime import datetime
-import yaml
-
 
 # Import Controller (call load, unload), characterization (know test types), and analysis (check on tests)
 from parasol.controller import Controller
@@ -27,6 +25,31 @@ if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 
+# Multithreading wrapper
+def run_async(func):
+	"""
+    Function decorator, intended to make "func" run in a separate thread (asynchronously).
+    
+    Arg:
+        func (function): function to run in seperate thread
+    Returns:
+        function: created thread object
+    """
+
+    # import modules needed
+	from threading import Thread
+	from functools import wraps
+
+    # wrapper function
+	@wraps(func)
+	def async_func(*args, **kwargs):
+		func_hl = Thread(target = func, args = args, kwargs = kwargs)
+		func_hl.start()
+		return func_hl
+
+	return async_func
+
+# Main function
 class RUN_UI(QMainWindow):
     """Run UI package for PARASOL"""
 
@@ -562,6 +585,7 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
+    @run_async
     def unload(self, stringid: int) -> None:
         """Unloads the module using the command in controller.py and the stringid
 
@@ -605,6 +629,7 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
+    @run_async
     def checktest(self, stringid: int) -> None:
         """Checks the test using the string id with the commands in analysis.py & grapher.py
 
