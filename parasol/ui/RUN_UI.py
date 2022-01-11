@@ -37,13 +37,14 @@ def run_async(func):
     """
 
     # import modules needed
-	from threading import Thread
+    # from threading import Thread
+	from multiprocessing import Process
 	from functools import wraps
 
     # wrapper function
 	@wraps(func)
 	def async_func(*args, **kwargs):
-		func_hl = Thread(target = func, args = args, kwargs = kwargs)
+		func_hl = Process(target = func, args = args, kwargs = kwargs)
 		func_hl.start()
 		return func_hl
 
@@ -629,7 +630,9 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
-    @run_async
+    # @run_async
+    # matplotlib doesnt work with threading...
+    # cant thread the
     def checktest(self, stringid: int) -> None:
         """Checks the test using the string id with the commands in analysis.py & grapher.py
 

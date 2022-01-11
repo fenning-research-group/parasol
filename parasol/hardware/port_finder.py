@@ -7,6 +7,13 @@ def get_port(device_identifiers):
         str: port address
     """    
 
+    port = _get_port_windows(device_identifiers)
+
+    if port is None:
+        raise ValueError(f"Device not found!")
+    return port
+
+def _get_port_windows(device_identifiers):
     for p in lp.comports():
         match = True
         for attr, value in device_identifiers.items():

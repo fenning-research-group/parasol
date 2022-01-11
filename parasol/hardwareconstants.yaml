@@ -3,11 +3,11 @@ filestructure:
   num_modules: 24 # Number of modules
 
 relay:
-  # device_identifiers:
-  #   pid: 24577
-  #   vid: 1027
-  #   location: None
-  address: 'COM3'
+  device_identifiers: # Generally COM3
+    pid: 24577
+    vid: 1027
+    serial_number : 'AQ01FVSHA'
+    # location: None
 
   response_time: 0.1 # Seconds for relay switch to settle
 
@@ -22,22 +22,19 @@ yokogawa:
   timeout : 10 # sec
 
 easttester:
-  # device_idenitifiers:
-    # ET_1:
-      # pid: 29987
-      # vid: 6790
-      # location: "1-4.2"
-    # ET_2:
-      # pid: 29987
-      # vid: 6790
-      # location: "1-4.3"
-    # ET_3:
-      # pid: 29987
-      # vid: 6790
-      # location: "1-4.4"
-  ET_1_PORT: 'COM10'
-  ET_2_PORT: 'COM11'
-  ET_3_PORT: 'COM9'
+  device_identifiers:
+    ET_1: # Generally COM10
+      pid: 29987
+      vid: 6790
+      location: "1-4.2"
+    ET_2: # Generally COM11
+      pid: 29987
+      vid: 6790
+      location: "1-4.3"
+    ET_3: # Generally COM9
+      pid: 29987
+      vid: 6790
+      location: "1-4.4"
 
   source_delay: 0.5 # Seconds for source to settle (voltage stabilization) [0.25,0.25,0.5 had lag]
   sense_delay: 0.25 # Seconds for sense to return value

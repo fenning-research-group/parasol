@@ -68,16 +68,16 @@ class EastTester:
 
         # Get port information
         if et_num == 1:
-            port = constants['ET_1_PORT']
-            #port = get_port(constants["device_identifiers"]["ET_1"])
+            #port = constants['ET_1_PORT']
+            port = get_port(constants["device_identifiers"]["ET_1"])
 
         elif et_num == 2:
-            port = constants['ET_2_PORT']
-            #port = get_port(constants["device_identifiers"]["ET_2"])
+            #port = constants['ET_2_PORT']
+            port = get_port(constants["device_identifiers"]["ET_2"])
 
         elif et_num == 3:
-            port = constants['ET_3_PORT']
-            #port = get_port(constants["device_identifiers"]["ET_3"])
+            #port = constants['ET_3_PORT']
+            port = get_port(constants["device_identifiers"]["ET_3"])
         
 
 

@@ -72,8 +72,8 @@ class Relay:
         """Connect to the relay"""
         
         # Get port information
-        port = constants["address"]
-        # port = get_port(constants["device_identifiers"])
+        # port = constants["address"]
+        port = get_port(constants["device_identifiers"])
 
         # Connect to relay using serial
         self.inst = serial.Serial(port)
