@@ -250,14 +250,21 @@ class FileStructure:
         """
         return [f.path for f in os.scandir(folder) if f.is_file()]
 
-    def get_tests(self) -> list:
+    def get_tests(self, rootdir=None) -> list:
         """Returns a list of all test paths in root directory
 
         Returns:
             list[str]: paths to all test folders
         """
+
+        # If no root directory specified, use default
+        if rootdir is None:
+            root_folder = self.root_folder
+        else:
+            root_folder = rootdir
+
         # get date folders
-        self.date_folders = self.get_subfolders(self.root_folder)
+        self.date_folders = self.get_subfolders(root_folder)
 
         # get test folders
         test_folders = []
