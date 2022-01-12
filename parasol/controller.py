@@ -84,8 +84,8 @@ class Controller:
 
         Args:
             id (int): string number
-            startdate (datetime): start date for test
-            name (string): test name
+            startdate (string): start date for test (XYYYYMMDD)
+            name (string): test name (basename, no _idx added)
             area (float): area of each module on string
             jv_mode (int): JV mode (#'s correspond to option # in UI)
             mpp_mode (int): MPP mode (#'s correspond to option # in UI)
@@ -155,7 +155,7 @@ class Controller:
         # Create the base MPP file with header and no data (we will append to it)
         self._make_mpp_file(id)
 
-        return self.strings[id]["_savedir"]
+        return self.strings[id]["name"]
 
     def unload_string(self, id: int) -> None:
         """Unloads a string of modules
@@ -252,10 +252,10 @@ class Controller:
             scan_future.add_done_callback(future_callback)
 
             # Scan the module and let user know
-            print(f"Scanning {id}")
+            # print(f"Scanning {id}")
             await scan_future
             self.jv_queue.task_done()
-            print(f"Done Scanning {id}")
+            print(f"Scanned {id}")
 
     async def mpp_worker(self, loop: asyncio.AbstractEventLoop) -> None:
         """Worker for MPP scans
@@ -279,10 +279,10 @@ class Controller:
             scan_future.add_done_callback(future_callback)
 
             # Scan the string and let the user know
-            print(f"Tracking {id}")
+            # print(f"Tracking {id}")
             await scan_future
             self.mpp_queue.task_done()
-            print(f"Done Tracking {id}")
+            print(f"Tracked {id}")
 
     async def jv_timer(self, id: int) -> None:
         """Manages timing for JV worker

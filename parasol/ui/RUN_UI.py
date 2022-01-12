@@ -558,9 +558,6 @@ class RUN_UI(QMainWindow):
         id = int(stringid)
         d = self.strings[id]
 
-        # Lock Values
-        self.lock_values(id)
-
         # Grab values from dictionary
         start_date = d["start_date"]
         name = d["name"]
@@ -575,7 +572,7 @@ class RUN_UI(QMainWindow):
         mpp_interval = float(d["mpp"]["interval"])
 
         # Call Load String from controller
-        saveloc = self.controller.load_string(
+        updated_name = self.controller.load_string(
             id,
             start_date,
             name,
@@ -590,25 +587,34 @@ class RUN_UI(QMainWindow):
             jv_steps,
         )
 
-        # Update saveloc
+        # reconstruct savedir from name and date
+        updated_savedir = self.filestructure.get_test_folder(start_date, updated_name)
+
+        # Update saveloc, name
         if id == 1:
-            self.savedir1 = saveloc
-            d["_savedir"] = saveloc
+            self.name1.setText(updated_name)
+            self.savedir1 = updated_savedir
         elif id == 2:
-            self.savedir2 = saveloc
-            d["_savedir"] = saveloc
+            self.name2.setText(updated_name)
+            self.savedir2 = updated_savedir
         elif id == 3:
-            self.savedir3 = saveloc
-            d["_savedir"] = saveloc
+            self.name3.setText(updated_name)
+            self.savedir3 = updated_savedir
         elif id == 4:
-            self.savedir4 = saveloc
-            d["_savedir"] = saveloc
+            self.name4.setText(updated_name)
+            self.savedir4 = updated_savedir
         elif id == 5:
-            self.savedir5 = saveloc
-            d["_savedir"] = saveloc
+            self.name5.setText(updated_name)
+            self.savedir5 = updated_savedir
         elif id == 6:
-            self.savedir6 = saveloc
-            d["_savedir"] = saveloc
+            self.name6.setText(updated_name)
+            self.savedir6 = updated_savedir
+
+        d["_savedir"] = updated_savedir
+        d["name"] = updated_name
+
+        # Lock values/buttons
+        self.lock_values(id)
 
     # Run unload in a new thread to not interfere with other measurments active
     @run_async_thread

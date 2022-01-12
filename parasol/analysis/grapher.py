@@ -83,7 +83,15 @@ class Grapher:
             # for each parameter, plot all data
             y_vals = df[y_param]
             for i in range(len(y_vals)):
-                plt.scatter(x_vals[i], y_vals[i])
+                
+                # plot using fwd/rev arrows
+                if "FWD" in y_param:
+                    plt.scatter(x_vals[i], y_vals[i], marker=self.fwd_rev_cursor_dict[0])
+                elif "REV" in y_param:
+                    plt.scatter(x_vals[i], y_vals[i], marker=self.fwd_rev_cursor_dict[1])
+                else:
+                    plt.scatter(x_vals[i], y_vals[i])
+
                 y_label += str(y_param) + " / "
 
         # label axes, show plot
