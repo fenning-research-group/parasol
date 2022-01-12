@@ -24,12 +24,36 @@ if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
 if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
+# Multithreading wrapper
+def run_async_thread(func):
+    """
+    Function decorator, intended to make "func" run in a separate thread (asynchronously).
+
+    Arg:
+        func (function): function to run in seperate thread
+    Returns:
+        function: created thread object
+    """
+
+    # import modules needed
+    from threading import Thread
+    from functools import wraps
+
+    # wrapper function
+    @wraps(func)
+    def async_func(*args, **kwargs):
+        func_hl = Thread(target=func, args=args, kwargs=kwargs)
+        func_hl.start()
+        return func_hl
+
+    return async_func
+
 
 # Multithreading wrapper
-def run_async(func):
-	"""
+def run_async_process(func):
+    """
     Function decorator, intended to make "func" run in a separate thread (asynchronously).
-    
+
     Arg:
         func (function): function to run in seperate thread
     Returns:
@@ -38,17 +62,18 @@ def run_async(func):
 
     # import modules needed
     # from threading import Thread
-	from multiprocessing import Process
-	from functools import wraps
+    from multiprocessing import Process
+    from functools import wraps
 
     # wrapper function
-	@wraps(func)
-	def async_func(*args, **kwargs):
-		func_hl = Process(target = func, args = args, kwargs = kwargs)
-		func_hl.start()
-		return func_hl
+    @wraps(func)
+    def async_func(*args, **kwargs):
+        func_hl = Process(target=func, args=args, kwargs=kwargs)
+        func_hl.start()
+        return func_hl
 
-	return async_func
+    return async_func
+
 
 # Main function
 class RUN_UI(QMainWindow):
@@ -586,7 +611,7 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
-    @run_async
+    @run_async_thread
     def unload(self, stringid: int) -> None:
         """Unloads the module using the command in controller.py and the stringid
 
@@ -631,8 +656,8 @@ class RUN_UI(QMainWindow):
             d["_savedir"] = saveloc
 
     # @run_async
-    # matplotlib doesnt work with threading...
-    # cant thread the
+    # matplotlib doesnt work with threading so here we will use multiprocessing (i dont think this will actually solve problem)
+    @run_async_process
     def checktest(self, stringid: int) -> None:
         """Checks the test using the string id with the commands in analysis.py & grapher.py
 
