@@ -14,6 +14,9 @@ from parasol.analysis.analysis import Analysis
 from parasol.analysis.grapher import Grapher
 from parasol.filestructure import FileStructure
 
+from multiprocessing import Process
+from threading import Thread
+
 # Set module directory
 MODULE_DIR = os.path.dirname(__file__)
 
@@ -48,32 +51,21 @@ def run_async_thread(func):
 
     return async_func
 
-
-# Multithreading wrapper
-def run_async_process(func):
+# _check_test function outside of the class so that we can use multiprocessing on it
+def _check_test(jv_paths: list, mpp_paths: list) -> None:
     """
-    Function decorator, intended to make "func" run in a separate thread (asynchronously).
+    Process to check test and plot
 
-    Arg:
-        func (function): function to run in seperate thread
-    Returns:
-        function: created thread object
+    Args:
+        jv_paths(list[str]): list of paths to JV folders
+        mpp_paths(list[str]): list of paths to MPP folders 
     """
-
-    # import modules needed
-    # from threading import Thread
-    from multiprocessing import Process
-    from functools import wraps
-
-    # wrapper function
-    @wraps(func)
-    def async_func(*args, **kwargs):
-        func_hl = Process(target=func, args=args, kwargs=kwargs)
-        func_hl.start()
-        return func_hl
-
-    return async_func
-
+    analysis = Analysis()
+    grapher = Grapher()
+    plot_df = analysis.check_test(jv_paths, mpp_paths)
+    grapher.plot_x_v_ys(
+        plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+    )
 
 # Main function
 class RUN_UI(QMainWindow):
@@ -611,6 +603,7 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
+    # Run unload in a new thread to not interfere with other measurments active
     @run_async_thread
     def unload(self, stringid: int) -> None:
         """Unloads the module using the command in controller.py and the stringid
@@ -655,9 +648,9 @@ class RUN_UI(QMainWindow):
             self.savedir6 = saveloc
             d["_savedir"] = saveloc
 
-    # @run_async
-    # matplotlib doesnt work with threading so here we will use multiprocessing (i dont think this will actually solve problem)
-    @run_async_process
+        # Let user know its complete
+        print("String " + str(stringid)+ " unload successful")
+
     def checktest(self, stringid: int) -> None:
         """Checks the test using the string id with the commands in analysis.py & grapher.py
 
@@ -684,11 +677,13 @@ class RUN_UI(QMainWindow):
             )
         ]
 
+        Process(target = _check_test, args = (jv_paths, mpp_paths)).start()
+
         # Send to analysis & grapher to plot MPP from JV curves
-        plot_df = self.analysis.check_test(jv_paths, mpp_paths)
-        self.grapher.plot_x_v_ys(
-            plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
-        )
+        # plot_df = self.analysis.check_test(jv_paths, mpp_paths)
+        # self.grapher.plot_x_v_ys(
+        #     self.plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+        # )
 
     ################################################################################
     # Buttons / Duplicated Functions
