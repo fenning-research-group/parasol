@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Run GUI</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>run_icon.png</normaloff>run_icon.png</iconset>
   </property>
   <widget class="QWidget" name="MainWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -25,8 +29,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1130</width>
-         <height>1102</height>
+         <width>1138</width>
+         <height>1098</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_2">

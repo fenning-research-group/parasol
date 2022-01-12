@@ -51,6 +51,7 @@ def run_async_thread(func):
 
     return async_func
 
+
 # _check_test function outside of the class so that we can use multiprocessing on it
 def _check_test(jv_paths: list, mpp_paths: list) -> None:
     """
@@ -58,14 +59,20 @@ def _check_test(jv_paths: list, mpp_paths: list) -> None:
 
     Args:
         jv_paths(list[str]): list of paths to JV folders
-        mpp_paths(list[str]): list of paths to MPP folders 
+        mpp_paths(list[str]): list of paths to MPP folders
     """
+    # Get analysis and grapher classes
     analysis = Analysis()
     grapher = Grapher()
+
+    # Calculate "Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"
     plot_df = analysis.check_test(jv_paths, mpp_paths)
+
+    # Plot "Time Elapsed (s)" vsersus "FWD Pmp (mW/cm2)" and "REV Pmp (mW/cm2)"
     grapher.plot_x_v_ys(
         plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
     )
+
 
 # Main function
 class RUN_UI(QMainWindow):
@@ -649,7 +656,7 @@ class RUN_UI(QMainWindow):
             d["_savedir"] = saveloc
 
         # Let user know its complete
-        print("String " + str(stringid)+ " unload successful")
+        print("String " + str(stringid) + " unload successful")
 
     def checktest(self, stringid: int) -> None:
         """Checks the test using the string id with the commands in analysis.py & grapher.py
@@ -677,7 +684,8 @@ class RUN_UI(QMainWindow):
             )
         ]
 
-        Process(target = _check_test, args = (jv_paths, mpp_paths)).start()
+        # Start process to anlayze and plot data in new process --> requires multiple cores
+        Process(target=_check_test, args=(jv_paths, mpp_paths)).start()
 
         # Send to analysis & grapher to plot MPP from JV curves
         # plot_df = self.analysis.check_test(jv_paths, mpp_paths)
