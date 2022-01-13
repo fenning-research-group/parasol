@@ -66,7 +66,7 @@ class Grapher:
             10: "X",
         }
 
-    def plot_x_v_ys(self, df: pd.DataFrame, x: str, ys: list) -> None:
+    def plot_x_v_ys(self, df: pd.DataFrame, x: str, ys: list, **plt_kwargs) -> None:
         """Plots x vs. y for a set of ys (1 graph)
 
         Args:
@@ -92,11 +92,11 @@ class Grapher:
                 
                 # plot using fwd/rev arrows
                 if "FWD" in y_param:
-                    plt.scatter(x_vals[i], y_vals[i], marker=self.fwd_rev_cursor_dict[0])
+                    plt.scatter(x_vals[i], y_vals[i], marker=self.fwd_rev_cursor_dict[0], **plt_kwargs)
                 elif "REV" in y_param:
-                    plt.scatter(x_vals[i], y_vals[i], marker=self.fwd_rev_cursor_dict[1])
+                    plt.scatter(x_vals[i], y_vals[i], marker=self.fwd_rev_cursor_dict[1], **plt_kwargs)
                 else:
-                    plt.scatter(x_vals[i], y_vals[i])
+                    plt.scatter(x_vals[i], y_vals[i], **plt_kwargs)
 
                 y_label += str(y_param) + " / "
 
@@ -110,7 +110,7 @@ class Grapher:
 
     # Plot JV scans for a single module
 
-    def plot_module_jvs(self, jvfolder: str) -> None:
+    def plot_module_jvs(self, jvfolder: str, **plt_kwargs) -> None:
         """Plot JVs in given JV folder
 
         Args:
@@ -123,9 +123,9 @@ class Grapher:
         jv_file_paths = jv_dict[jvfolder]
 
         # Plot JVs for each module
-        self.plot_jvs(jv_file_paths)
+        self.plot_jvs(jv_file_paths, **plt_kwargs)
 
-    def plot_jvs(self, jvfiles: list) -> None:
+    def plot_jvs(self, jvfiles: list, **plt_kwargs) -> None:
         """Plot JVs for input JV files
 
         Args:
@@ -156,8 +156,8 @@ class Grapher:
 
         # Plot FWD and REV curves, REV with --
         for jvpair in range(len(all_t_elapsed)):
-            plt.plot(all_v[jvpair], all_j_fwd[jvpair], color=colors[jvpair])
-            plt.plot(all_v[jvpair], all_j_rev[jvpair], "--", color=colors[jvpair])
+            plt.plot(all_v[jvpair], all_j_fwd[jvpair], color=colors[jvpair], **plt_kwargs)
+            plt.plot(all_v[jvpair], all_j_rev[jvpair], "--", color=colors[jvpair], **plt_kwargs)
 
         # Create legend for 4 files to show change over time
         if len(jvfiles) >= 4:
@@ -184,7 +184,7 @@ class Grapher:
 
     # Plot MPP Tracking for a single string
 
-    def plot_string_mpp(self, mppfolder: str) -> None:
+    def plot_string_mpp(self, mppfolder: str, **plt_kwargs) -> None:
         """Plot MPP information in given MPP folder
 
         Args:
@@ -197,9 +197,9 @@ class Grapher:
         # Feed file into the dictionary to get a list of MPP files
         mpp_file_paths = mpp_dict[mppfolder]
 
-        self.plot_mpps(self, mpp_file_paths)
+        self.plot_mpps(self, mpp_file_paths, **plt_kwargs)
 
-    def plot_mpps(self, mppfiles: list) -> None:
+    def plot_mpps(self, mppfiles: list, **plt_kwargs) -> None:
         """Plots MPPs for input MPP files
 
         Args:
@@ -237,6 +237,7 @@ class Grapher:
                 all_p[idx],
                 color=colors[idx],
                 legend="Module #" + str(module_ids[idx]),
+                **plt_kwargs,
             )
 
         # Customize plot and show
@@ -248,19 +249,25 @@ class Grapher:
 
     # Plot x v y with color axis as different devices
     # Plot x v y with color axis another parameter (z)
-    # THESE RETURN FIGURES RIGHT NOW
+    # THESE RUN ON AXES LIKE THEY SHOULD! 
 
-    def plot_xy_scalars(self, paramfiles: list, x: str, y: str) -> None:
+    def plot_xy_scalars(self, paramfiles: list, x: str, y: str, ax : plt.axes = None, **plt_kwargs) -> plt.axes:
         """Plot x vs. y for a set of scalar files
 
         Args:
             paramfiles (list[str]): path to file containing x and y values (scalars)
             x (str): x header name
             y (str): y header name
+            ax (plt.axes): axes
+            **plt_kwargs : additional plot options
+        
+        Returns:
+            plt.ax: plotted axes
         """
-
-        # mpl.rcParams["axes.linewidth"] = 1.75
-        fig = plt.figure()
+        # If not passed axes, use last set
+        if ax is None:
+            #fig, ax = plt.subplots()
+            ax = plt.gca()
 
         # Cycle through paramfiles
         for paramfile in paramfiles:
@@ -271,25 +278,32 @@ class Grapher:
             # Get x and y values, add to plot
             x_vals = df[x]
             y_vals = df[y]
-            plt.scatter(x_vals, y_vals)
+            ax.scatter(x_vals, y_vals, **plt_kwargs)
 
-        # Label axes and show plot
-        plt.ylabel(y, weight="black")
-        plt.xlabel(x, weight="black")
-        #plt.show()
-        return fig
+        # Label axes, no title
+        ax.set_ylabel(y, weight="black")
+        ax.set_xlabel(x, weight="black")
+        # ax.set_title("")
 
-    def plot_xy2_scalars(self, paramfiles: list, x: str, ys: list) -> None:
+        # Return axes
+        return ax
+
+    def plot_xy2_scalars(self, paramfiles: list, x: str, ys: list, ax : plt.axes = None, **plt_kwargs) -> plt.axes:
         """Plots x vs. y for a set of scalar files
 
         Args:
             paramfiles (list[str]): paths to file containing x and y values (scalars)
             x (str): x header name
             ys (list[str]): y header names
+            ax (plt.axes): axes
+            **plt_kwargs : additional plot options
+        
+        Returns:
+            plt.ax: plotted axes
         """
-
-        # mpl.rcParams["axes.linewidth"] = 1.75
-        fig = plt.figure()
+        # If not passed axes, use last set
+        if ax is None:
+            ax = plt.gca()
 
         # Cycle through paramfiles
         for paramfile in paramfiles:
@@ -303,20 +317,21 @@ class Grapher:
             # Cycle through y values, and add (x,y) to plot
             for idx, y in enumerate(ys):
                 y_vals = df[y]
-                plt.scatter(x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx])
+                ax.scatter(x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx], **plt_kwargs)
 
-        # Label axes and show plot
+        # Label axes , no title
         ylab = ""
         for y in ys:
             ylab += str(y) + " / "
         ylab = ylab[:-3]
-        plt.ylabel(ylab, weight="black")
-        plt.xlabel(x, weight="black")
-        
-        #plt.show()
-        return fig
+        ax.set_ylabel(ylab, weight="black")
+        ax.set_xlabel(x, weight="black")
+        # ax.set_title("")
 
-    def plot_xyz_scalar(self, paramfile: str, x: str, y: str, z: str) -> None:
+        # Return axes
+        return ax
+
+    def plot_xyz_scalar(self, paramfile: str, x: str, y: str, z: str, ax : plt.axes = None, **plt_kwargs) -> plt.axes:
         """Plots x vs. y with z colorbar for a set of scalar files
 
         Args:
@@ -324,13 +339,18 @@ class Grapher:
             x (str): x header name
             y (str): y header name
             z (str): z header name
+            ax (plt.axes): axes
+            **plt_kwargs : additional plot options
+        
+        Returns:
+            plt.ax: plotted axes
         """
+        # If not passed axes, use last set
+        if ax is None:
+            ax = plt.gca()
 
         # Load datafolder path
         df = pd.read_csv(paramfile)
-
-        # mpl.rcParams["axes.linewidth"] = 1.75
-        fig = plt.figure()
 
         # cycle through # of points in each array
         for n in range(df.shape[0]):
@@ -347,12 +367,15 @@ class Grapher:
             colors = plt.cm.viridis(znorm.astype(float))
 
             # Plot (x,y) with colorbar
-            plt.scatter(xval, yval, color=colors[n])
+            ax.scatter(xval, yval, color=colors[n], **plt_kwargs)
+
 
         # Manage colorbar
         norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
+        
         objs = plt.colorbar(
             mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
+            ax = ax,
             orientation="vertical",
             label=str(z),
         )
@@ -366,7 +389,8 @@ class Grapher:
         )
 
         # Label axes and show plot
-        plt.ylabel(y, weight="black")
-        plt.xlabel(x, weight="black")
-        #plt.show()
-        return fig
+        ax.set_ylabel(y, weight="black")
+        ax.set_xlabel(x, weight="black")
+
+        # Return axes
+        return ax

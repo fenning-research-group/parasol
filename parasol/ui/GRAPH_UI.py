@@ -68,15 +68,19 @@ class GRAPH_UI(QMainWindow):
         # xspacer = 10
         # ystart = 0
         # yspacer = 10
-        # width = 270
-        # height = 180
+        width = 270
+        height = 180
 
         # # Get main loadout for appending the graphs to
-        # self.layout = self.findChild(PyQt5.QtWidgets.QVBoxLayout, "verticalLayout")
-        # self.fwd_jsc_fig = plt.figure(figsize =(width,height))
-        # self.fwd_jsc_canvas = FigureCanvas(self.fwd_jsc_fig)
-        # self.layout.addWidget(self.fwd_jsc_canvas)
+        self.layout = self.findChild(PyQt5.QtWidgets.QVBoxLayout, "verticalLayout")
+        
+        self.fwd_jsc_fig = plt.figure(figsize =(width,height))
+        self.fwd_jsc_canvas = FigureCanvas(self.fwd_jsc_fig)
+        
+        self.layout.addWidget(self.fwd_jsc_canvas)
+
         # self._jsc_ax = self.fwd_jsc_canvas.figure.subplots()
+        # self.fwd_jsc_plot = None
         # self._jsc_ax.plot([1],[2])
 
 
@@ -178,6 +182,7 @@ class GRAPH_UI(QMainWindow):
             elif self.test_selection_dict[key] == False:
                 self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
 
+
     def update_plots(self, analyzed_file_lists : list):
                 
         allfiles = []
@@ -185,57 +190,71 @@ class GRAPH_UI(QMainWindow):
             for analyzed_file in analyzed_file_list_for_given_test:
                 allfiles.append(analyzed_file)
 
+        #fig, ax = plt.subplots(1, figsize=(3, 2))
+        # if self.fwd_jsc_plot:
+        #     self.fwd_jsc_plot.remove()
+        self.fwd_jsc_fig.clear()
+        self.fwd_jsc_ax = self.fwd_jsc_fig.add_subplot(111)
+
+        self.fwd_jsc_plot = self.grapher.plot_xy_scalars(
+            allfiles,
+            self.grapher.variable_dict["Time Elapsed"],
+            self.grapher.variable_dict["FWD Jsc"],
+            self.fwd_jsc_ax 
+            )
+
+        self.fwd_jsc_canvas.draw()
 
         # Cycle through paramfiles
-        fwd_jsc_fig = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["FWD Jsc"] )
-        fwd_voc_fig = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["FWD Voc"] )
-        fwd_ff_fig = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["FWD FF"] )
-        fwd_pce_fig = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["FWD PCE"] )
+        # fwd_jsc_fig = self.grapher.plot_xy_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     self.grapher.variable_dict["FWD Jsc"] )
+        # fwd_voc_fig = self.grapher.plot_xy_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     self.grapher.variable_dict["FWD Voc"] )
+        # fwd_ff_fig = self.grapher.plot_xy_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     self.grapher.variable_dict["FWD FF"] )
+        # fwd_pce_fig = self.grapher.plot_xy_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     self.grapher.variable_dict["FWD PCE"] )
         
-        rev_jsc_fig = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["REV Jsc"] )
-        rev_voc_fig = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["REV Voc"] )
-        rev_ff_fig = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["REV FF"] )
-        rev_pce_fig = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["REV PCE"] )
+        # rev_jsc_fig = self.grapher.plot_xy_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     self.grapher.variable_dict["REV Jsc"] )
+        # rev_voc_fig = self.grapher.plot_xy_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     self.grapher.variable_dict["REV Voc"] )
+        # rev_ff_fig = self.grapher.plot_xy_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     self.grapher.variable_dict["REV FF"] )
+        # rev_pce_fig = self.grapher.plot_xy_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     self.grapher.variable_dict["REV PCE"] )
 
-        rser_fig = self.grapher.plot_xy2_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            [self.grapher.variable_dict["FWD Rs"], self.grapher.variable_dict["REV Rs"]]
-            )
-        rsh_fig = self.grapher.plot_xy2_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            [self.grapher.variable_dict["FWD Rsh"], self.grapher.variable_dict["REV Rsh"]]
-            )
-        rch_fig = self.grapher.plot_xy2_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            [self.grapher.variable_dict["FWD Rch"], self.grapher.variable_dict["REV Rch"]]
-            )
+        # rser_fig = self.grapher.plot_xy2_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     [self.grapher.variable_dict["FWD Rs"], self.grapher.variable_dict["REV Rs"]]
+        #     )
+        # rsh_fig = self.grapher.plot_xy2_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     [self.grapher.variable_dict["FWD Rsh"], self.grapher.variable_dict["REV Rsh"]]
+        #     )
+        # rch_fig = self.grapher.plot_xy2_scalars(
+        #     allfiles,
+        #     self.grapher.variable_dict["Time Elapsed"],
+        #     [self.grapher.variable_dict["FWD Rch"], self.grapher.variable_dict["REV Rch"]]
+        #     )
 
         # mppt_fig = self.grapher.plot_xy_scalars(
         #     allfiles,
@@ -243,8 +262,8 @@ class GRAPH_UI(QMainWindow):
         #     self.grapher.variable_dict["REV PCE"] )
         
 
-        self.fwd_jsc_fig = fwd_pce_fig
-        self.fwd_jsc_canvas = FigureCanvas(self.fwd_jsc_fig)
+        #self.fwd_jsc_fig = fwd_pce_fig
+        #self.fwd_jsc_canvas = FigureCanvas(self.fwd_jsc_fig)
 
         #self.fwd_jsc_fig.canvas.draw()
         # self.fwd_jsc_fig.show()
