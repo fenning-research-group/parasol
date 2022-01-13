@@ -7,6 +7,10 @@ import math
 
 from parasol.filestructure import FileStructure
 
+# Dummy function to plot any figures returned
+def Plotme(fig):
+    fig.show()
+
 
 class Grapher:
     """Grapher package for PARASOL"""
@@ -27,7 +31,7 @@ class Grapher:
             "FWD Jsc": "FWD Jsc (mA/cm2)",
             "FWD Voc": "FWD Voc (V)",
             "FWD FF": "FWD FF (%)",
-            "FWD Pce": "FWD PCE (%)",
+            "FWD PCE": "FWD PCE (%)",
             "FWD Rs": "FWD Rs (Ohm/cm2)",
             "FWD Rsh": "FWD Rsh (Ohm/cm2)",
             "FWD Rch": "FWD Rch (Ohm/cm2)",
@@ -70,6 +74,8 @@ class Grapher:
             x (str): x header name
             ys (list[str]): y header names
         """
+        # Create figure
+        # fig = plt.figure()
 
         # Get x values
         x_vals = df[x]
@@ -99,6 +105,8 @@ class Grapher:
         plt.ylabel(y_label, weight="black")
         plt.xlabel(x, weight="black")
         plt.show()
+
+        # return fig
 
     # Plot JV scans for a single module
 
@@ -240,6 +248,7 @@ class Grapher:
 
     # Plot x v y with color axis as different devices
     # Plot x v y with color axis another parameter (z)
+    # THESE RETURN FIGURES RIGHT NOW
 
     def plot_xy_scalars(self, paramfiles: list, x: str, y: str) -> None:
         """Plot x vs. y for a set of scalar files
@@ -251,6 +260,7 @@ class Grapher:
         """
 
         # mpl.rcParams["axes.linewidth"] = 1.75
+        fig = plt.figure()
 
         # Cycle through paramfiles
         for paramfile in paramfiles:
@@ -266,7 +276,8 @@ class Grapher:
         # Label axes and show plot
         plt.ylabel(y, weight="black")
         plt.xlabel(x, weight="black")
-        plt.show()
+        #plt.show()
+        return fig
 
     def plot_xy2_scalars(self, paramfiles: list, x: str, ys: list) -> None:
         """Plots x vs. y for a set of scalar files
@@ -278,6 +289,7 @@ class Grapher:
         """
 
         # mpl.rcParams["axes.linewidth"] = 1.75
+        fig = plt.figure()
 
         # Cycle through paramfiles
         for paramfile in paramfiles:
@@ -300,7 +312,9 @@ class Grapher:
         ylab = ylab[:-3]
         plt.ylabel(ylab, weight="black")
         plt.xlabel(x, weight="black")
-        plt.show()
+        
+        #plt.show()
+        return fig
 
     def plot_xyz_scalar(self, paramfile: str, x: str, y: str, z: str) -> None:
         """Plots x vs. y with z colorbar for a set of scalar files
@@ -316,6 +330,7 @@ class Grapher:
         df = pd.read_csv(paramfile)
 
         # mpl.rcParams["axes.linewidth"] = 1.75
+        fig = plt.figure()
 
         # cycle through # of points in each array
         for n in range(df.shape[0]):
@@ -353,4 +368,5 @@ class Grapher:
         # Label axes and show plot
         plt.ylabel(y, weight="black")
         plt.xlabel(x, weight="black")
-        plt.show()
+        #plt.show()
+        return fig

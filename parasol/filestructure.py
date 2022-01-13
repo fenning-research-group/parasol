@@ -250,11 +250,12 @@ class FileStructure:
         """
         return [f.path for f in os.scandir(folder) if f.is_file()]
 
+    
     def get_tests(self, rootdir=None) -> list:
         """Returns a list of all test paths in root directory
 
         Returns:
-            list[str]: paths to all test folders
+            list[str]: paths to all test folders 
         """
 
         # If no root directory specified, use default
@@ -266,23 +267,31 @@ class FileStructure:
         # get date folders
         self.date_folders = self.get_subfolders(root_folder)
 
-        # get test folders
+        # Make blank list for folders
         test_folders = []
+
+        # Cycle through each date folder
         for date_folder in self.date_folders:
-            test_folders.append(self.get_subfolders(date_folder))
+
+            # Get a list of tests in the date folder
+            test_folders_for_date = self.get_subfolders(date_folder)
+
+            # Append to list 1 by 1
+            for test_folder_for_date in test_folders_for_date:
+                test_folders.append(test_folder_for_date)
 
         return test_folders
 
-    def get_test_subfolders(self, stringpath: str) -> str:
+    def get_test_subfolders(self, stringpath: str) -> list:
         """Returns list of subfolders in test folder
 
         Args:
             stringpath (str): path to test folder
 
         Returns:
-            str: path to MPP folder
+            list[str]: path to MPP folder
             list[str]: paths to JV folders
-            str: path to analyzed folder
+            list[str]: path to analyzed folder
         """
 
         # Get path to MPP folders
@@ -296,9 +305,36 @@ class FileStructure:
                 jv_folders.append(jv_folder)
 
         # path to analyzed folder --> rootfolder:Analyzed
-        analyzed_folder = os.path.join(stringpath, "Analyzed")
+        analyzed_folder = [os.path.join(stringpath, "Analyzed")]
 
         return mpp_folder, jv_folders, analyzed_folder
+
+
+    def get_files(self,test_folders, filetype = "Analyzed") -> dict:
+
+        # dict[testfolder][scanfolder] = folderpath
+        folder_map = self.map_test_folders(test_folders)
+
+        # Get list of Analyzed folders
+        analyzed_folders = []
+        for select_test in test_folders:
+            sub_folders = folder_map[select_test][filetype]
+            for sub_folder in sub_folders:
+                analyzed_folders.append(sub_folder)
+
+
+        # dict[analyzedfolder] = files
+        file_map = self.map_test_files(analyzed_folders)
+        
+        # Get list of Analyzed files
+        analyzed_files = []
+        for select_analyzed_folder in analyzed_folders:
+            analyzed_files.append(file_map[select_analyzed_folder])
+        
+        #
+        return analyzed_files
+
+
 
     def map_test_folders(self, test_paths: list) -> dict:
         """Creates a dictionary maping test folders to their subfolders
