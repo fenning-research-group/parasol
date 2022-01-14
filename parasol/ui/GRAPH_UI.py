@@ -50,7 +50,7 @@ class GRAPH_UI(QMainWindow):
         #     'size' : 10
         # }
         # matplotlib.rc('font', **mplfont)
-        mpl.rcParams['font.size'] = 8
+        mpl.rcParams["font.size"] = 8
 
         # Define UI
         super(GRAPH_UI, self).__init__()
@@ -71,81 +71,96 @@ class GRAPH_UI(QMainWindow):
         self.alltestfolders.clear()
         self.alltestfolders.itemClicked.connect(self.testfolder_clicked)
         self.alltestfolders.itemDoubleClicked.connect(self.testfolder_doubleclicked)
-        
+
         # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
-        self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(rootdir)
+        self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(
+            rootdir
+        )
 
         # Loads all the graphics
         nrows = 3
         ncols = 4
         dpival = 50
-        xloc = 270
+        xloc = 0
         yloc = 0
 
         # Get main loadout for appending the Canvas to
-        self.layout = self.findChild(PyQt5.QtWidgets.QFrame, "frame")
-        
+        self.layout = self.findChild(PyQt5.QtWidgets.QFrame, "graphframe")
+
         # Create a figure with several subplots, devide up axes
-        self.figure, self.axes = plt.subplots(ncols, nrows, dpi = dpival, tight_layout = True)
-        
+        self.figure, self.axes = plt.subplots(
+            ncols, nrows, dpi=dpival, tight_layout=True
+        )
+
         self.plot_axes_dict = {
-            1 : self.axes[0][0],
-            2 : self.axes[1][0],
-            3 : self.axes[2][0],
-            4 : self.axes[3][0],
-            5 : self.axes[0][1],
-            6 : self.axes[1][1],
-            7 : self.axes[2][1],
-            8 : self.axes[3][1],
-            9 : self.axes[0][2],
-            10 : self.axes[1][2],
-            11 : self.axes[2][2],
-            12 : self.axes[3][2],
+            1: self.axes[0][0],
+            2: self.axes[1][0],
+            3: self.axes[2][0],
+            4: self.axes[3][0],
+            5: self.axes[0][1],
+            6: self.axes[1][1],
+            7: self.axes[2][1],
+            8: self.axes[3][1],
+            9: self.axes[0][2],
+            10: self.axes[1][2],
+            11: self.axes[2][2],
+            12: self.axes[3][2],
         }
 
         self.plot_y_dict = {
-            1 : self.grapher.variable_dict["FWD Jsc"],
-            2 : self.grapher.variable_dict["FWD Voc"],
-            3 : self.grapher.variable_dict["FWD FF"],
+            1: self.grapher.variable_dict["FWD Jsc"],
+            2: self.grapher.variable_dict["FWD Voc"],
+            3: self.grapher.variable_dict["FWD FF"],
             4: self.grapher.variable_dict["FWD PCE"],
             5: self.grapher.variable_dict["REV Jsc"],
-            6 : self.grapher.variable_dict["REV Voc"],
+            6: self.grapher.variable_dict["REV Voc"],
             7: self.grapher.variable_dict["REV FF"],
             8: self.grapher.variable_dict["REV PCE"],
-            9: [self.grapher.variable_dict["FWD Rs"], self.grapher.variable_dict["REV Rs"]],
-            10: [self.grapher.variable_dict["FWD Rsh"], self.grapher.variable_dict["REV Rsh"]],
-            11: [self.grapher.variable_dict["FWD Rch"], self.grapher.variable_dict["REV Rch"]],
-            12: [self.grapher.variable_dict["FWD Rch"], self.grapher.variable_dict["REV Rch"]],
-            #12: "MPPT",
+            9: [
+                self.grapher.variable_dict["FWD Rs"],
+                self.grapher.variable_dict["REV Rs"],
+            ],
+            10: [
+                self.grapher.variable_dict["FWD Rsh"],
+                self.grapher.variable_dict["REV Rsh"],
+            ],
+            11: [
+                self.grapher.variable_dict["FWD Rch"],
+                self.grapher.variable_dict["REV Rch"],
+            ],
+            12: [
+                self.grapher.variable_dict["FWD Rch"],
+                self.grapher.variable_dict["REV Rch"],
+            ],
+            # 12: "MPPT",
         }
 
         self.plot_x_dict = {
-            1 : self.grapher.variable_dict["Time Elapsed"],
-            2 : self.grapher.variable_dict["Time Elapsed"],
-            3 : self.grapher.variable_dict["Time Elapsed"],
-            4 : self.grapher.variable_dict["Time Elapsed"],
-            5 : self.grapher.variable_dict["Time Elapsed"],
-            6 : self.grapher.variable_dict["Time Elapsed"],
-            7 : self.grapher.variable_dict["Time Elapsed"],
-            8 : self.grapher.variable_dict["Time Elapsed"],
-            9 : self.grapher.variable_dict["Time Elapsed"],
-            10 : self.grapher.variable_dict["Time Elapsed"],
-            11 : self.grapher.variable_dict["Time Elapsed"],
-            12 : self.grapher.variable_dict["Time Elapsed"],
+            1: self.grapher.variable_dict["Time Elapsed"],
+            2: self.grapher.variable_dict["Time Elapsed"],
+            3: self.grapher.variable_dict["Time Elapsed"],
+            4: self.grapher.variable_dict["Time Elapsed"],
+            5: self.grapher.variable_dict["Time Elapsed"],
+            6: self.grapher.variable_dict["Time Elapsed"],
+            7: self.grapher.variable_dict["Time Elapsed"],
+            8: self.grapher.variable_dict["Time Elapsed"],
+            9: self.grapher.variable_dict["Time Elapsed"],
+            10: self.grapher.variable_dict["Time Elapsed"],
+            11: self.grapher.variable_dict["Time Elapsed"],
+            12: self.grapher.variable_dict["Time Elapsed"],
         }
-        
+
         # Place figure in canvas, control resize policy, resize, place on UI, and set location
         self.canvas = FigureCanvas(self.figure)
-        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)        
+        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.canvas.updateGeometry()
-        self.canvas.resize(850,770)
+        self.canvas.resize(850, 770)
         self.canvas.setParent(self.layout)
-        self.canvas.move(xloc,yloc)
+        self.canvas.move(xloc, yloc)
 
         # customize axes
         for key in self.plot_axes_dict:
-            self.plot_axes_dict[key].tick_params(direction = 'in', labelsize = 'small')
-
+            self.plot_axes_dict[key].tick_params(direction="in", labelsize="small")
 
         # show UI
         self.show()
@@ -154,7 +169,7 @@ class GRAPH_UI(QMainWindow):
         self.launch_gui()
 
     # List of all test folders --> autoupdates when the program launches
-    def update_test_folders(self, rootdir: str)->list:
+    def update_test_folders(self, rootdir: str) -> list:
         """Updates the list of test folders"""
 
         # Clear current displaylist
@@ -162,12 +177,15 @@ class GRAPH_UI(QMainWindow):
 
         # Get test folders and test foldernames
         test_folderpath_list = self.filestructure.get_tests(rootdir)
-        test_foldername_list = [os.path.basename(os.path.normpath(testfolderpath)) for testfolderpath in test_folderpath_list]
-        
+        test_foldername_list = [
+            os.path.basename(os.path.normpath(testfolderpath))
+            for testfolderpath in test_folderpath_list
+        ]
+
         # Create dict[foldername] = folderpath -> map names to paths
         # Create dict[foldername] = True/False -> map names to if they have been selected
         # Add test foldernames to GUI
-        testname_to_testpath= {}
+        testname_to_testpath = {}
         test_selection_dict = {}
         for idx in range(len(test_foldername_list)):
             testname_to_testpath[test_foldername_list[idx]] = test_folderpath_list[idx]
@@ -191,7 +209,7 @@ class GRAPH_UI(QMainWindow):
     # Command on single click
     def testfolder_clicked(self, item: QListWidgetItem) -> None:
         """Temporarily displays the test folder when clicked"""
-        #print(item.text())
+        # print(item.text())
 
     # Command on double click
     def testfolder_doubleclicked(self, item: QListWidgetItem) -> None:
@@ -211,7 +229,7 @@ class GRAPH_UI(QMainWindow):
 
         # Get selected test files seperated by test (list of lists)
         analyzed_files = self.filestructure.get_files(test_folders, "Analyzed")
-        
+
         # Update Plots
         self.update_plots(analyzed_files)
 
@@ -224,10 +242,9 @@ class GRAPH_UI(QMainWindow):
             elif self.test_selection_dict[key] == False:
                 self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
 
+    def update_plots(self, analyzed_file_lists: list):
 
-    def update_plots(self, analyzed_file_lists : list):
-
-        # Flatten file array        
+        # Flatten file array
         allfiles = []
         for analyzed_file_list_for_given_test in analyzed_file_lists:
             for analyzed_file in analyzed_file_list_for_given_test:
@@ -243,15 +260,12 @@ class GRAPH_UI(QMainWindow):
 
             # Pass to appropriate plotter to plot on given axes
             if type(yparam) != list:
-                self.grapher.plot_xy_scalars(allfiles,xparam,yparam, axes)
+                self.grapher.plot_xy_scalars(allfiles, xparam, yparam, axes)
             else:
-               self.grapher.plot_xy2_scalars(allfiles,xparam,yparam,axes)
+                self.grapher.plot_xy2_scalars(allfiles, xparam, yparam, axes)
 
         # Update canvas
         self.canvas.draw()
-
-              
-        
 
     def launch_gui(self) -> None:
         """Launches GUI"""
