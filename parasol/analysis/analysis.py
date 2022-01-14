@@ -62,19 +62,19 @@ class Analysis:
             list[str]: path to output file
         """
 
-        # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder
+        # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder (all lists)
         (
             mpp_folder,
             jv_folders,
             analyzed_folder,
         ) = self.filestructure.get_test_subfolders(stringpath)
-        os.mkdir(analyzed_folder)
+        os.mkdir(analyzed_folder[0])
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
 
         # Analyze JV files: For each module export scalars_{module}.csv
-        analyzed_waves = self.analyze_jv_files(jv_folders, jv_dict, analyzed_folder)
+        analyzed_waves = self.analyze_jv_files(jv_folders, jv_dict, analyzed_folder[0])
 
         return analyzed_waves
 
@@ -132,7 +132,7 @@ class Analysis:
         return t_vals, pmp_fwd_vals, pmp_rev_vals
 
     def analyze_jv_files(
-        self, jv_folders: list, jv_dict: dict, analyzed_folder: list
+        self, jv_folders: list, jv_dict: dict, analyzed_folder: str
     ) -> list:
         """Cycle through JV files, analyze, and make output file for parameters
 
