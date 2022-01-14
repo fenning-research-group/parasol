@@ -284,6 +284,7 @@ class Grapher:
         ax.set_ylabel(y, weight="black")
         ax.set_xlabel(x, weight="black")
         # ax.set_title("")
+        plt.tight_layout()
 
         # Return axes
         return ax

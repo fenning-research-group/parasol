@@ -180,18 +180,18 @@ class FileStructure:
         mpp_file_path = f"{startdate}_{name}_{id}_all_MPP_1.csv"
         return mpp_file_path
 
-    def get_analyzed_file_name(self, startdate: str, name: str, id: int) -> str:
+    def get_analyzed_file_name(self, startdate: str, name: str, id: int, module_channel:int) -> str:
         """Returns the Analyzed file name
 
         Args:
             startdate (str): startdate in YYYYMMDD format
             name (str): name of test
-            id (int): test id
+            id (int): module/channel id
 
         Returns:
             str: name of Analyed file
         """
-        analyzed_file_path = f"{startdate}_{name}_{id}_all_Scalars_1.csv"
+        analyzed_file_path = f"{startdate}_{name}_{id}_{module_channel}_Scalars_1.csv"
         return analyzed_file_path
 
     # Get useful save information from the file name, make runinfo dict

@@ -55,7 +55,7 @@ class EastTester:
         self.current_range = constants["current_range"]
 
         # Set both channels to source voltage and measure current when initialized (1st is dummy index)
-        self._sourcing_current = [None, False, False]
+        self._sourcing_current = [False, False, False]
         self.srcV_measI(1)
         self.srcV_measI(2)
 

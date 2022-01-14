@@ -184,6 +184,12 @@ class Controller:
         while id in self.mpp_queue._queue:
             self.mpp_queue._queue.remove(id)
 
+        # Dont touch relays/yoko --> dont want to mess with other tests
+        # Reset ET
+        et_key, ch = self.et_channels[id]
+        et = self.easttester[et_key]
+        et.output_off(ch)
+
         # Analyze the saveloc
         print("Analysis saved at :", saveloc)
         self.analysis.analyze_from_savepath(saveloc)

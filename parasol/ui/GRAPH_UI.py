@@ -7,9 +7,12 @@ from PyQt5.QtWidgets import (
     QListWidgetItem,
     QOpenGLWidget,
     QVBoxLayout,
+    QFrame,
+    QSizePolicy,
 )
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 from PyQt5 import QtCore
 from PyQt5 import uic
@@ -41,6 +44,14 @@ class GRAPH_UI(QMainWindow):
     def __init__(self) -> None:
         """Initliazes the RUN_UI class"""
 
+        # Set matplotlib params:
+        # mplfont = {
+        #     'weight' : 'light',
+        #     'size' : 10
+        # }
+        # matplotlib.rc('font', **mplfont)
+        mpl.rcParams['font.size'] = 8
+
         # Define UI
         super(GRAPH_UI, self).__init__()
 
@@ -52,7 +63,7 @@ class GRAPH_UI(QMainWindow):
         rootdir = self.filestructure.get_root_dir()
 
         # Load the ui file
-        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI2.ui")
+        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI.ui")
         uic.loadUi(ui_path, self)
 
         # Load all Test Folders, clear list, add events on click and doubleclick
@@ -60,52 +71,83 @@ class GRAPH_UI(QMainWindow):
         self.alltestfolders.clear()
         self.alltestfolders.itemClicked.connect(self.testfolder_clicked)
         self.alltestfolders.itemDoubleClicked.connect(self.testfolder_doubleclicked)
+        
         # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
         self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(rootdir)
 
         # Loads all the graphics
-        # xstart = 260
-        # xspacer = 10
-        # ystart = 0
-        # yspacer = 10
-        width = 270
-        height = 180
+        nrows = 3
+        ncols = 4
+        dpival = 50
+        xloc = 270
+        yloc = 0
 
-        # # Get main loadout for appending the graphs to
-        self.layout = self.findChild(PyQt5.QtWidgets.QVBoxLayout, "verticalLayout")
+        # Get main loadout for appending the Canvas to
+        self.layout = self.findChild(PyQt5.QtWidgets.QFrame, "frame")
         
-        self.fwd_jsc_fig = plt.figure(figsize =(width,height))
-        self.fwd_jsc_canvas = FigureCanvas(self.fwd_jsc_fig)
+        # Create a figure with several subplots, devide up axes
+        self.figure, self.axes = plt.subplots(ncols, nrows, dpi = dpival, tight_layout = True)
         
-        self.layout.addWidget(self.fwd_jsc_canvas)
+        self.plot_axes_dict = {
+            1 : self.axes[0][0],
+            2 : self.axes[1][0],
+            3 : self.axes[2][0],
+            4 : self.axes[3][0],
+            5 : self.axes[0][1],
+            6 : self.axes[1][1],
+            7 : self.axes[2][1],
+            8 : self.axes[3][1],
+            9 : self.axes[0][2],
+            10 : self.axes[1][2],
+            11 : self.axes[2][2],
+            12 : self.axes[3][2],
+        }
 
-        # self._jsc_ax = self.fwd_jsc_canvas.figure.subplots()
-        # self.fwd_jsc_plot = None
-        # self._jsc_ax.plot([1],[2])
+        self.plot_y_dict = {
+            1 : self.grapher.variable_dict["FWD Jsc"],
+            2 : self.grapher.variable_dict["FWD Voc"],
+            3 : self.grapher.variable_dict["FWD FF"],
+            4: self.grapher.variable_dict["FWD PCE"],
+            5: self.grapher.variable_dict["REV Jsc"],
+            6 : self.grapher.variable_dict["REV Voc"],
+            7: self.grapher.variable_dict["REV FF"],
+            8: self.grapher.variable_dict["REV PCE"],
+            9: [self.grapher.variable_dict["FWD Rs"], self.grapher.variable_dict["REV Rs"]],
+            10: [self.grapher.variable_dict["FWD Rsh"], self.grapher.variable_dict["REV Rsh"]],
+            11: [self.grapher.variable_dict["FWD Rch"], self.grapher.variable_dict["REV Rch"]],
+            12: [self.grapher.variable_dict["FWD Rch"], self.grapher.variable_dict["REV Rch"]],
+            #12: "MPPT",
+        }
 
-
-        #self._fwd_jsc = self.fwd_jsc_canvas.figure.subplots()
-        #self._fwd_jsc_trace, = self._fwd_jsc.plot([],[]) 
+        self.plot_x_dict = {
+            1 : self.grapher.variable_dict["Time Elapsed"],
+            2 : self.grapher.variable_dict["Time Elapsed"],
+            3 : self.grapher.variable_dict["Time Elapsed"],
+            4 : self.grapher.variable_dict["Time Elapsed"],
+            5 : self.grapher.variable_dict["Time Elapsed"],
+            6 : self.grapher.variable_dict["Time Elapsed"],
+            7 : self.grapher.variable_dict["Time Elapsed"],
+            8 : self.grapher.variable_dict["Time Elapsed"],
+            9 : self.grapher.variable_dict["Time Elapsed"],
+            10 : self.grapher.variable_dict["Time Elapsed"],
+            11 : self.grapher.variable_dict["Time Elapsed"],
+            12 : self.grapher.variable_dict["Time Elapsed"],
+        }
         
-        
-        #self.fwd_jsc_canvas.draw()        
+        # Place figure in canvas, control resize policy, resize, place on UI, and set location
+        self.canvas = FigureCanvas(self.figure)
+        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)        
+        self.canvas.updateGeometry()
+        self.canvas.resize(850,770)
+        self.canvas.setParent(self.layout)
+        self.canvas.move(xloc,yloc)
 
-        # self.fwd_jsc_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "FWD_Jsc")
-        # self.fwd_voc_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "FWD_Voc")
-        # self.fwd_ff_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "FWD_FF")
-        # self.fwd_pce_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "FWD_PCE")
+        # customize axes
+        for key in self.plot_axes_dict:
+            self.plot_axes_dict[key].tick_params(direction = 'in', labelsize = 'small')
 
-        # self.rev_jsc_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "REV_Jsc")
-        # self.rev_voc_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "REV_Voc")
-        # self.rev_ff_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "REV_FF")
-        # self.rev_pce_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "REV_PCE")
 
-        # self.rser_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "Rser")
-        # self.rsh_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "Rsh")
-        # self.rch_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "Rch")
-        # self.mpp_graphics = self.findChild(PyQt5.QtWidgets.QOpenGLWidget, "mppt")
-
-        # show
+        # show UI
         self.show()
 
         # Create GUI
@@ -184,91 +226,31 @@ class GRAPH_UI(QMainWindow):
 
 
     def update_plots(self, analyzed_file_lists : list):
-                
+
+        # Flatten file array        
         allfiles = []
         for analyzed_file_list_for_given_test in analyzed_file_lists:
             for analyzed_file in analyzed_file_list_for_given_test:
                 allfiles.append(analyzed_file)
 
-        #fig, ax = plt.subplots(1, figsize=(3, 2))
-        # if self.fwd_jsc_plot:
-        #     self.fwd_jsc_plot.remove()
-        self.fwd_jsc_fig.clear()
-        self.fwd_jsc_ax = self.fwd_jsc_fig.add_subplot(111)
+        # Cycle through dictionaries for each plot (set in __init__) to get desired parameters
+        for key in self.plot_axes_dict:
+            self.plot_axes_dict[key].cla()
 
-        self.fwd_jsc_plot = self.grapher.plot_xy_scalars(
-            allfiles,
-            self.grapher.variable_dict["Time Elapsed"],
-            self.grapher.variable_dict["FWD Jsc"],
-            self.fwd_jsc_ax 
-            )
+            yparam = self.plot_y_dict[key]
+            xparam = self.plot_x_dict[key]
+            axes = self.plot_axes_dict[key]
 
-        self.fwd_jsc_canvas.draw()
+            # Pass to appropriate plotter to plot on given axes
+            if type(yparam) != list:
+                self.grapher.plot_xy_scalars(allfiles,xparam,yparam, axes)
+            else:
+               self.grapher.plot_xy2_scalars(allfiles,xparam,yparam,axes)
 
-        # Cycle through paramfiles
-        # fwd_jsc_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["FWD Jsc"] )
-        # fwd_voc_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["FWD Voc"] )
-        # fwd_ff_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["FWD FF"] )
-        # fwd_pce_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["FWD PCE"] )
-        
-        # rev_jsc_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["REV Jsc"] )
-        # rev_voc_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["REV Voc"] )
-        # rev_ff_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["REV FF"] )
-        # rev_pce_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["REV PCE"] )
+        # Update canvas
+        self.canvas.draw()
 
-        # rser_fig = self.grapher.plot_xy2_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     [self.grapher.variable_dict["FWD Rs"], self.grapher.variable_dict["REV Rs"]]
-        #     )
-        # rsh_fig = self.grapher.plot_xy2_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     [self.grapher.variable_dict["FWD Rsh"], self.grapher.variable_dict["REV Rsh"]]
-        #     )
-        # rch_fig = self.grapher.plot_xy2_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     [self.grapher.variable_dict["FWD Rch"], self.grapher.variable_dict["REV Rch"]]
-        #     )
-
-        # mppt_fig = self.grapher.plot_xy_scalars(
-        #     allfiles,
-        #     self.grapher.variable_dict["Time Elapsed"],
-        #     self.grapher.variable_dict["REV PCE"] )
-        
-
-        #self.fwd_jsc_fig = fwd_pce_fig
-        #self.fwd_jsc_canvas = FigureCanvas(self.fwd_jsc_fig)
-
-        #self.fwd_jsc_fig.canvas.draw()
-        # self.fwd_jsc_fig.show()
-        #self.fwd_jsc_canvas.draw()
-        
+              
         
 
     def launch_gui(self) -> None:

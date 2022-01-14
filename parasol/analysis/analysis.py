@@ -149,7 +149,7 @@ class Analysis:
         save_locations = []
 
         # Cycle through every module/folder in jv dict
-        for jv_folder in jv_folders:
+        for idx, jv_folder in enumerate(jv_folders):
 
             # Get data from JV files
             jv_file_paths = jv_dict[jv_folder]
@@ -184,7 +184,7 @@ class Analysis:
                 scalardict[k] = v
 
             # Get info from JV file name
-            d = self.filestructure.filepath_to_runinfo(jv_file_paths[-1])
+            d = self.filestructure.filepath_to_runinfo(jv_file_paths[idx])
 
             # Create scalar dataframe
             scalar_df = pd.DataFrame(scalardict)
@@ -194,7 +194,7 @@ class Analysis:
 
             # Save dataframe to csv
             analysis_file = self.filestructure.get_analyzed_file_name(
-                d["date"], d["name"], d["string_id"]
+                d["date"], d["name"], d["string_id"], d["module_id"]
             )
             save_loc = os.path.join(analyzed_folder, analysis_file)
             scalar_df_filtered.to_csv(save_loc, index=False)
