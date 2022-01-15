@@ -135,7 +135,7 @@ class GRAPH_UI(QMainWindow):
         self.canvas.setParent(self.layout)
 
         # Make Plots work!
-        self.canvas.resize(1072, 804)
+        self.canvas.resize(1200, 900)
         mpl.rcParams["font.size"] = 8
         for key in self.plot_axes_dict:
             self.plot_axes_dict[key].tick_params(direction="in", labelsize="small")
