@@ -55,6 +55,8 @@ class GRAPH_UI(QMainWindow):
         # Create user variables
         nrows = 4
         ncols = 3
+        fontsize = 8
+        markersize = 1.0
         dpival = 50
         # rootdir = self.filestructure.get_root_dir()
 
@@ -145,9 +147,12 @@ class GRAPH_UI(QMainWindow):
 
         # Make Plots work!
         self.canvas.resize(1600, 900)
-        mpl.rcParams["font.size"] = 8
+        mpl.rcParams["font.size"] = fontsize
+        mpl.rcParams["lines.markersize"] = markersize
         for key in self.plot_axes_dict:
             self.plot_axes_dict[key].tick_params(direction="in", labelsize="small")
+            self.plot_axes_dict[key].xaxis.label.set_size(fontsize)
+            self.plot_axes_dict[key].yaxis.label.set_size(fontsize)
 
         # show UI
         self.show()
