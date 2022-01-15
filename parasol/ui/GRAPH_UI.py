@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QFrame,
     QSizePolicy,
+    QFileDialog,
 )
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
@@ -55,20 +56,28 @@ class GRAPH_UI(QMainWindow):
         nrows = 4
         ncols = 3
         dpival = 50
-        rootdir = self.filestructure.get_root_dir()
+        # rootdir = self.filestructure.get_root_dir()
 
         # Load the ui file
-        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI_Larger.ui")
+        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI_Larger2.ui")
         uic.loadUi(ui_path, self)
+
+        # Load default root dir, set in UI
+        self.rootdir = self.findChild(QLineEdit, "rootdir")
+        self.rootdir.setText(self.filestructure.get_root_dir())
+
+        self.setrootdir = self.findChild(QPushButton, "setrootdir")
+        self.setrootdir.clicked.connect(self.setrootdir_clicked)
 
         # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
         self.alltestfolders = self.findChild(QListWidget, "AllTestFolders")
         self.alltestfolders.clear()
         self.alltestfolders.itemClicked.connect(self.testfolder_clicked)
         self.alltestfolders.itemDoubleClicked.connect(self.testfolder_doubleclicked)
+
         # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
         self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(
-            rootdir
+            self.rootdir.text()
         )
 
         # Get layout where we are appending graphs
@@ -211,6 +220,15 @@ class GRAPH_UI(QMainWindow):
 
         # Update Plots
         self.update_plots(analyzed_files, mpp_files)
+
+    def setrootdir_clicked(self):
+        file = QFileDialog.getExistingDirectory(self, "Select Directory")
+        self.rootdir.setText(file)
+
+        # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
+        self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(
+            file
+        )
 
     def colorize_list(self):
 
