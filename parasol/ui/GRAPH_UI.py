@@ -58,7 +58,7 @@ class GRAPH_UI(QMainWindow):
         rootdir = self.filestructure.get_root_dir()
 
         # Load the ui file
-        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI_Large.ui")
+        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI_Larger.ui")
         uic.loadUi(ui_path, self)
 
         # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
@@ -135,7 +135,7 @@ class GRAPH_UI(QMainWindow):
         self.canvas.setParent(self.layout)
 
         # Make Plots work!
-        self.canvas.resize(1200, 900)
+        self.canvas.resize(1600, 900)
         mpl.rcParams["font.size"] = 8
         for key in self.plot_axes_dict:
             self.plot_axes_dict[key].tick_params(direction="in", labelsize="small")
