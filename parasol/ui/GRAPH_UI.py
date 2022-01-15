@@ -58,7 +58,7 @@ class GRAPH_UI(QMainWindow):
         rootdir = self.filestructure.get_root_dir()
 
         # Load the ui file
-        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI.ui")
+        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI_Large.ui")
         uic.loadUi(ui_path, self)
 
         # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
@@ -135,7 +135,7 @@ class GRAPH_UI(QMainWindow):
         self.canvas.setParent(self.layout)
 
         # Make Plots work!
-        self.canvas.resize(1072,804)
+        self.canvas.resize(1072, 804)
         mpl.rcParams["font.size"] = 8
         for key in self.plot_axes_dict:
             self.plot_axes_dict[key].tick_params(direction="in", labelsize="small")
@@ -207,10 +207,10 @@ class GRAPH_UI(QMainWindow):
 
         # Get selected test files seperated by test (list of lists)
         analyzed_files = self.filestructure.get_files(test_folders, "Analyzed")
-        mpp_files = self.filestructure.get_files(test_folders,"MPP")
+        mpp_files = self.filestructure.get_files(test_folders, "MPP")
 
         # Update Plots
-        self.update_plots(analyzed_files,mpp_files)
+        self.update_plots(analyzed_files, mpp_files)
 
     def colorize_list(self):
 
@@ -228,7 +228,7 @@ class GRAPH_UI(QMainWindow):
         for analyzed_file_list_for_given_test in analyzed_file_lists:
             for analyzed_file in analyzed_file_list_for_given_test:
                 allfiles.append(analyzed_file)
-        
+
         mppfiles = []
         for mpp_file_list_for_given_test in mpp_file_lists:
             for mpp_file in mpp_file_list_for_given_test:
