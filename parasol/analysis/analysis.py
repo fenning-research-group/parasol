@@ -430,6 +430,40 @@ class Analysis:
 
         return t, v, j_fwd, p_fwd, j_rev, p_rev
 
+    def load_mpp_files(self, mpp_file_paths: list) -> list:
+        """Loads JV files contained in jv_file_paths, returns data
+
+        Args:
+            mpp_file_paths (list[str]): list of paths to mpp files
+
+        Returns:
+            list[np.ndarray]: list of time vectors
+            list[np.ndarray]: list of voltage vectors
+            list[np.ndarray]: list of FWD current vectors
+            list[np.ndarray]: list of FWD power vectors
+            list[np.ndarray]: list of REV current vectors
+            list[np.ndarray]: list of REV power vectors
+        """
+
+        # Create blank lists to fill with numpy arrays
+        all_t = []
+        all_v = []
+        all_i = []
+        all_j = []
+        all_p = []
+
+
+        for mpp_file_path in mpp_file_paths:
+
+            t, v, i, j, p = self.load_mpp_file(mpp_file_path)
+            all_t.append(t)
+            all_v.append(v)
+            all_i.append(i)
+            all_j.append(j)
+            all_p.append(p)
+
+        return all_t, all_v, all_i, all_j, all_p
+    
     def load_mpp_file(self, mpp_file_path: str) -> np.ndarray:
         """Loads data for a single MPP file given by mpp_file_path, returns values
 
@@ -445,15 +479,15 @@ class Analysis:
         """
 
         # Get the time information
-        with open(mpp_file_path) as f:
-            reader = csv.reader(f)
-            _ = next(reader)  # date
-            _ = next(reader)  # time
-            t_start = float(next(reader)[-1])  # epoch time
-            _ = next(reader)  # string
-            _ = next(reader)  # module
-            _ = next(reader)  # area
-
+        # with open(mpp_file_path) as f:
+        #     reader = csv.reader(f)
+        #     _ = next(reader)  # date
+        #     _ = next(reader)  # time
+        #     t_start = float(next(reader)[-1])  # epoch time
+        #     _ = next(reader)  # string
+        #     _ = next(reader)  # module
+        #     _ = next(reader)  # area
+        print(mpp_file_path)
         # Load rest of dataframe, split into paramters, and return
         all_data = np.loadtxt(mpp_file_path, delimiter=",", skiprows=8)
         all_data = np.transpose(all_data)

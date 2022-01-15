@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import math
 
 from parasol.filestructure import FileStructure
+from parasol.analysis.analysis import Analysis
 
 # Dummy function to plot any figures returned
 def Plotme(fig):
@@ -18,8 +19,9 @@ class Grapher:
     def __init__(self) -> None:
         """Initializes Grapher class"""
 
-        # Load filstructure package to manage JV files
+        # Load filstructure and analysis package to manage files
         self.filestructure = FileStructure()
+        self.analysis = Analysis()
 
         # Get path to root directory (test folder)
         self.rootdir = self.filestructure.get_root_dir()
@@ -197,14 +199,22 @@ class Grapher:
         # Feed file into the dictionary to get a list of MPP files
         mpp_file_paths = mpp_dict[mppfolder]
 
-        self.plot_mpps(self, mpp_file_paths, **plt_kwargs)
+        self.plot_mpps(self, mpp_file_paths, None, **plt_kwargs)
 
-    def plot_mpps(self, mppfiles: list, **plt_kwargs) -> None:
+    def plot_mpps(self, mppfiles: list, ax: plt.axes = None, **plt_kwargs) -> plt.axes:
         """Plots MPPs for input MPP files
 
         Args:
             mppfiles (list[str]): list of MPP files
+            ax (plt.axes): axes
+            **plt_kwargs : additional plot options
+        
+        Returns:
+            plt.ax: plotted axes
         """
+        # If not passed axes, use last set
+        if ax is None:
+            ax = plt.gca()
 
         # Load MPP Files
         (
@@ -216,9 +226,8 @@ class Grapher:
         ) = self.analysis.load_mpp_files(mppfiles)
 
         # Make time data numpy array, calc time elapsed
-        all_t = np.array(all_t)
-        all_t_elapsed = all_t - all_t[0]
-
+        # all_t = np.array(all_t)
+        # all_t_elapsed = all_t - all_t[0]
         # Create linear colormap that spans the number of files
         colors = plt.cm.viridis(np.linspace(0, 1, len(mppfiles)))
 
@@ -231,21 +240,25 @@ class Grapher:
             module_ids.append(self.filestructure.filepath_to_runinfo(file)["module_id"])
 
         # Plot time versus power, add legends for every trace
-        for idx in range(len(all_t_elapsed)):
-            plt.plot(
-                all_t_elapsed[idx],
+        for idx in range(len(all_t)):
+            t1 = all_t[idx]
+            t_elapsed = t1 - t1[0]
+
+            ax.plot(
+                t_elapsed,
                 all_p[idx],
                 color=colors[idx],
-                legend="Module #" + str(module_ids[idx]),
+#                legend="Module #" + str(module_ids[idx]),
                 **plt_kwargs,
             )
 
         # Customize plot and show
-        plt.ylabel("MPPT MPP (mW/cm2)", weight="black")
-        plt.xlabel("Time Elapsed (sec)", weight="black")
-        plt.title(titlestr)
-        plt.legend(loc="lower left", frameon=False)
-        plt.show()
+        ax.set_ylabel("MPPT MPP (mW/cm2)", weight="black")
+        ax.set_xlabel("Time Elapsed (sec)", weight="black")
+        #ax.set_title(titlestr)
+        #ax.legend(loc="lower left", frameon=False)
+        
+        return ax
 
     # Plot x v y with color axis as different devices
     # Plot x v y with color axis another parameter (z)
@@ -266,7 +279,6 @@ class Grapher:
         """
         # If not passed axes, use last set
         if ax is None:
-            #fig, ax = plt.subplots()
             ax = plt.gca()
 
         # Cycle through paramfiles
@@ -284,7 +296,7 @@ class Grapher:
         ax.set_ylabel(y, weight="black")
         ax.set_xlabel(x, weight="black")
         # ax.set_title("")
-        plt.tight_layout()
+        #plt.tight_layout()
 
         # Return axes
         return ax

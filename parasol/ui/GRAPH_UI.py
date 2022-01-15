@@ -44,14 +44,6 @@ class GRAPH_UI(QMainWindow):
     def __init__(self) -> None:
         """Initliazes the RUN_UI class"""
 
-        # Set matplotlib params:
-        # mplfont = {
-        #     'weight' : 'light',
-        #     'size' : 10
-        # }
-        # matplotlib.rc('font', **mplfont)
-        mpl.rcParams["font.size"] = 8
-
         # Define UI
         super(GRAPH_UI, self).__init__()
 
@@ -59,32 +51,27 @@ class GRAPH_UI(QMainWindow):
         self.filestructure = FileStructure()
         self.grapher = Grapher()
 
-        # Assume basic root directory --> will add to UI
+        # Create user variables
+        nrows = 4
+        ncols = 3
+        dpival = 50
         rootdir = self.filestructure.get_root_dir()
 
         # Load the ui file
         ui_path = os.path.join(MODULE_DIR, "GRAPH_UI.ui")
         uic.loadUi(ui_path, self)
 
-        # Load all Test Folders, clear list, add events on click and doubleclick
+        # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
         self.alltestfolders = self.findChild(QListWidget, "AllTestFolders")
         self.alltestfolders.clear()
         self.alltestfolders.itemClicked.connect(self.testfolder_clicked)
         self.alltestfolders.itemDoubleClicked.connect(self.testfolder_doubleclicked)
-
         # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
         self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(
             rootdir
         )
 
-        # Loads all the graphics
-        nrows = 3
-        ncols = 4
-        dpival = 50
-        xloc = 0
-        yloc = 0
-
-        # Get main loadout for appending the Canvas to
+        # Get layout where we are appending graphs
         self.layout = self.findChild(PyQt5.QtWidgets.QFrame, "graphframe")
 
         # Create a figure with several subplots, devide up axes
@@ -92,21 +79,15 @@ class GRAPH_UI(QMainWindow):
             ncols, nrows, dpi=dpival, tight_layout=True
         )
 
-        self.plot_axes_dict = {
-            1: self.axes[0][0],
-            2: self.axes[1][0],
-            3: self.axes[2][0],
-            4: self.axes[3][0],
-            5: self.axes[0][1],
-            6: self.axes[1][1],
-            7: self.axes[2][1],
-            8: self.axes[3][1],
-            9: self.axes[0][2],
-            10: self.axes[1][2],
-            11: self.axes[2][2],
-            12: self.axes[3][2],
-        }
+        # Make axes dict for plots, numbering left -> right & top -> down
+        idnum = 1
+        self.plot_axes_dict = {}
+        for colnum in range(ncols):
+            for rownum in range(nrows):
+                self.plot_axes_dict[idnum] = self.axes[colnum][rownum]
+                idnum += 1
 
+        # Make dict to hold y parameter names
         self.plot_y_dict = {
             1: self.grapher.variable_dict["FWD Jsc"],
             2: self.grapher.variable_dict["FWD Voc"],
@@ -128,13 +109,10 @@ class GRAPH_UI(QMainWindow):
                 self.grapher.variable_dict["FWD Rch"],
                 self.grapher.variable_dict["REV Rch"],
             ],
-            12: [
-                self.grapher.variable_dict["FWD Rch"],
-                self.grapher.variable_dict["REV Rch"],
-            ],
-            # 12: "MPPT",
+            12: "MPP",
         }
 
+        # Make dict to hold x parameter names
         self.plot_x_dict = {
             1: self.grapher.variable_dict["Time Elapsed"],
             2: self.grapher.variable_dict["Time Elapsed"],
@@ -154,11 +132,11 @@ class GRAPH_UI(QMainWindow):
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.canvas.updateGeometry()
-        self.canvas.resize(850, 770)
         self.canvas.setParent(self.layout)
-        self.canvas.move(xloc, yloc)
 
-        # customize axes
+        # Make Plots work!
+        self.canvas.resize(1072,804)
+        mpl.rcParams["font.size"] = 8
         for key in self.plot_axes_dict:
             self.plot_axes_dict[key].tick_params(direction="in", labelsize="small")
 
@@ -229,9 +207,10 @@ class GRAPH_UI(QMainWindow):
 
         # Get selected test files seperated by test (list of lists)
         analyzed_files = self.filestructure.get_files(test_folders, "Analyzed")
+        mpp_files = self.filestructure.get_files(test_folders,"MPP")
 
         # Update Plots
-        self.update_plots(analyzed_files)
+        self.update_plots(analyzed_files,mpp_files)
 
     def colorize_list(self):
 
@@ -242,13 +221,18 @@ class GRAPH_UI(QMainWindow):
             elif self.test_selection_dict[key] == False:
                 self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
 
-    def update_plots(self, analyzed_file_lists: list):
+    def update_plots(self, analyzed_file_lists: list, mpp_file_lists: list):
 
         # Flatten file array
         allfiles = []
         for analyzed_file_list_for_given_test in analyzed_file_lists:
             for analyzed_file in analyzed_file_list_for_given_test:
                 allfiles.append(analyzed_file)
+        
+        mppfiles = []
+        for mpp_file_list_for_given_test in mpp_file_lists:
+            for mpp_file in mpp_file_list_for_given_test:
+                mppfiles.append(mpp_file)
 
         # Cycle through dictionaries for each plot (set in __init__) to get desired parameters
         for key in self.plot_axes_dict:
@@ -259,7 +243,9 @@ class GRAPH_UI(QMainWindow):
             axes = self.plot_axes_dict[key]
 
             # Pass to appropriate plotter to plot on given axes
-            if type(yparam) != list:
+            if "MPP" in yparam:
+                self.grapher.plot_mpps(mppfiles, axes)
+            elif type(yparam) != list:
                 self.grapher.plot_xy_scalars(allfiles, xparam, yparam, axes)
             else:
                 self.grapher.plot_xy2_scalars(allfiles, xparam, yparam, axes)
