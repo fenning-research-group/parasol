@@ -1,13 +1,11 @@
 import PyQt5
-from PyQt5.QtWidgets import QMainWindow, QApplication, QCheckBox, QComboBox
 from PyQt5.QtWidgets import (
+    QMainWindow,
+    QApplication,
     QPushButton,
     QLineEdit,
     QListWidget,
     QListWidgetItem,
-    QOpenGLWidget,
-    QVBoxLayout,
-    QFrame,
     QSizePolicy,
     QFileDialog,
 )
@@ -19,14 +17,11 @@ from PyQt5 import QtCore
 from PyQt5 import uic
 import sys
 import os
-from datetime import datetime
-import yaml
+
 
 from parasol.filestructure import FileStructure
 from parasol.analysis.grapher import Grapher
 
-
-# Import Controller (call load, unload), characterization (know test types), and analysis (check on tests)
 
 # Set module directory
 MODULE_DIR = os.path.dirname(__file__)
@@ -58,18 +53,23 @@ class GRAPH_UI(QMainWindow):
         fontsize = 8
         markersize = 1.0
         dpival = 50
-        # rootdir = self.filestructure.get_root_dir()
 
         # Load the ui file
-        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI_Larger2.ui")
+        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI_Larger3.ui")
         uic.loadUi(ui_path, self)
 
         # Load default root dir, set in UI
         self.rootdir = self.findChild(QLineEdit, "rootdir")
         self.rootdir.setText(self.filestructure.get_root_dir())
 
+        # Manage rootdir button
         self.setrootdir = self.findChild(QPushButton, "setrootdir")
         self.setrootdir.clicked.connect(self.setrootdir_clicked)
+
+        # Manage savefigure button
+        self.savefigure = self.findChild(QPushButton, "savefigure")
+        self.savefigure.clicked.connect(self.savefigure_clicked)
+        self.savedir = ""
 
         # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
         self.alltestfolders = self.findChild(QListWidget, "AllTestFolders")
@@ -77,10 +77,15 @@ class GRAPH_UI(QMainWindow):
         self.alltestfolders.itemClicked.connect(self.testfolder_clicked)
         self.alltestfolders.itemDoubleClicked.connect(self.testfolder_doubleclicked)
 
-        # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
-        self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(
-            self.rootdir.text()
-        )
+        # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath if rootdir exsists, else let user change
+        if os.path.exists(self.rootdir.text()):
+            (
+                self.testname_to_testpath,
+                self.test_selection_dict,
+            ) = self.update_test_folders(self.rootdir.text())
+        else:
+            self.test_name_to_testpath = {}
+            self.test_selection_dict = {}
 
         # Get layout where we are appending graphs
         self.layout = self.findChild(PyQt5.QtWidgets.QFrame, "graphframe")
@@ -234,6 +239,15 @@ class GRAPH_UI(QMainWindow):
         self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(
             file
         )
+
+    def savefigure_clicked(self):
+
+        file = QFileDialog.getSaveFileName(
+            self, "Save File", self.savedir, "PNG (*.png)"
+        )
+        if file is not None:
+            self.figure.savefig(file[0])
+            self.savedir = os.path.dirname(file[0])
 
     def colorize_list(self):
 
