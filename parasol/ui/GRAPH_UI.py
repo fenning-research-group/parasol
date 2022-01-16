@@ -9,6 +9,8 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QFileDialog,
 )
+
+import PyQt5.QtGui
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -17,6 +19,7 @@ from PyQt5 import QtCore
 from PyQt5 import uic
 import sys
 import os
+import numpy as np
 
 
 from parasol.filestructure import FileStructure
@@ -61,6 +64,8 @@ class GRAPH_UI(QMainWindow):
         # Load default root dir, set in UI
         self.rootdir = self.findChild(QLineEdit, "rootdir")
         self.rootdir.setText(self.filestructure.get_root_dir())
+        if os.path.exists(self.rootdir.text()) == False:
+            self.rootdir.setText("")
 
         # Manage rootdir button
         self.setrootdir = self.findChild(QPushButton, "setrootdir")
@@ -181,9 +186,11 @@ class GRAPH_UI(QMainWindow):
 
         # Create dict[foldername] = folderpath -> map names to paths
         # Create dict[foldername] = True/False -> map names to if they have been selected
+        # Create diuct[foldername] = color -> map names to colors
         # Add test foldernames to GUI
         testname_to_testpath = {}
         test_selection_dict = {}
+
         for idx in range(len(test_foldername_list)):
             testname_to_testpath[test_foldername_list[idx]] = test_folderpath_list[idx]
             test_selection_dict[test_foldername_list[idx]] = False
@@ -206,7 +213,7 @@ class GRAPH_UI(QMainWindow):
     # Command on single click
     def testfolder_clicked(self, item: QListWidgetItem) -> None:
         """Temporarily displays the test folder when clicked"""
-        # print(item.text())
+        # for now --> do nothing.
 
     # Command on double click
     def testfolder_doubleclicked(self, item: QListWidgetItem) -> None:
@@ -219,7 +226,7 @@ class GRAPH_UI(QMainWindow):
             self.test_selection_dict[str(item.text())] = False
 
         # Color input values using dictionary
-        self.colorize_list()
+        self.test_colors = self.colorize_list()
 
         # Get selected test folders
         test_folders = self.get_selected_folders()
@@ -232,13 +239,16 @@ class GRAPH_UI(QMainWindow):
         self.update_plots(analyzed_files, mpp_files)
 
     def setrootdir_clicked(self):
-        file = QFileDialog.getExistingDirectory(self, "Select Directory")
+        file = QFileDialog.getExistingDirectory(
+            self, "Select Directory", self.rootdir.text()
+        )
         self.rootdir.setText(file)
 
         # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
-        self.testname_to_testpath, self.test_selection_dict = self.update_test_folders(
-            file
-        )
+        (
+            self.testname_to_testpath,
+            self.test_selection_dict,
+        ) = self.update_test_folders(file)
 
     def savefigure_clicked(self):
 
@@ -251,12 +261,33 @@ class GRAPH_UI(QMainWindow):
 
     def colorize_list(self):
 
+        # Cylcle through tests, count # selected, append to list
+        numtests = 0
+        selected_tests = []
+        for i, key in enumerate(self.test_selection_dict):
+            if self.test_selection_dict[key] == True:
+                numtests += 1
+                selected_tests.append(key)
+            elif self.test_selection_dict[key] == False:
+                numtests += 0
+
+        # Create color map dict to hold color for each test
+        colors = plt.cm.viridis(np.linspace(0, 1, numtests))
+        test_color_dict = {}
+        for idx, selected_test in enumerate(selected_tests):
+            test_color_dict[selected_test] = colors[idx]
+
         # Colorize the list
         for i, key in enumerate(self.test_selection_dict):
             if self.test_selection_dict[key] == True:
-                self.alltestfolders.item(i).setBackground(QtCore.Qt.green)
+                # self.alltestfolders.item(i).setBackground(QtCore.Qt.green)
+                self.alltestfolders.item(i).setBackground(
+                    PyQt5.QtGui.QColor(test_color_dict[key])
+                )
             elif self.test_selection_dict[key] == False:
                 self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
+
+        return test_color_dict
 
     def update_plots(self, analyzed_file_lists: list, mpp_file_lists: list):
 
