@@ -36,7 +36,6 @@ if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
 if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
-
 class GRAPH_UI(QMainWindow):
     """Run UI package for PARASOL"""
 
@@ -170,9 +169,16 @@ class GRAPH_UI(QMainWindow):
         # Create GUI
         self.launch_gui()
 
-    # List of all test folders --> autoupdates when the program launches
     def update_test_folders(self, rootdir: str) -> list:
-        """Updates the list of test folders"""
+        """Updates the list of test folders
+        
+        Args:
+            rootdir[str]: root directory
+
+        Returns 
+            dict : dictionary[testfoldername] : testpath
+            dict : dictionary[testfoldername] : True/False for plotting
+        """
 
         # Clear current displaylist
         self.alltestfolders.clear()
@@ -198,8 +204,14 @@ class GRAPH_UI(QMainWindow):
 
         return testname_to_testpath, test_selection_dict
 
-    # List of all selected test folders --> autoupdates when the program launches
     def get_selected_folders(self) -> list:
+        """
+        Gets list of selected folder paths
+
+        Returns:
+            list[str] : paths to test folders selected
+        
+        """
 
         selected_test_folders = []
 
@@ -215,9 +227,12 @@ class GRAPH_UI(QMainWindow):
         """Temporarily displays the test folder when clicked"""
         # for now --> do nothing.
 
-    # Command on double click
     def testfolder_doubleclicked(self, item: QListWidgetItem) -> None:
-        """Permanantley displays the test folder when double clicked"""
+        """Permanantley displays the test folder when double clicked
+        
+        Args:
+        item[QListWidgetItem] : item selected
+        """
 
         # Change status of selected test folder
         if self.test_selection_dict[str(item.text())] == False:
@@ -225,7 +240,7 @@ class GRAPH_UI(QMainWindow):
         elif self.test_selection_dict[str(item.text())] == True:
             self.test_selection_dict[str(item.text())] = False
 
-        # Color input values using dictionary
+        # Color input values using dictionary[testfolder] = color
         self.test_colors = self.colorize_list()
 
         # Get selected test folders
@@ -236,9 +251,10 @@ class GRAPH_UI(QMainWindow):
         mpp_files = self.filestructure.get_files(test_folders, "MPP")
 
         # Update Plots
-        self.update_plots(analyzed_files, mpp_files)
+        self.update_plots(analyzed_files, mpp_files, test_folders)
 
-    def setrootdir_clicked(self):
+    def setrootdir_clicked(self) -> None:
+        """Manages setting root directory on button click"""
         file = QFileDialog.getExistingDirectory(
             self, "Select Directory", self.rootdir.text()
         )
@@ -250,17 +266,28 @@ class GRAPH_UI(QMainWindow):
             self.test_selection_dict,
         ) = self.update_test_folders(file)
 
-    def savefigure_clicked(self):
+    def savefigure_clicked(self) -> None:
+        """Manages saving figure on button click"""
+
+        fig2 = self.figure
+        # ax = fig2.axes[10]
+        # ax.legend("test")
 
         file = QFileDialog.getSaveFileName(
             self, "Save File", self.savedir, "PNG (*.png)"
         )
         if file is not None:
-            self.figure.savefig(file[0])
+            fig2.savefig(file[0])
             self.savedir = os.path.dirname(file[0])
 
-    def colorize_list(self):
+    def colorize_list(self) -> None:
+        """
+        Sets the colors for items clicked and creates dictionary for plots to be set to same color
 
+        Returns:
+            dict: dictionary[testfolderpath] : hexcolor
+
+        """
         # Cylcle through tests, count # selected, append to list
         numtests = 0
         selected_tests = []
@@ -275,48 +302,57 @@ class GRAPH_UI(QMainWindow):
         colors = plt.cm.viridis(np.linspace(0, 1, numtests))
         test_color_dict = {}
         for idx, selected_test in enumerate(selected_tests):
-            test_color_dict[selected_test] = colors[idx]
+            test_color_dict[self.testname_to_testpath[selected_test]] = str(mpl.colors.to_hex(colors[idx])) # colors[idx]
 
         # Colorize the list
         for i, key in enumerate(self.test_selection_dict):
             if self.test_selection_dict[key] == True:
-                # self.alltestfolders.item(i).setBackground(QtCore.Qt.green)
+                # Get colors and set item to same color as graph
+                rgbh = test_color_dict[self.testname_to_testpath[key]]
                 self.alltestfolders.item(i).setBackground(
-                    PyQt5.QtGui.QColor(test_color_dict[key])
+                    PyQt5.QtGui.QColor(rgbh)
                 )
             elif self.test_selection_dict[key] == False:
+                # Set white
                 self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
 
         return test_color_dict
 
-    def update_plots(self, analyzed_file_lists: list, mpp_file_lists: list):
+    def update_plots(self, analyzed_file_lists: list, mpp_file_lists: list, test_folder_list: list):
+        """
+        Updates plots
 
-        # Flatten file array
-        allfiles = []
-        for analyzed_file_list_for_given_test in analyzed_file_lists:
-            for analyzed_file in analyzed_file_list_for_given_test:
-                allfiles.append(analyzed_file)
-
-        mppfiles = []
-        for mpp_file_list_for_given_test in mpp_file_lists:
-            for mpp_file in mpp_file_list_for_given_test:
-                mppfiles.append(mpp_file)
-
+        Args:
+            analyzed_files_lists (list[list[str]]): list of analyzed file paths seperated by test
+            mpp_files_lists (list[list[str]]): list of mpp file paths seperated by test
+            test_folder_list (list[str]): list of test folder paths
+        """
         # Cycle through dictionaries for each plot (set in __init__) to get desired parameters
         for key in self.plot_axes_dict:
+            
+            # Clear plot
             self.plot_axes_dict[key].cla()
 
+            # Get parameters
             yparam = self.plot_y_dict[key]
             xparam = self.plot_x_dict[key]
             axes = self.plot_axes_dict[key]
 
-            # Pass to appropriate plotter to plot on given axes
-            if "MPP" in yparam:
-                self.grapher.plot_mpps(mppfiles, axes)
-            elif type(yparam) != list:
-                self.grapher.plot_xy_scalars(allfiles, xparam, yparam, axes)
-            else:
-                self.grapher.plot_xy2_scalars(allfiles, xparam, yparam, axes)
+
+            # Cycle through each Test, plot
+            for index, test_folder in enumerate(test_folder_list):
+
+                # Get colors
+                rgbh = self.test_colors[test_folder]
+
+                # Pass to appropriate plotter to plot on given axes
+                if "MPP" in yparam:
+                    self.grapher.plot_mpps(mppfiles = mpp_file_lists[index], ax = axes, c=rgbh)
+                elif type(yparam) != list:
+                    self.grapher.plot_xy_scalars(paramfiles = analyzed_file_lists[index], x = xparam, y = yparam, ax = axes, c=rgbh)
+                else:
+                    self.grapher.plot_xy2_scalars(paramfiles = analyzed_file_lists[index], x = xparam, ys = yparam, ax = axes, c=rgbh)
+            
 
         # Update canvas
         self.canvas.draw()

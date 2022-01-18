@@ -247,7 +247,7 @@ class Grapher:
             ax.plot(
                 t_elapsed,
                 all_p[idx],
-                color=colors[idx],
+#                color=colors[idx],
 #                legend="Module #" + str(module_ids[idx]),
                 **plt_kwargs,
             )
