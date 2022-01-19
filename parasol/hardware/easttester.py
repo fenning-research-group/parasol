@@ -183,7 +183,7 @@ class EastTester:
         self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
         time.sleep(self.et_delay)
 
-    @et_lock
+    @et_lock # ET lock at highest level of functions
     def output_on(self, channel: int) -> None:
         """Turns output on
 
@@ -196,7 +196,7 @@ class EastTester:
             self.source_delay
         )  # if this delay reduced we get issues in measuring current (first point low)
 
-    @et_lock
+    @et_lock # ET lock at highest level of functions
     def output_off(self, channel: int) -> None:
         """Turns output off
 
@@ -209,7 +209,7 @@ class EastTester:
             self.source_delay
         )  # if this delay reduced we get issues in measuring current (first point low)
 
-    @et_lock
+    # @et_lock
     def set_voltage(self, channel: int, voltage: float) -> None:
         """Sets voltage
 
@@ -227,7 +227,7 @@ class EastTester:
         time.sleep(self.source_delay)
 
     # untested
-    @et_lock
+    # @et_lock
     def set_current(self, channel: int, current: float) -> None:
         """Sets current
 
@@ -245,7 +245,7 @@ class EastTester:
         self.et.write(("CURR" + str(channel) + ":CC %f\n" % (current)).encode())
         time.sleep(self.source_delay)
 
-    @et_lock
+    # @et_lock
     def measure_current(self, channel: int) -> float:
         """Measures current several times and then averages (number defined in hardwareconstants.yaml)
 
@@ -255,9 +255,11 @@ class EastTester:
         Returns:
             float: current (A) reading
         """
+        # If timing is off here we get Exemption in Future: List Index Out of Range
 
         i = 0
         curr_tot = 0
+
         # Average over avg_num (set in hardwareconstants.yaml) times for stats
         while i < self.et_avg_num:
             #adding outputon here may help --> confused on which ch?>
@@ -265,13 +267,23 @@ class EastTester:
             time.sleep(self.sense_delay)
             curr = self.et.readlines()
             
-            if curr is None:
-                print("ET measurement failed current")
+            # If we dont get a reply, try again
+            if (len(curr) == 0) or (curr[-1] is None):
+                i-=1
+
+            # Else, decode and look for number
             else:
                 curr = curr[-1].decode("utf-8")
                 curr = re.findall("\d*\.?\d+", curr)
-                curr = float(curr[0])
-                curr_tot += curr
+
+                # If we dont have one, retry
+                if len(curr) == 0:
+                    i-=1
+
+                # Else, get it and add it to the total
+                else:
+                    curr = float(curr[0])
+                    curr_tot += curr
             i += 1
 
         curr_tot = curr_tot / self.et_avg_num
@@ -279,7 +291,7 @@ class EastTester:
         return curr_tot
 
     # untested
-    @et_lock
+    # @et_lock
     def measure_voltage(self, channel: int) -> float:
         """Measures voltage several times and then averages (number defined in hardwareconstants.yaml)
 
@@ -308,6 +320,7 @@ class EastTester:
         return volt_tot
 
     # untested
+    @et_lock # ET lock at highest level of functions
     def voc(self, channel: int) -> float:
         """Gets open circut voltage: V where I = 0
 
@@ -325,6 +338,7 @@ class EastTester:
         return voc
 
     # untested
+    @et_lock # ET lock at highest level of functions
     def isc(self, channel: int) -> float:
         """Gets short circut current: I where V = 0
 
@@ -341,7 +355,8 @@ class EastTester:
 
         return isc
 
-    # no et lock, it calls functions with them
+    
+    @et_lock # ET lock at highest level of functions
     def set_V_measure_I(self, channel: int, voltage: float) -> float:
         """Sets voltage and measures current
 
@@ -358,6 +373,7 @@ class EastTester:
         curr = self.measure_current(channel)
         return curr
 
+    @et_lock # ET lock at highest level of functions
     def set_I_measure_V(self, channel: int, voltage: float) -> float:
         """Sets current and measures voltage
 
