@@ -31,6 +31,11 @@ class Controller:
             "34": EastTester(et_num = 2),
             "56": EastTester(et_num = 3),
         }
+        # self.et_running = {
+        #     "12": False,
+        #     "34": False,
+        #     "56": False,
+        # }
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
@@ -481,16 +486,22 @@ class Controller:
         if last_vmpp is None:
             return
 
+        # Ensure that the ET we need is not running: --> note this didnt seem to matter
+        # et_key, ch = self.et_channels[id]
+        # while self.et_running[et_key] == True:
+        #     time.sleep(1)
+
         # Ensure that JV isn't running
         with d["lock"]:
+
+            # Tell ET we running
+            # self.et_running[et_key] = True
 
             # Turn on easttester output, set voltage, measure current
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
-
             # Scan mpp
             t, v, i = self.characterization.track_mpp(d, et, ch, last_vmpp)
-
             # Convert current to mA and calc j and p
             i *= 1000
             j = i / (d["area"] * len(d["module_channels"]))
@@ -515,6 +526,10 @@ class Controller:
             with open(fpath, "a", newline="") as f:
                 writer = csv.writer(f, delimiter=",")
                 writer.writerow([t, v, i, j, p])
+
+            # Tell ET we are done
+            # self.et_running[et_key] = False
+
 
     def __del__(self) -> None:
         """Stops que and program on exit"""

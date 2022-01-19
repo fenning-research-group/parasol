@@ -260,14 +260,18 @@ class EastTester:
         curr_tot = 0
         # Average over avg_num (set in hardwareconstants.yaml) times for stats
         while i < self.et_avg_num:
-
+            #adding outputon here may help --> confused on which ch?>
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             time.sleep(self.sense_delay)
             curr = self.et.readlines()
-            curr = curr[-1].decode("utf-8")
-            curr = re.findall("\d*\.?\d+", curr)
-            curr = float(curr[0])
-            curr_tot += curr
+            
+            if curr is None:
+                print("ET measurement failed current")
+            else:
+                curr = curr[-1].decode("utf-8")
+                curr = re.findall("\d*\.?\d+", curr)
+                curr = float(curr[0])
+                curr_tot += curr
             i += 1
 
         curr_tot = curr_tot / self.et_avg_num

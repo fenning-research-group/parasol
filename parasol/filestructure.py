@@ -326,12 +326,12 @@ class FileStructure:
         # dict[analyzedfolder] = files
         file_map = self.map_test_files(analyzed_folders)
         
-        # Get list of Analyzed files
+        # Get list of files
         analyzed_files = []
         for select_analyzed_folder in analyzed_folders:
             analyzed_files.append(file_map[select_analyzed_folder])
         
-        #
+        # list of filetypes requested
         return analyzed_files
 
 
