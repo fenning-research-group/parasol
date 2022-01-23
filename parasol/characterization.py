@@ -212,10 +212,10 @@ class Characterization:
         orientation_correct = None
 
         isc = scanner.isc()
-
-        if isc < 0:
+        minisc = -0.0005
+        if isc < minisc:
             orientation_correct = True
-        elif isc > 0:
+        elif isc > minisc:
             orientation_correct = False
 
         return orientation_correct

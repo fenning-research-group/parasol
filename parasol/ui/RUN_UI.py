@@ -322,12 +322,12 @@ class RUN_UI(QMainWindow):
             QPushButton, "CheckOrientationButton_6"
         )
 
-        self.checkorientationbutton1.clicked.connect(self.checkorientationbutton1)
-        self.checkorientationbutton2.clicked.connect(self.checkorientationbutton2)
-        self.checkorientationbutton3.clicked.connect(self.checkorientationbutton3)
-        self.checkorientationbutton4.clicked.connect(self.checkorientationbutton4)
-        self.checkorientationbutton5.clicked.connect(self.checkorientationbutton5)
-        self.checkorientationbutton6.clicked.connect(self.checkorientationbutton6)
+        self.checkorientationbutton1.clicked.connect(self.checkorientation1)
+        self.checkorientationbutton2.clicked.connect(self.checkorientation2)
+        self.checkorientationbutton3.clicked.connect(self.checkorientation3)
+        self.checkorientationbutton4.clicked.connect(self.checkorientation4)
+        self.checkorientationbutton5.clicked.connect(self.checkorientation5)
+        self.checkorientationbutton6.clicked.connect(self.checkorientation6)
 
         self.checkorientationbutton1.setEnabled(True)
         self.checkorientationbutton2.setEnabled(True)
@@ -794,7 +794,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton1.setEnabled(False)
         self.unloadbutton1.setEnabled(True)
         self.checktestbutton1.setEnabled(True)
-        self.checkorientationbutton1.setEnbable(False)
+        self.checkorientationbutton1.setEnabled(False)
 
     def lock_value2(self) -> None:
         """Locks all changeable objects for test 2"""
@@ -816,7 +816,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton2.setEnabled(False)
         self.unloadbutton2.setEnabled(True)
         self.checktestbutton2.setEnabled(True)
-        self.checkorientationbutton2.setEnbable(False)
+        self.checkorientationbutton2.setEnabled(False)
 
     def lock_value3(self) -> None:
         """Locks all changeable objects for test 3"""
@@ -838,7 +838,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton3.setEnabled(False)
         self.unloadbutton3.setEnabled(True)
         self.checktestbutton3.setEnabled(True)
-        self.checkorientationbutton3.setEnbable(False)
+        self.checkorientationbutton3.setEnabled(False)
 
     def lock_value4(self) -> None:
         """Locks all changeable objects for test 4"""
@@ -860,7 +860,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton4.setEnabled(False)
         self.unloadbutton4.setEnabled(True)
         self.checktestbutton4.setEnabled(True)
-        self.checkorientationbutton4.setEnbable(False)
+        self.checkorientationbutton4.setEnabled(False)
 
     def lock_value5(self) -> None:
         """Locks all changeable objects for test 5"""
@@ -882,7 +882,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton5.setEnabled(False)
         self.unloadbutton5.setEnabled(True)
         self.checktestbutton5.setEnabled(True)
-        self.checkorientationbutton5.setEnbable(False)
+        self.checkorientationbutton5.setEnabled(False)
 
     def lock_value6(self) -> None:
         """Locks all changeable objects for test 6"""
@@ -904,7 +904,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton6.setEnabled(False)
         self.unloadbutton6.setEnabled(True)
         self.checktestbutton6.setEnabled(True)
-        self.checkorientationbutton6.setEnbable(False)
+        self.checkorientationbutton6.setEnabled(False)
 
     # Unlock Values For Editing
 
@@ -928,7 +928,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton1.setEnabled(True)
         self.unloadbutton1.setEnabled(False)
         self.checktestbutton1.setEnabled(False)
-        self.checkorientationbutton1.setEnbable(True)
+        self.checkorientationbutton1.setEnabled(True)
 
     def unlock_value2(self) -> None:
         """Unlocks all changeable objects for test 2"""
@@ -950,7 +950,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton2.setEnabled(True)
         self.unloadbutton2.setEnabled(False)
         self.checktestbutton2.setEnabled(False)
-        self.checkorientationbutton2.setEnbable(True)
+        self.checkorientationbutton2.setEnabled(True)
 
     def unlock_value3(self) -> None:
         """Unlocks all changeable objects for test 3"""
@@ -972,7 +972,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton3.setEnabled(True)
         self.unloadbutton3.setEnabled(False)
         self.checktestbutton3.setEnabled(False)
-        self.checkorientationbutton3.setEnbable(True)
+        self.checkorientationbutton3.setEnabled(True)
 
     def unlock_value4(self) -> None:
         """Unlocks all changeable objects for test 4"""
@@ -994,7 +994,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton4.setEnabled(True)
         self.unloadbutton4.setEnabled(False)
         self.checktestbutton4.setEnabled(False)
-        self.checkorientationbutton4.setEnbable(True)
+        self.checkorientationbutton4.setEnabled(True)
 
     def unlock_value5(self) -> None:
         """Unlocks all changeable objects for test 5"""
@@ -1016,7 +1016,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton5.setEnabled(True)
         self.unloadbutton5.setEnabled(False)
         self.checktestbutton5.setEnabled(False)
-        self.checkorientationbutton5.setEnbable(True)
+        self.checkorientationbutton5.setEnabled(True)
 
     def unlock_value6(self) -> None:
         """Unlocks all changeable objects for test 6"""
@@ -1038,7 +1038,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton6.setEnabled(True)
         self.unloadbutton6.setEnabled(False)
         self.checktestbutton6.setEnabled(False)
-        self.checkorientationbutton6.setEnbable(True)
+        self.checkorientationbutton6.setEnabled(True)
 
     # Load Buttons
 
@@ -1126,27 +1126,27 @@ class RUN_UI(QMainWindow):
 
     # Checkorientation Buttons
 
-    def checkorientationbutton1(self) -> None:
+    def checkorientation1(self) -> None:
         """Checks orientation of test 1"""
         self.checkorientation(1)
 
-    def checkorientationbutton2(self) -> None:
+    def checkorientation2(self) -> None:
         """Checks orientation of test 2"""
         self.checkorientation(2)
 
-    def checkorientationbutton3(self) -> None:
+    def checkorientation3(self) -> None:
         """Checks orientation of test 3"""
         self.checkorientation(3)
 
-    def checkorientationbutton4(self) -> None:
+    def checkorientation4(self) -> None:
         """Checks orientation of test 4"""
         self.checkorientation(4)
 
-    def checkorientationbutton5(self) -> None:
+    def checkorientation5(self) -> None:
         """Checks orientation of test 5"""
         self.checkorientation(5)
 
-    def checkorientationbutton6(self) -> None:
+    def checkorientation6(self) -> None:
         """Checks orientation of test 6"""
         self.checkorientation(6)
 

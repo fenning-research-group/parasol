@@ -173,10 +173,10 @@ class Scanner:
         # Set current to 0, measure voltage
         self.set_current(0)
         self.output_on()
-        voc = float(self._trig_read())
+        vocval = float(self._trig_read())
         self.output_off()
 
-        return voc
+        return vocval
 
     def isc(self) -> float:
         """Measures the short circuit current
@@ -188,10 +188,10 @@ class Scanner:
         # Set voltage to 0, measure current
         self.set_voltage(0)
         self.output_on()
-        isc = float(self._trig_read)
+        iscval = float(self._trig_read())
         self.output_off()
 
-        return isc
+        return iscval
 
     def iv_sweep(self, vstart: float, vend: float, steps: int) -> np.ndarray:
         """Runs a single IV sweep and returns the data

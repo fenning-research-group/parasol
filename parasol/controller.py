@@ -360,7 +360,7 @@ class Controller:
         asyncio.set_event_loop(self.loop)
         self.jv_queue = asyncio.Queue()
         self.mpp_queue = asyncio.Queue()
-        #        self.random_queue = asyncio.Queue()
+        self.random_queue = asyncio.Queue()
         self.loop.run_forever()
 
     def start(self) -> None:
@@ -381,7 +381,7 @@ class Controller:
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        #        asyncio.run_coroutine_threadsafe(self.check_orientation_worker(self.loop), self.loop)
+        asyncio.run_coroutine_threadsafe(self.check_orientation_worker(self.loop), self.loop)
 
         # Set to running
         self.running = True
@@ -561,8 +561,7 @@ class Controller:
     # checks orientaiton of string --> could proabbly devide string into modules and check each one but yoko use is low and we should be fine
     def check_orientation(self, modules: list) -> None:
 
-        correct_orientation = [] * len(modules)
-
+        correct_orientation = [None] * len(modules)
         for idx, module in enumerate(modules):
 
             # Turn on relay
@@ -572,7 +571,6 @@ class Controller:
             correct_orientation[idx] = self.characterization.check_orientation(
                 self.scanner
             )
-
             # Turn off relay
             self.relay.all_off()
 
