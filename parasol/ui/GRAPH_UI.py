@@ -36,6 +36,7 @@ if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
 if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
+
 class GRAPH_UI(QMainWindow):
     """Run UI package for PARASOL"""
 
@@ -57,7 +58,7 @@ class GRAPH_UI(QMainWindow):
         dpival = 50
 
         # Load the ui file
-        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI_Larger3.ui")
+        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI.ui")
         uic.loadUi(ui_path, self)
 
         # Load default root dir, set in UI
@@ -171,11 +172,11 @@ class GRAPH_UI(QMainWindow):
 
     def update_test_folders(self, rootdir: str) -> list:
         """Updates the list of test folders
-        
+
         Args:
             rootdir[str]: root directory
 
-        Returns 
+        Returns
             dict : dictionary[testfoldername] : testpath
             dict : dictionary[testfoldername] : True/False for plotting
         """
@@ -210,7 +211,7 @@ class GRAPH_UI(QMainWindow):
 
         Returns:
             list[str] : paths to test folders selected
-        
+
         """
 
         selected_test_folders = []
@@ -229,7 +230,7 @@ class GRAPH_UI(QMainWindow):
 
     def testfolder_doubleclicked(self, item: QListWidgetItem) -> None:
         """Permanantley displays the test folder when double clicked
-        
+
         Args:
         item[QListWidgetItem] : item selected
         """
@@ -302,23 +303,25 @@ class GRAPH_UI(QMainWindow):
         colors = plt.cm.viridis(np.linspace(0, 1, numtests))
         test_color_dict = {}
         for idx, selected_test in enumerate(selected_tests):
-            test_color_dict[self.testname_to_testpath[selected_test]] = str(mpl.colors.to_hex(colors[idx])) # colors[idx]
+            test_color_dict[self.testname_to_testpath[selected_test]] = str(
+                mpl.colors.to_hex(colors[idx])
+            )  # colors[idx]
 
         # Colorize the list
         for i, key in enumerate(self.test_selection_dict):
             if self.test_selection_dict[key] == True:
                 # Get colors and set item to same color as graph
                 rgbh = test_color_dict[self.testname_to_testpath[key]]
-                self.alltestfolders.item(i).setBackground(
-                    PyQt5.QtGui.QColor(rgbh)
-                )
+                self.alltestfolders.item(i).setBackground(PyQt5.QtGui.QColor(rgbh))
             elif self.test_selection_dict[key] == False:
                 # Set white
                 self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
 
         return test_color_dict
 
-    def update_plots(self, analyzed_file_lists: list, mpp_file_lists: list, test_folder_list: list):
+    def update_plots(
+        self, analyzed_file_lists: list, mpp_file_lists: list, test_folder_list: list
+    ):
         """
         Updates plots
 
@@ -329,7 +332,7 @@ class GRAPH_UI(QMainWindow):
         """
         # Cycle through dictionaries for each plot (set in __init__) to get desired parameters
         for key in self.plot_axes_dict:
-            
+
             # Clear plot
             self.plot_axes_dict[key].cla()
 
@@ -337,7 +340,6 @@ class GRAPH_UI(QMainWindow):
             yparam = self.plot_y_dict[key]
             xparam = self.plot_x_dict[key]
             axes = self.plot_axes_dict[key]
-
 
             # Cycle through each Test, plot
             for index, test_folder in enumerate(test_folder_list):
@@ -347,12 +349,25 @@ class GRAPH_UI(QMainWindow):
 
                 # Pass to appropriate plotter to plot on given axes
                 if "MPP" in yparam:
-                    self.grapher.plot_mpps(mppfiles = mpp_file_lists[index], ax = axes, c=rgbh)
+                    self.grapher.plot_mpps(
+                        mppfiles=mpp_file_lists[index], ax=axes, c=rgbh
+                    )
                 elif type(yparam) != list:
-                    self.grapher.plot_xy_scalars(paramfiles = analyzed_file_lists[index], x = xparam, y = yparam, ax = axes, c=rgbh)
+                    self.grapher.plot_xy_scalars(
+                        paramfiles=analyzed_file_lists[index],
+                        x=xparam,
+                        y=yparam,
+                        ax=axes,
+                        c=rgbh,
+                    )
                 else:
-                    self.grapher.plot_xy2_scalars(paramfiles = analyzed_file_lists[index], x = xparam, ys = yparam, ax = axes, c=rgbh)
-            
+                    self.grapher.plot_xy2_scalars(
+                        paramfiles=analyzed_file_lists[index],
+                        x=xparam,
+                        ys=yparam,
+                        ax=axes,
+                        c=rgbh,
+                    )
 
         # Update canvas
         self.canvas.draw()

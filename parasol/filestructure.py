@@ -180,7 +180,9 @@ class FileStructure:
         mpp_file_path = f"{startdate}_{name}_{id}_all_MPP_1.csv"
         return mpp_file_path
 
-    def get_analyzed_file_name(self, startdate: str, name: str, id: int, module_channel:int) -> str:
+    def get_analyzed_file_name(
+        self, startdate: str, name: str, id: int, module_channel: int
+    ) -> str:
         """Returns the Analyzed file name
 
         Args:
@@ -250,12 +252,11 @@ class FileStructure:
         """
         return [f.path for f in os.scandir(folder) if f.is_file()]
 
-    
     def get_tests(self, rootdir=None) -> list:
         """Returns a list of all test paths in root directory
 
         Returns:
-            list[str]: paths to all test folders 
+            list[str]: paths to all test folders
         """
 
         # If no root directory specified, use default
@@ -309,8 +310,7 @@ class FileStructure:
 
         return mpp_folder, jv_folders, analyzed_folder
 
-
-    def get_files(self,test_folders, filetype = "Analyzed") -> dict:
+    def get_files(self, test_folders, filetype="Analyzed") -> dict:
 
         # dict[testfolder][scanfolder] = folderpath
         folder_map = self.map_test_folders(test_folders)
@@ -322,19 +322,16 @@ class FileStructure:
             for sub_folder in sub_folders:
                 analyzed_folders.append(sub_folder)
 
-
         # dict[analyzedfolder] = files
         file_map = self.map_test_files(analyzed_folders)
-        
+
         # Get list of files
         analyzed_files = []
         for select_analyzed_folder in analyzed_folders:
             analyzed_files.append(file_map[select_analyzed_folder])
-        
+
         # list of filetypes requested
         return analyzed_files
-
-
 
     def map_test_folders(self, test_paths: list) -> dict:
         """Creates a dictionary maping test folders to their subfolders

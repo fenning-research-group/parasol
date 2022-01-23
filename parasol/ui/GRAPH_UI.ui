@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1380</width>
-    <height>870</height>
+    <width>1908</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,8 +29,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>1360</width>
-         <height>830</height>
+         <width>1888</width>
+         <height>960</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
@@ -38,8 +38,8 @@
          <widget class="QFrame" name="ScrollAreaFrame">
           <property name="minimumSize">
            <size>
-            <width>1342</width>
-            <height>812</height>
+            <width>1870</width>
+            <height>938</height>
            </size>
           </property>
           <property name="frameShape">
@@ -54,7 +54,7 @@
              <x>0</x>
              <y>0</y>
              <width>260</width>
-             <height>804</height>
+             <height>875</height>
             </rect>
            </property>
           </widget>
@@ -63,8 +63,8 @@
             <rect>
              <x>270</x>
              <y>0</y>
-             <width>1072</width>
-             <height>804</height>
+             <width>1600</width>
+             <height>900</height>
             </rect>
            </property>
            <property name="frameShape">
@@ -72,6 +72,45 @@
            </property>
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="rootdir">
+           <property name="geometry">
+            <rect>
+             <x>5</x>
+             <y>880</y>
+             <width>250</width>
+             <height>25</height>
+            </rect>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="setrootdir">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>910</y>
+             <width>200</width>
+             <height>25</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Set Root Directory</string>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="savefigure">
+           <property name="geometry">
+            <rect>
+             <x>970</x>
+             <y>910</y>
+             <width>200</width>
+             <height>25</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Save Figure</string>
            </property>
           </widget>
          </widget>

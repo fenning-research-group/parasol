@@ -91,12 +91,22 @@ class Grapher:
             # for each parameter, plot all data
             y_vals = df[y_param]
             for i in range(len(y_vals)):
-                
+
                 # plot using fwd/rev arrows
                 if "FWD" in y_param:
-                    plt.scatter(x_vals[i], y_vals[i], marker=self.fwd_rev_cursor_dict[0], **plt_kwargs)
+                    plt.scatter(
+                        x_vals[i],
+                        y_vals[i],
+                        marker=self.fwd_rev_cursor_dict[0],
+                        **plt_kwargs,
+                    )
                 elif "REV" in y_param:
-                    plt.scatter(x_vals[i], y_vals[i], marker=self.fwd_rev_cursor_dict[1], **plt_kwargs)
+                    plt.scatter(
+                        x_vals[i],
+                        y_vals[i],
+                        marker=self.fwd_rev_cursor_dict[1],
+                        **plt_kwargs,
+                    )
                 else:
                     plt.scatter(x_vals[i], y_vals[i], **plt_kwargs)
 
@@ -158,8 +168,16 @@ class Grapher:
 
         # Plot FWD and REV curves, REV with --
         for jvpair in range(len(all_t_elapsed)):
-            plt.plot(all_v[jvpair], all_j_fwd[jvpair], color=colors[jvpair], **plt_kwargs)
-            plt.plot(all_v[jvpair], all_j_rev[jvpair], "--", color=colors[jvpair], **plt_kwargs)
+            plt.plot(
+                all_v[jvpair], all_j_fwd[jvpair], color=colors[jvpair], **plt_kwargs
+            )
+            plt.plot(
+                all_v[jvpair],
+                all_j_rev[jvpair],
+                "--",
+                color=colors[jvpair],
+                **plt_kwargs,
+            )
 
         # Create legend for 4 files to show change over time
         if len(jvfiles) >= 4:
@@ -208,7 +226,7 @@ class Grapher:
             mppfiles (list[str]): list of MPP files
             ax (plt.axes): axes
             **plt_kwargs : additional plot options
-        
+
         Returns:
             plt.ax: plotted axes
         """
@@ -247,24 +265,26 @@ class Grapher:
             ax.plot(
                 t_elapsed,
                 all_p[idx],
-#                color=colors[idx],
-#                legend="Module #" + str(module_ids[idx]),
+                #                color=colors[idx],
+                #                legend="Module #" + str(module_ids[idx]),
                 **plt_kwargs,
             )
 
         # Customize plot and show
         ax.set_ylabel("MPPT MPP (mW/cm2)", weight="black")
         ax.set_xlabel("Time Elapsed (sec)", weight="black")
-        #ax.set_title(titlestr)
-        #ax.legend(loc="lower left", frameon=False)
-        
+        # ax.set_title(titlestr)
+        # ax.legend(loc="lower left", frameon=False)
+
         return ax
 
     # Plot x v y with color axis as different devices
     # Plot x v y with color axis another parameter (z)
-    # THESE RUN ON AXES LIKE THEY SHOULD! 
+    # THESE RUN ON AXES LIKE THEY SHOULD!
 
-    def plot_xy_scalars(self, paramfiles: list, x: str, y: str, ax : plt.axes = None, **plt_kwargs) -> plt.axes:
+    def plot_xy_scalars(
+        self, paramfiles: list, x: str, y: str, ax: plt.axes = None, **plt_kwargs
+    ) -> plt.axes:
         """Plot x vs. y for a set of scalar files
 
         Args:
@@ -273,7 +293,7 @@ class Grapher:
             y (str): y header name
             ax (plt.axes): axes
             **plt_kwargs : additional plot options
-        
+
         Returns:
             plt.ax: plotted axes
         """
@@ -296,12 +316,14 @@ class Grapher:
         ax.set_ylabel(y, weight="black")
         ax.set_xlabel(x, weight="black")
         # ax.set_title("")
-        #plt.tight_layout()
+        # plt.tight_layout()
 
         # Return axes
         return ax
 
-    def plot_xy2_scalars(self, paramfiles: list, x: str, ys: list, ax : plt.axes = None, **plt_kwargs) -> plt.axes:
+    def plot_xy2_scalars(
+        self, paramfiles: list, x: str, ys: list, ax: plt.axes = None, **plt_kwargs
+    ) -> plt.axes:
         """Plots x vs. y for a set of scalar files
 
         Args:
@@ -310,7 +332,7 @@ class Grapher:
             ys (list[str]): y header names
             ax (plt.axes): axes
             **plt_kwargs : additional plot options
-        
+
         Returns:
             plt.ax: plotted axes
         """
@@ -330,7 +352,9 @@ class Grapher:
             # Cycle through y values, and add (x,y) to plot
             for idx, y in enumerate(ys):
                 y_vals = df[y]
-                ax.scatter(x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx], **plt_kwargs)
+                ax.scatter(
+                    x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx], **plt_kwargs
+                )
 
         # Label axes , no title
         ylab = ""
@@ -344,7 +368,9 @@ class Grapher:
         # Return axes
         return ax
 
-    def plot_xyz_scalar(self, paramfile: str, x: str, y: str, z: str, ax : plt.axes = None, **plt_kwargs) -> plt.axes:
+    def plot_xyz_scalar(
+        self, paramfile: str, x: str, y: str, z: str, ax: plt.axes = None, **plt_kwargs
+    ) -> plt.axes:
         """Plots x vs. y with z colorbar for a set of scalar files
 
         Args:
@@ -354,7 +380,7 @@ class Grapher:
             z (str): z header name
             ax (plt.axes): axes
             **plt_kwargs : additional plot options
-        
+
         Returns:
             plt.ax: plotted axes
         """
@@ -382,13 +408,12 @@ class Grapher:
             # Plot (x,y) with colorbar
             ax.scatter(xval, yval, color=colors[n], **plt_kwargs)
 
-
         # Manage colorbar
         norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
-        
+
         objs = plt.colorbar(
             mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
-            ax = ax,
+            ax=ax,
             orientation="vertical",
             label=str(z),
         )

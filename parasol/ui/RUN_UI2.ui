@@ -1,0 +1,3822 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1175</width>
+    <height>789</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Run GUI</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>run_icon.png</normaloff>run_icon.png</iconset>
+  </property>
+  <widget class="QWidget" name="MainWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>-349</y>
+         <width>1138</width>
+         <height>1098</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QFrame" name="frame">
+          <property name="minimumSize">
+           <size>
+            <width>1000</width>
+            <height>1080</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_3">
+             <item>
+              <widget class="QGroupBox" name="String_1">
+               <property name="minimumSize">
+                <size>
+                 <width>1080</width>
+                 <height>185</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>String/Common 1</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignHCenter|Qt::AlignTop</set>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <widget class="QGroupBox" name="GeneralInfo_1">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>General Information</string>
+                </property>
+                <widget class="QLineEdit" name="NameInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>150</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="NameLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Name:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Area:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="AreaInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaUnits_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>cm^2</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="JVBox_1">
+                <property name="geometry">
+                 <rect>
+                  <x>610</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>JV Parameters</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="VmaxLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Max V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VmaxInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VmaxUnits_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VstepsInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="Vstepsabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Steps:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VstepsUnits_1">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>steps</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Min V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VminInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminUnits_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="TimerBox_1">
+                <property name="geometry">
+                 <rect>
+                  <x>245</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Timers</string>
+                </property>
+                <widget class="QLabel" name="MPPFrequencyLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>MPP:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="MPPFrequencyInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPFrequencyUnits_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>JV:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="JVFrequencyInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyUnits_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>21</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ActionBox_1">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>165</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Actions</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QPushButton" name="LoadButton_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Load String</string>
+                 </property>
+                 <property name="autoDefault">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="UnLoadButton_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>56</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Unload String</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckTestButton_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>91</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ChannelBox_1">
+                <property name="geometry">
+                 <rect>
+                  <x>485</x>
+                  <y>30</y>
+                  <width>110</width>
+                  <height>126</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Active Chanels</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <widget class="QCheckBox" name="checkBox_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 1</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>46</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 2</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>71</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 3</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>96</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 4</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ModeBox_1">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>95</y>
+                  <width>461</width>
+                  <height>80</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Mode Options</string>
+                </property>
+                <widget class="QComboBox" name="MPPModeBox_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>21</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="JVModeBox_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>46</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPModeLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>20</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>MPP Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVModeLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>45</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>JV Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="String_2">
+               <property name="minimumSize">
+                <size>
+                 <width>1080</width>
+                 <height>185</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>String/Common 2</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignHCenter|Qt::AlignTop</set>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <widget class="QGroupBox" name="GeneralInfo_2">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>General Information</string>
+                </property>
+                <widget class="QLineEdit" name="NameInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>150</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="NameLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Name:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Area:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="AreaInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaUnits_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>cm^2</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="JVBox_2">
+                <property name="geometry">
+                 <rect>
+                  <x>610</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>JV Parameters</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="VmaxLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Max V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VmaxInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VmaxUnits_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VstepsInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="Vstepsabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Steps:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VstepsUnits_2">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>steps</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Min V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VminInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminUnits_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="TimerBox_2">
+                <property name="geometry">
+                 <rect>
+                  <x>245</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Timers</string>
+                </property>
+                <widget class="QLabel" name="MPPFrequencyLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>MPP:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="MPPFrequencyInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPFrequencyUnits_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>JV:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="JVFrequencyInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyUnits_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>21</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ActionBox_2">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>165</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Actions</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QPushButton" name="LoadButton_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Load String</string>
+                 </property>
+                 <property name="autoDefault">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="UnLoadButton_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>56</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Unload String</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckTestButton_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>91</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ChannelBox_2">
+                <property name="geometry">
+                 <rect>
+                  <x>485</x>
+                  <y>30</y>
+                  <width>110</width>
+                  <height>126</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Active Chanels</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <widget class="QCheckBox" name="checkBox_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 5</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>46</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 6</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_7">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>71</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 7</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_8">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>96</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 8</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ModeBox_2">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>95</y>
+                  <width>461</width>
+                  <height>80</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Mode Options</string>
+                </property>
+                <widget class="QComboBox" name="MPPModeBox_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>21</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="JVModeBox_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>46</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPModeLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>20</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>MPP Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVModeLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>45</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>JV Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="String_3">
+               <property name="minimumSize">
+                <size>
+                 <width>1080</width>
+                 <height>185</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>String/Common 3</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignHCenter|Qt::AlignTop</set>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <widget class="QGroupBox" name="GeneralInfo_3">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>General Information</string>
+                </property>
+                <widget class="QLineEdit" name="NameInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>150</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="NameLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Name:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Area:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="AreaInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaUnits_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>cm^2</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="JVBox_3">
+                <property name="geometry">
+                 <rect>
+                  <x>610</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>JV Parameters</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="VmaxLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Max V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VmaxInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VmaxUnits_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VstepsInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="Vstepsabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Steps:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VstepsUnits_3">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>steps</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Min V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VminInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminUnits_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="TimerBox_3">
+                <property name="geometry">
+                 <rect>
+                  <x>245</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Timers</string>
+                </property>
+                <widget class="QLabel" name="MPPFrequencyLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>MPP:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="MPPFrequencyInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPFrequencyUnits_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>JV:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="JVFrequencyInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyUnits_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>21</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ActionBox_3">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>165</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Actions</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QPushButton" name="LoadButton_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Load String</string>
+                 </property>
+                 <property name="autoDefault">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="UnLoadButton_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>56</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Unload String</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckTestButton_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>91</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ChannelBox_3">
+                <property name="geometry">
+                 <rect>
+                  <x>485</x>
+                  <y>30</y>
+                  <width>110</width>
+                  <height>126</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Active Chanels</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <widget class="QCheckBox" name="checkBox_9">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 9</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_10">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>46</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 10</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_11">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>71</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 11</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_12">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>96</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 12</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ModeBox_3">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>95</y>
+                  <width>461</width>
+                  <height>80</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Mode Options</string>
+                </property>
+                <widget class="QComboBox" name="MPPModeBox_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>21</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                 <property name="currentText">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="JVModeBox_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>46</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPModeLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>20</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>MPP Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVModeLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>45</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>JV Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="String_4">
+               <property name="minimumSize">
+                <size>
+                 <width>1080</width>
+                 <height>185</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>String/Common 4</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignHCenter|Qt::AlignTop</set>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <widget class="QGroupBox" name="GeneralInfo_4">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>General Information</string>
+                </property>
+                <widget class="QLineEdit" name="NameInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>150</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="NameLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Name:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Area:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="AreaInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaUnits_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>cm^2</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="JVBox_4">
+                <property name="geometry">
+                 <rect>
+                  <x>610</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>JV Parameters</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="VmaxLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Max V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VmaxInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VmaxUnits_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VstepsInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="Vstepsabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Steps:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VstepsUnits_4">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>steps</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Min V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VminInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminUnits_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="TimerBox_4">
+                <property name="geometry">
+                 <rect>
+                  <x>245</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Timers</string>
+                </property>
+                <widget class="QLabel" name="MPPFrequencyLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>MPP:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="MPPFrequencyInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPFrequencyUnits_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>JV:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="JVFrequencyInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyUnits_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>21</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ActionBox_4">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>165</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Actions</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QPushButton" name="LoadButton_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Load String</string>
+                 </property>
+                 <property name="autoDefault">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="UnLoadButton_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>56</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Unload String</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckTestButton_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>91</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ChannelBox_4">
+                <property name="geometry">
+                 <rect>
+                  <x>485</x>
+                  <y>30</y>
+                  <width>110</width>
+                  <height>126</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Active Chanels</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <widget class="QCheckBox" name="checkBox_13">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 13</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_14">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>46</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 14</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_15">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>71</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 15</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_16">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>96</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 16</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ModeBox_4">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>95</y>
+                  <width>461</width>
+                  <height>80</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Mode Options</string>
+                </property>
+                <widget class="QComboBox" name="MPPModeBox_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>21</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                 <property name="currentText">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="JVModeBox_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>46</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPModeLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>20</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>MPP Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVModeLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>45</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>JV Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="String_5">
+               <property name="minimumSize">
+                <size>
+                 <width>1080</width>
+                 <height>185</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>String/Common 5</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignHCenter|Qt::AlignTop</set>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <widget class="QGroupBox" name="GeneralInfo_5">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>General Information</string>
+                </property>
+                <widget class="QLineEdit" name="NameInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>150</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="NameLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Name:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Area:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="AreaInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaUnits_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>cm^2</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="JVBox_5">
+                <property name="geometry">
+                 <rect>
+                  <x>610</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>JV Parameters</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="VmaxLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Max V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VmaxInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VmaxUnits_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VstepsInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="Vstepsabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Steps:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VstepsUnits_5">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>steps</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Min V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VminInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminUnits_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="TimerBox_5">
+                <property name="geometry">
+                 <rect>
+                  <x>245</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Timers</string>
+                </property>
+                <widget class="QLabel" name="MPPFrequencyLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>MPP:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="MPPFrequencyInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPFrequencyUnits_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>JV:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="JVFrequencyInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyUnits_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>21</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ActionBox_5">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>165</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Actions</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QPushButton" name="LoadButton_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Load String</string>
+                 </property>
+                 <property name="autoDefault">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="UnLoadButton_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>56</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Unload String</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckTestButton_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>91</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ChannelBox_5">
+                <property name="geometry">
+                 <rect>
+                  <x>485</x>
+                  <y>30</y>
+                  <width>110</width>
+                  <height>126</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Active Chanels</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <widget class="QCheckBox" name="checkBox_17">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 17</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_18">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>46</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 18</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_19">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>71</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 19</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_20">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>96</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 20</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ModeBox_5">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>95</y>
+                  <width>461</width>
+                  <height>80</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Mode Options</string>
+                </property>
+                <widget class="QComboBox" name="MPPModeBox_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>21</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                 <property name="currentText">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="JVModeBox_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>46</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPModeLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>20</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>MPP Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVModeLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>45</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>JV Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="String_6">
+               <property name="minimumSize">
+                <size>
+                 <width>1080</width>
+                 <height>185</height>
+                </size>
+               </property>
+               <property name="title">
+                <string>String/Common 6</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignHCenter|Qt::AlignTop</set>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+               <widget class="QGroupBox" name="GeneralInfo_6">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>General Information</string>
+                </property>
+                <widget class="QLineEdit" name="NameInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>150</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="NameLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>Name:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Area:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="AreaInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="AreaUnits_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>cm^2</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="JVBox_6">
+                <property name="geometry">
+                 <rect>
+                  <x>610</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>JV Parameters</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="VmaxLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Max V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VmaxInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VmaxUnits_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VstepsInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="Vstepsabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Steps:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VstepsUnits_6">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>steps</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Min V:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="VminInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="VminUnits_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>V</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="TimerBox_6">
+                <property name="geometry">
+                 <rect>
+                  <x>245</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>85</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Timers</string>
+                </property>
+                <widget class="QLabel" name="MPPFrequencyLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>MPP:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="MPPFrequencyInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPFrequencyUnits_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>51</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>JV:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="JVFrequencyInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>65</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVFrequencyUnits_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>170</x>
+                   <y>21</y>
+                   <width>45</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>s/scan</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ActionBox_6">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>165</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Actions</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QPushButton" name="LoadButton_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Load String</string>
+                 </property>
+                 <property name="autoDefault">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="UnLoadButton_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>56</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Unload String</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckTestButton_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>91</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ChannelBox_6">
+                <property name="geometry">
+                 <rect>
+                  <x>485</x>
+                  <y>30</y>
+                  <width>110</width>
+                  <height>126</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Active Chanels</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+                <widget class="QCheckBox" name="checkBox_21">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 21</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_22">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>46</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 22</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_23">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>71</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 23</string>
+                 </property>
+                </widget>
+                <widget class="QCheckBox" name="checkBox_24">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>96</y>
+                   <width>90</width>
+                   <height>20</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Channel 24</string>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="ModeBox_6">
+                <property name="geometry">
+                 <rect>
+                  <x>10</x>
+                  <y>95</y>
+                  <width>461</width>
+                  <height>80</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Mode Options</string>
+                </property>
+                <widget class="QComboBox" name="MPPModeBox_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>21</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QComboBox" name="JVModeBox_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>115</x>
+                   <y>46</y>
+                   <width>335</width>
+                   <height>23</height>
+                  </rect>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="MPPModeLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>20</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>MPP Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="JVModeLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>45</y>
+                   <width>95</width>
+                   <height>25</height>
+                  </rect>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>JV Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

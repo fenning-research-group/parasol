@@ -45,7 +45,7 @@ class Scanner:
         # connect to the yokogawa using pyvisa (GPIB)
         rm = pyvisa.ResourceManager()
         self.yoko = rm.open_resource(yoko_address)
-        self.yoko.timeout = constants['timeout'] 
+        self.yoko.timeout = constants["timeout"]
 
     def srcV_measI(self) -> None:
         """Setup source voltage and measure current"""

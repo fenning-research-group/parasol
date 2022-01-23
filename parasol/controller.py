@@ -27,15 +27,10 @@ class Controller:
         self.relay = Relay()
         self.scanner = Scanner()
         self.easttester = {
-            "12": EastTester(et_num = 1),
-            "34": EastTester(et_num = 2),
-            "56": EastTester(et_num = 3),
+            "12": EastTester(et_num=1),
+            "34": EastTester(et_num=2),
+            "56": EastTester(et_num=3),
         }
-        # self.et_running = {
-        #     "12": False,
-        #     "34": False,
-        #     "56": False,
-        # }
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
@@ -67,7 +62,8 @@ class Controller:
         self.strings = {}
 
         # Decide how many workers we will allow and start the queue
-        self.threadpool = ThreadPoolExecutor(max_workers=6)
+        # 1 for Yoko, 6 for ET, 1 for random tasks
+        self.threadpool = ThreadPoolExecutor(max_workers=8)
         self.start()
 
     def load_string(
@@ -295,6 +291,37 @@ class Controller:
             self.mpp_queue.task_done()
             print(f"Tracked {id}")
 
+    # Create worker to check on orientation
+    async def check_orientation_worker(self, loop: asyncio.AbstractEventLoop) -> None:
+
+        time.sleep(0.5)
+        # While the loop is running, add mpp scans to queue
+        while self.running:
+            modules = await self.random_queue.get()
+            scan_future = asyncio.gather(
+                loop.run_in_executor(
+                    self.threadpool,
+                    self.check_orientation,
+                    modules,
+                )
+            )
+            scan_future.add_done_callback(future_callback)
+
+            # Scan the string and let the user know
+            await scan_future
+            self.random_queue.task_done()
+
+    # Create timer to do random tasks
+    async def random_task_timer(self, modules: list) -> None:
+        """Manages inserting random tasks
+
+        Args:
+            module (int): module number
+        """
+
+        # Add worker to que and start when possible
+        self.random_queue.put_nowait(modules)
+
     async def jv_timer(self, id: int) -> None:
         """Manages timing for JV worker
 
@@ -333,6 +360,7 @@ class Controller:
         asyncio.set_event_loop(self.loop)
         self.jv_queue = asyncio.Queue()
         self.mpp_queue = asyncio.Queue()
+        #        self.random_queue = asyncio.Queue()
         self.loop.run_forever()
 
     def start(self) -> None:
@@ -353,6 +381,7 @@ class Controller:
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        #        asyncio.run_coroutine_threadsafe(self.check_orientation_worker(self.loop), self.loop)
 
         # Set to running
         self.running = True
@@ -486,22 +515,16 @@ class Controller:
         if last_vmpp is None:
             return
 
-        # Ensure that the ET we need is not running: --> note this didnt seem to matter
-        # et_key, ch = self.et_channels[id]
-        # while self.et_running[et_key] == True:
-        #     time.sleep(1)
-
         # Ensure that JV isn't running
         with d["lock"]:
-
-            # Tell ET we running
-            # self.et_running[et_key] = True
 
             # Turn on easttester output, set voltage, measure current
             et_key, ch = self.et_channels[id]
             et = self.easttester[et_key]
+
             # Scan mpp
             t, v, i = self.characterization.track_mpp(d, et, ch, last_vmpp)
+
             # Convert current to mA and calc j and p
             i *= 1000
             j = i / (d["area"] * len(d["module_channels"]))
@@ -527,9 +550,35 @@ class Controller:
                 writer = csv.writer(f, delimiter=",")
                 writer.writerow([t, v, i, j, p])
 
-            # Tell ET we are done
-            # self.et_running[et_key] = False
+    # Creates workers to check orientaiton of string
+    def load_check_orientation(self, modules: list) -> None:
 
+        check_task_future = asyncio.run_coroutine_threadsafe(
+            self.random_task_timer(modules=modules), self.loop
+        )
+        check_task_future.add_done_callback(future_callback)
+
+    # checks orientaiton of string --> could proabbly devide string into modules and check each one but yoko use is low and we should be fine
+    def check_orientation(self, modules: list) -> None:
+
+        correct_orientation = [] * len(modules)
+
+        for idx, module in enumerate(modules):
+
+            # Turn on relay
+            self.relay.on(module)
+
+            # Pass scanner to characterization module, returns True if Isc < 0, False otherwise
+            correct_orientation[idx] = self.characterization.check_orientation(
+                self.scanner
+            )
+
+            # Turn off relay
+            self.relay.all_off()
+
+        # Return True if orientation is correct, False otherwise
+        for module in modules:
+            print(f"Module {module} orientation correct: {correct_orientation[idx]}")
 
     def __del__(self) -> None:
         """Stops que and program on exit"""

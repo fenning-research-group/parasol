@@ -452,7 +452,6 @@ class Analysis:
         all_j = []
         all_p = []
 
-
         for mpp_file_path in mpp_file_paths:
 
             t, v, i, j, p = self.load_mpp_file(mpp_file_path)
@@ -463,7 +462,7 @@ class Analysis:
             all_p.append(p)
 
         return all_t, all_v, all_i, all_j, all_p
-    
+
     def load_mpp_file(self, mpp_file_path: str) -> np.ndarray:
         """Loads data for a single MPP file given by mpp_file_path, returns values
 

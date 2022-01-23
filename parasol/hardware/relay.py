@@ -70,7 +70,7 @@ class Relay:
 
     def connect(self) -> None:
         """Connect to the relay"""
-        
+
         # Get port information
         # port = constants["address"]
         port = get_port(constants["device_identifiers"])

@@ -107,7 +107,7 @@ class RUN_UI(QMainWindow):
         self.savedir6 = None
 
         # Load the ui file
-        ui_path = os.path.join(MODULE_DIR, "RUN_UI.ui")
+        ui_path = os.path.join(MODULE_DIR, "RUN_UI2.ui")
         uic.loadUi(ui_path, self)
         self.show()
 
@@ -301,6 +301,40 @@ class RUN_UI(QMainWindow):
         self.checktestbutton4.setEnabled(False)
         self.checktestbutton5.setEnabled(False)
         self.checktestbutton6.setEnabled(False)
+
+        # Get the check module orientation button & connect to function
+        self.checkorientationbutton1 = self.findChild(
+            QPushButton, "CheckOrientationButton_1"
+        )
+        self.checkorientationbutton2 = self.findChild(
+            QPushButton, "CheckOrientationButton_2"
+        )
+        self.checkorientationbutton3 = self.findChild(
+            QPushButton, "CheckOrientationButton_3"
+        )
+        self.checkorientationbutton4 = self.findChild(
+            QPushButton, "CheckOrientationButton_4"
+        )
+        self.checkorientationbutton5 = self.findChild(
+            QPushButton, "CheckOrientationButton_5"
+        )
+        self.checkorientationbutton6 = self.findChild(
+            QPushButton, "CheckOrientationButton_6"
+        )
+
+        self.checkorientationbutton1.clicked.connect(self.checkorientationbutton1)
+        self.checkorientationbutton2.clicked.connect(self.checkorientationbutton2)
+        self.checkorientationbutton3.clicked.connect(self.checkorientationbutton3)
+        self.checkorientationbutton4.clicked.connect(self.checkorientationbutton4)
+        self.checkorientationbutton5.clicked.connect(self.checkorientationbutton5)
+        self.checkorientationbutton6.clicked.connect(self.checkorientationbutton6)
+
+        self.checkorientationbutton1.setEnabled(True)
+        self.checkorientationbutton2.setEnabled(True)
+        self.checkorientationbutton3.setEnabled(True)
+        self.checkorientationbutton4.setEnabled(True)
+        self.checkorientationbutton5.setEnabled(True)
+        self.checkorientationbutton6.setEnabled(True)
 
         # Create GUI
         self.launch_gui()
@@ -693,11 +727,22 @@ class RUN_UI(QMainWindow):
         # Start process to anlayze and plot data in new process --> requires multiple cores
         Process(target=_check_test, args=(jv_paths, mpp_paths)).start()
 
-        # Send to analysis & grapher to plot MPP from JV curves
-        # plot_df = self.analysis.check_test(jv_paths, mpp_paths)
-        # self.grapher.plot_x_v_ys(
-        #     self.plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
-        # )
+    def checkorientation(self, stringid: int) -> None:
+        """Checks Orientaion of wiring to see if its is correct for the string
+
+        Args:
+            stringid (int): string number
+        """
+
+        # Update Values
+        self.update_loaded_modules()
+        self.update_dictionaries()
+
+        # Grab modules from dictionary
+        d = self.strings[stringid]
+        module_channels = d["module_channels"]
+
+        self.controller.load_check_orientation(module_channels)
 
     ################################################################################
     # Buttons / Duplicated Functions
@@ -749,6 +794,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton1.setEnabled(False)
         self.unloadbutton1.setEnabled(True)
         self.checktestbutton1.setEnabled(True)
+        self.checkorientationbutton1.setEnbable(False)
 
     def lock_value2(self) -> None:
         """Locks all changeable objects for test 2"""
@@ -770,6 +816,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton2.setEnabled(False)
         self.unloadbutton2.setEnabled(True)
         self.checktestbutton2.setEnabled(True)
+        self.checkorientationbutton2.setEnbable(False)
 
     def lock_value3(self) -> None:
         """Locks all changeable objects for test 3"""
@@ -791,6 +838,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton3.setEnabled(False)
         self.unloadbutton3.setEnabled(True)
         self.checktestbutton3.setEnabled(True)
+        self.checkorientationbutton3.setEnbable(False)
 
     def lock_value4(self) -> None:
         """Locks all changeable objects for test 4"""
@@ -812,6 +860,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton4.setEnabled(False)
         self.unloadbutton4.setEnabled(True)
         self.checktestbutton4.setEnabled(True)
+        self.checkorientationbutton4.setEnbable(False)
 
     def lock_value5(self) -> None:
         """Locks all changeable objects for test 5"""
@@ -833,6 +882,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton5.setEnabled(False)
         self.unloadbutton5.setEnabled(True)
         self.checktestbutton5.setEnabled(True)
+        self.checkorientationbutton5.setEnbable(False)
 
     def lock_value6(self) -> None:
         """Locks all changeable objects for test 6"""
@@ -854,6 +904,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton6.setEnabled(False)
         self.unloadbutton6.setEnabled(True)
         self.checktestbutton6.setEnabled(True)
+        self.checkorientationbutton6.setEnbable(False)
 
     # Unlock Values For Editing
 
@@ -877,6 +928,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton1.setEnabled(True)
         self.unloadbutton1.setEnabled(False)
         self.checktestbutton1.setEnabled(False)
+        self.checkorientationbutton1.setEnbable(True)
 
     def unlock_value2(self) -> None:
         """Unlocks all changeable objects for test 2"""
@@ -898,6 +950,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton2.setEnabled(True)
         self.unloadbutton2.setEnabled(False)
         self.checktestbutton2.setEnabled(False)
+        self.checkorientationbutton2.setEnbable(True)
 
     def unlock_value3(self) -> None:
         """Unlocks all changeable objects for test 3"""
@@ -919,6 +972,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton3.setEnabled(True)
         self.unloadbutton3.setEnabled(False)
         self.checktestbutton3.setEnabled(False)
+        self.checkorientationbutton3.setEnbable(True)
 
     def unlock_value4(self) -> None:
         """Unlocks all changeable objects for test 4"""
@@ -940,6 +994,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton4.setEnabled(True)
         self.unloadbutton4.setEnabled(False)
         self.checktestbutton4.setEnabled(False)
+        self.checkorientationbutton4.setEnbable(True)
 
     def unlock_value5(self) -> None:
         """Unlocks all changeable objects for test 5"""
@@ -961,6 +1016,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton5.setEnabled(True)
         self.unloadbutton5.setEnabled(False)
         self.checktestbutton5.setEnabled(False)
+        self.checkorientationbutton5.setEnbable(True)
 
     def unlock_value6(self) -> None:
         """Unlocks all changeable objects for test 6"""
@@ -982,6 +1038,7 @@ class RUN_UI(QMainWindow):
         self.loadbutton6.setEnabled(True)
         self.unloadbutton6.setEnabled(False)
         self.checktestbutton6.setEnabled(False)
+        self.checkorientationbutton6.setEnbable(True)
 
     # Load Buttons
 
@@ -1066,6 +1123,32 @@ class RUN_UI(QMainWindow):
     def checktest6(self) -> None:
         """Checks test 6"""
         self.checktest(6)
+
+    # Checkorientation Buttons
+
+    def checkorientationbutton1(self) -> None:
+        """Checks orientation of test 1"""
+        self.checkorientation(1)
+
+    def checkorientationbutton2(self) -> None:
+        """Checks orientation of test 2"""
+        self.checkorientation(2)
+
+    def checkorientationbutton3(self) -> None:
+        """Checks orientation of test 3"""
+        self.checkorientation(3)
+
+    def checkorientationbutton4(self) -> None:
+        """Checks orientation of test 4"""
+        self.checkorientation(4)
+
+    def checkorientationbutton5(self) -> None:
+        """Checks orientation of test 5"""
+        self.checkorientation(5)
+
+    def checkorientationbutton6(self) -> None:
+        """Checks orientation of test 6"""
+        self.checkorientation(6)
 
     # Launches GUI
 

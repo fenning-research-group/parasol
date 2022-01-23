@@ -8,7 +8,6 @@ from threading import Lock
 from parasol.hardware.port_finder import get_port
 
 
-
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
@@ -55,9 +54,12 @@ class EastTester:
         self.current_range = constants["current_range"]
 
         # Set both channels to source voltage and measure current when initialized (1st is dummy index)
+        # Added some time.sleep because sometimes Ch2 of ET5420 was not ready to receive commands
         self._sourcing_current = [False, False, False]
         self.srcV_measI(1)
+        time.sleep(1)
         self.srcV_measI(2)
+        time.sleep(1)
 
     def connect(self, et_num: int) -> None:
         """Connects to the easttester at the given port
@@ -68,18 +70,16 @@ class EastTester:
 
         # Get port information
         if et_num == 1:
-            #port = constants['ET_1_PORT']
+            # port = constants['ET_1_PORT']
             port = get_port(constants["device_identifiers"]["ET_1"])
 
         elif et_num == 2:
-            #port = constants['ET_2_PORT']
+            # port = constants['ET_2_PORT']
             port = get_port(constants["device_identifiers"]["ET_2"])
 
         elif et_num == 3:
-            #port = constants['ET_3_PORT']
+            # port = constants['ET_3_PORT']
             port = get_port(constants["device_identifiers"]["ET_3"])
-        
-
 
         # Connect using serial, use highest transferrate and shortest timeout
         self.et = serial.Serial(port, baudrate=115200, timeout=0.005)
@@ -183,7 +183,7 @@ class EastTester:
         self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
         time.sleep(self.et_delay)
 
-    @et_lock # ET lock at highest level of functions
+    @et_lock  # ET lock at highest level of functions
     def output_on(self, channel: int) -> None:
         """Turns output on
 
@@ -196,7 +196,7 @@ class EastTester:
             self.source_delay
         )  # if this delay reduced we get issues in measuring current (first point low)
 
-    @et_lock # ET lock at highest level of functions
+    @et_lock  # ET lock at highest level of functions
     def output_off(self, channel: int) -> None:
         """Turns output off
 
@@ -262,14 +262,14 @@ class EastTester:
 
         # Average over avg_num (set in hardwareconstants.yaml) times for stats
         while i < self.et_avg_num:
-            #adding outputon here may help --> confused on which ch?>
+            # adding outputon here may help --> confused on which ch?>
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             time.sleep(self.sense_delay)
             curr = self.et.readlines()
-            
+
             # If we dont get a reply, try again
             if (len(curr) == 0) or (curr[-1] is None):
-                i-=1
+                i -= 1
 
             # Else, decode and look for number
             else:
@@ -278,7 +278,7 @@ class EastTester:
 
                 # If we dont have one, retry
                 if len(curr) == 0:
-                    i-=1
+                    i -= 1
 
                 # Else, get it and add it to the total
                 else:
@@ -320,7 +320,7 @@ class EastTester:
         return volt_tot
 
     # untested
-    @et_lock # ET lock at highest level of functions
+    @et_lock  # ET lock at highest level of functions
     def voc(self, channel: int) -> float:
         """Gets open circut voltage: V where I = 0
 
@@ -338,7 +338,7 @@ class EastTester:
         return voc
 
     # untested
-    @et_lock # ET lock at highest level of functions
+    @et_lock  # ET lock at highest level of functions
     def isc(self, channel: int) -> float:
         """Gets short circut current: I where V = 0
 
@@ -355,8 +355,7 @@ class EastTester:
 
         return isc
 
-    
-    @et_lock # ET lock at highest level of functions
+    @et_lock  # ET lock at highest level of functions
     def set_V_measure_I(self, channel: int, voltage: float) -> float:
         """Sets voltage and measures current
 
@@ -373,7 +372,7 @@ class EastTester:
         curr = self.measure_current(channel)
         return curr
 
-    @et_lock # ET lock at highest level of functions
+    @et_lock  # ET lock at highest level of functions
     def set_I_measure_V(self, channel: int, voltage: float) -> float:
         """Sets current and measures voltage
 

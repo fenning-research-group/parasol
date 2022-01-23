@@ -206,3 +206,16 @@ class Characterization:
             vmpp = None
 
         return vmpp
+
+    def check_orientation(self, scanner: object) -> bool:
+
+        orientation_correct = None
+
+        isc = scanner.isc()
+
+        if isc < 0:
+            orientation_correct = True
+        elif isc > 0:
+            orientation_correct = False
+
+        return orientation_correct
