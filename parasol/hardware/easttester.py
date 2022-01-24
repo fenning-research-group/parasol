@@ -258,6 +258,7 @@ class EastTester:
         # If timing is off here we get Exemption in Future: List Index Out of Range
 
         i = 0
+        noreply = 0
         curr_tot = 0
 
         # Average over avg_num (set in hardwareconstants.yaml) times for stats
@@ -267,9 +268,23 @@ class EastTester:
             time.sleep(self.sense_delay)
             curr = self.et.readlines()
 
-            # If we dont get a reply, try again
-            if (len(curr) == 0) or (curr[-1] is None):
+            # If we havnt got 10 replies break loop by returning 0.
+            if noreply == 10:
+                return 0
+
+            # If we havnt got 5 replies, try to fix ET by resetting settings and restarting
+            elif noreply == 5:
+                print("Warning, no reply from ET")
+                # This command may help but lets start with internal commands (this may mess up other channel)
+                # self.et.flush()
+                # time.sleep(self.et_delay)
+                self.sourceV_measI(channel)
+                self.output_on(channel)
+
+            # If we dont get a reply, try again, iterate no reply counter
+            elif (len(curr) == 0) or (curr[-1] is None):
                 i -= 1
+                noreply += 1
 
             # Else, decode and look for number
             else:
@@ -279,6 +294,7 @@ class EastTester:
                 # If we dont have one, retry
                 if len(curr) == 0:
                     i -= 1
+                    noreply += 1
 
                 # Else, get it and add it to the total
                 else:
