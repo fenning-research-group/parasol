@@ -1,5 +1,6 @@
 filestructure:
   root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location
+  # Note that base load location is set in UI_defaults.yaml
   num_modules: 24 # Number of modules
 
 relay:

@@ -4,7 +4,7 @@ import yaml
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.load(f, Loader=yaml.FullLoader)["filestructure"]
+    constants = yaml.safe_load(f, Loader=yaml.FullLoader)["filestructure"]
 
 
 class FileStructure:
@@ -310,7 +310,16 @@ class FileStructure:
 
         return mpp_folder, jv_folders, analyzed_folder
 
-    def get_files(self, test_folders, filetype="Analyzed") -> dict:
+    def get_files(self, test_folders: str, filetype="Analyzed") -> str:
+        """Returns a dictionary of all files in test folders
+
+        Args:
+            test_folders (list[str]): list of test folders
+            filetype (string): either "Analyzed" "JV" or "MPP"
+
+        Returns:
+            list[list[str]]: list of file paths seperated by test
+        """
 
         # dict[testfolder][scanfolder] = folderpath
         folder_map = self.map_test_folders(test_folders)

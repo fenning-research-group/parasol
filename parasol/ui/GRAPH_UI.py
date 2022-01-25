@@ -9,11 +9,11 @@ from PyQt5.QtWidgets import (
     QSizePolicy,
     QFileDialog,
 )
-
 import PyQt5.QtGui
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import yaml
 
 from PyQt5 import QtCore
 from PyQt5 import uic
@@ -28,6 +28,8 @@ from parasol.analysis.grapher import Grapher
 
 # Set module directory
 MODULE_DIR = os.path.dirname(__file__)
+with open(os.path.join(MODULE_DIR, "UI_defaults.yaml"), "r") as f:
+    defaults = yaml.safe_load(f, Loader=yaml.FullLoader)["GRAPH_UI"]
 
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
@@ -63,7 +65,8 @@ class GRAPH_UI(QMainWindow):
 
         # Load default root dir, set in UI
         self.rootdir = self.findChild(QLineEdit, "rootdir")
-        self.rootdir.setText(self.filestructure.get_root_dir())
+        # self.rootdir.setText(self.filestructure.get_root_dir())
+        self.rootdir.setText(defaults["root_dir"])
         if os.path.exists(self.rootdir.text()) == False:
             self.rootdir.setText("")
 
@@ -74,7 +77,9 @@ class GRAPH_UI(QMainWindow):
         # Manage savefigure button
         self.savefigure = self.findChild(QPushButton, "savefigure")
         self.savefigure.clicked.connect(self.savefigure_clicked)
-        self.savedir = ""
+        self.savedir = defaults("save_dir")
+        if os.path.exists(self.savedir) == False:
+            self.savedir = ""
 
         # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
         self.alltestfolders = self.findChild(QListWidget, "AllTestFolders")

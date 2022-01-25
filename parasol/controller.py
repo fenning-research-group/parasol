@@ -381,7 +381,9 @@ class Controller:
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.check_orientation_worker(self.loop), self.loop)
+        asyncio.run_coroutine_threadsafe(
+            self.check_orientation_worker(self.loop), self.loop
+        )
 
         # Set to running
         self.running = True

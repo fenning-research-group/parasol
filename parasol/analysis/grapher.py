@@ -8,10 +8,6 @@ import math
 from parasol.filestructure import FileStructure
 from parasol.analysis.analysis import Analysis
 
-# Dummy function to plot any figures returned
-def Plotme(fig):
-    fig.show()
-
 
 class Grapher:
     """Grapher package for PARASOL"""

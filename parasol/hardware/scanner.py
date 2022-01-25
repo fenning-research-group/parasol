@@ -13,7 +13,7 @@ mpl.rcParams.update(mpl.rcParamsDefault)
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.load(f, Loader=yaml.FullLoader)["yokogawa"]
+    constants = yaml.safe_load(f, Loader=yaml.FullLoader)["yokogawa"]
 
 
 class Scanner:
