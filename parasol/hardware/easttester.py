@@ -11,7 +11,7 @@ from parasol.hardware.port_finder import get_port
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f, Loader=yaml.FullLoader)["easttester"]
+    constants = yaml.safe_load(f)["easttester"]  # , Loader=yaml.FullLoader)["relay"]
 
 # We have several workers managing east tester so we need to make sure two dont try to work at the same time
 def et_lock(f):

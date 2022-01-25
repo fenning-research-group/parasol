@@ -21,7 +21,7 @@ from threading import Thread
 # Set module directory, load yaml preferences
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "UI_defaults.yaml"), "r") as f:
-    defaults = yaml.safe_load(f, Loader=yaml.FullLoader)["RUN_UI"]
+    defaults = yaml.safe_load(f)["RUN_UI"]  # , loader = yaml.FullLoader)["RUN_UI"]
 
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):

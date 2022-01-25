@@ -6,7 +6,9 @@ import os
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f, Loader=yaml.FullLoader)["characterization"]
+    constants = yaml.safe_load(f)[
+        "characterization"
+    ]  # , Loader=yaml.FullLoader)["characterization"]
 
 
 class Characterization:

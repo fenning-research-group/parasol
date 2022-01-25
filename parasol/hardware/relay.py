@@ -10,7 +10,7 @@ from parasol.hardware.port_finder import get_port
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f, Loader=yaml.FullLoader)["relay"]
+    constants = yaml.safe_load(f)["relay"]  # , Loader=yaml.FullLoader)["relay"]
 
 
 def relay_lock(f):

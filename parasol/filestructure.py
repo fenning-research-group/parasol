@@ -4,7 +4,9 @@ import yaml
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f, Loader=yaml.FullLoader)["filestructure"]
+    constants = yaml.safe_load(f)[
+        "filestructure"
+    ]  # , Loader=yaml.FullLoader)["filestructure"]
 
 
 class FileStructure:

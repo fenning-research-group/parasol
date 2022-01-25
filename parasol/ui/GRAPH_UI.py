@@ -29,7 +29,7 @@ from parasol.analysis.grapher import Grapher
 # Set module directory
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "UI_defaults.yaml"), "r") as f:
-    defaults = yaml.safe_load(f, Loader=yaml.FullLoader)["GRAPH_UI"]
+    defaults = yaml.safe_load(f)["GRAPH_UI"]  # , Loader=yaml.FullLoader)["GRAPH_UI"]
 
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
