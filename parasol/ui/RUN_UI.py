@@ -156,11 +156,12 @@ class RUN_UI(QMainWindow):
         self.area5 = self.findChild(QLineEdit, "AreaInput_5")
         self.area6 = self.findChild(QLineEdit, "AreaInput_6")
 
-        self.area1.setText(defaults["area"])
-        self.area2.setText(defaults["area"])
-        self.area3.setText(defaults["area"])
-        self.area4.setText(defaults["area"])
-        self.area5.setText(defaults["area"])
+        self.area1.setText(str(defaults["area"]))
+        self.area2.setText(str(defaults["area"]))
+        self.area3.setText(str(defaults["area"]))
+        self.area4.setText(str(defaults["area"]))
+        self.area5.setText(str(defaults["area"]))
+        self.area6.setText(str(defaults["area"]))
 
         # get JV frequency and MPP frequency
         self.jvfrequency1 = self.findChild(QLineEdit, "JVFrequencyInput_1")
@@ -170,11 +171,13 @@ class RUN_UI(QMainWindow):
         self.jvfrequency5 = self.findChild(QLineEdit, "JVFrequencyInput_5")
         self.jvfrequency6 = self.findChild(QLineEdit, "JVFrequencyInput_6")
 
-        self.jvfrequency1.setText(defaults["jv_frequency"])
-        self.jvfrequency2.setText(defaults["jv_frequency"])
-        self.jvfrequency3.setText(defaults["jv_frequency"])
-        self.jvfrequency4.setText(defaults["jv_frequency"])
-        self.jvfrequency5.setText(defaults["jv_frequency"])
+        self.jvfrequency1.setText(str(defaults["jv_frequency"]))
+        self.jvfrequency2.setText(str(defaults["jv_frequency"]))
+        self.jvfrequency3.setText(str(defaults["jv_frequency"]))
+        self.jvfrequency4.setText(str(defaults["jv_frequency"]))
+        self.jvfrequency5.setText(str(defaults["jv_frequency"]))
+        self.jvfrequency6.setText(str(defaults["jv_frequency"]))
+
 
         self.mppfrequency1 = self.findChild(QLineEdit, "MPPFrequencyInput_1")
         self.mppfrequency2 = self.findChild(QLineEdit, "MPPFrequencyInput_2")
@@ -183,11 +186,13 @@ class RUN_UI(QMainWindow):
         self.mppfrequency5 = self.findChild(QLineEdit, "MPPFrequencyInput_5")
         self.mppfrequency6 = self.findChild(QLineEdit, "MPPFrequencyInput_6")
 
-        self.mppfrequency1.setText(defaults["mpp_frequency"])
-        self.mppfrequency2.setText(defaults["mpp_frequency"])
-        self.mppfrequency3.setText(defaults["mpp_frequency"])
-        self.mppfrequency4.setText(defaults["mpp_frequency"])
-        self.mppfrequency5.setText(defaults["mpp_frequency"])
+        self.mppfrequency1.setText(str(defaults["mpp_frequency"]))
+        self.mppfrequency2.setText(str(defaults["mpp_frequency"]))
+        self.mppfrequency3.setText(str(defaults["mpp_frequency"]))
+        self.mppfrequency4.setText(str(defaults["mpp_frequency"]))
+        self.mppfrequency5.setText(str(defaults["mpp_frequency"]))
+        self.mppfrequency6.setText(str(defaults["mpp_frequency"]))
+        
 
         # Get JV min voltage, max voltage, and voltage step size
         self.vmin1 = self.findChild(QLineEdit, "VminInput_1")
@@ -197,11 +202,12 @@ class RUN_UI(QMainWindow):
         self.vmin5 = self.findChild(QLineEdit, "VminInput_5")
         self.vmin6 = self.findChild(QLineEdit, "VminInput_6")
 
-        self.vmin1.setText(defaults["v_min"])
-        self.vmin2.setText(defaults["v_min"])
-        self.vmin3.setText(defaults["v_min"])
-        self.vmin4.setText(defaults["v_min"])
-        self.vmin5.setText(defaults["v_min"])
+        self.vmin1.setText(str(defaults["v_min"]))
+        self.vmin2.setText(str(defaults["v_min"]))
+        self.vmin3.setText(str(defaults["v_min"]))
+        self.vmin4.setText(str(defaults["v_min"]))
+        self.vmin5.setText(str(defaults["v_min"]))
+        self.vmin6.setText(str(defaults["v_min"]))
 
         self.vmax1 = self.findChild(QLineEdit, "VmaxInput_1")
         self.vmax2 = self.findChild(QLineEdit, "VmaxInput_2")
@@ -210,11 +216,13 @@ class RUN_UI(QMainWindow):
         self.vmax5 = self.findChild(QLineEdit, "VmaxInput_5")
         self.vmax6 = self.findChild(QLineEdit, "VmaxInput_6")
 
-        self.vmax1.setText(defaults["v_max"])
-        self.vmax2.setText(defaults["v_max"])
-        self.vmax3.setText(defaults["v_max"])
-        self.vmax4.setText(defaults["v_max"])
-        self.vmax5.setText(defaults["v_max"])
+        self.vmax1.setText(str(defaults["v_max"]))
+        self.vmax2.setText(str(defaults["v_max"]))
+        self.vmax3.setText(str(defaults["v_max"]))
+        self.vmax4.setText(str(defaults["v_max"]))
+        self.vmax5.setText(str(defaults["v_max"]))
+        self.vmax6.setText(str(defaults["v_max"]))
+    
 
         self.vstep1 = self.findChild(QLineEdit, "VstepsInput_1")
         self.vstep2 = self.findChild(QLineEdit, "VstepsInput_2")
@@ -223,11 +231,12 @@ class RUN_UI(QMainWindow):
         self.vstep5 = self.findChild(QLineEdit, "VstepsInput_5")
         self.vstep6 = self.findChild(QLineEdit, "VstepsInput_6")
 
-        self.vstep1.setText(defaults["v_steps"])
-        self.vstep2.setText(defaults["v_steps"])
-        self.vstep3.setText(defaults["v_steps"])
-        self.vstep4.setText(defaults["v_steps"])
-        self.vstep5.setText(defaults["v_steps"])
+        self.vstep1.setText(str(defaults["v_steps"]))
+        self.vstep2.setText(str(defaults["v_steps"]))
+        self.vstep3.setText(str(defaults["v_steps"]))
+        self.vstep4.setText(str(defaults["v_steps"]))
+        self.vstep5.setText(str(defaults["v_steps"]))
+        self.vstep6.setText(str(defaults["v_steps"]))
 
         # Get MPP mode, clear, feed in options from characteriations
         self.mppmode1 = self.findChild(QComboBox, "MPPModeBox_1")
@@ -257,6 +266,7 @@ class RUN_UI(QMainWindow):
         self.mppmode3.setCurrentIndex(int(defaults["mpp_mode"]))
         self.mppmode4.setCurrentIndex(int(defaults["mpp_mode"]))
         self.mppmode5.setCurrentIndex(int(defaults["mpp_mode"]))
+        self.mppmode6.setCurrentIndex(int(defaults["mpp_mode"]))
 
         # Get JV mode, clear, feed in options from characteriations
         self.jvmode1 = self.findChild(QComboBox, "JVModeBox_1")
@@ -286,6 +296,7 @@ class RUN_UI(QMainWindow):
         self.jvmode3.setCurrentIndex(int(defaults["jv_mode"]))
         self.jvmode4.setCurrentIndex(int(defaults["jv_mode"]))
         self.jvmode5.setCurrentIndex(int(defaults["jv_mode"]))
+        self.jvmode6.setCurrentIndex(int(defaults["jv_mode"]))
 
         # Get load button & connect to function
         self.loadbutton1 = self.findChild(QPushButton, "LoadButton_1")

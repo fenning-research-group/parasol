@@ -270,19 +270,33 @@ class EastTester:
 
             # If we havnt got 10 replies break loop by returning 0.
             if noreply == 10:
-                return 0
+                return 0.000
 
             # If we havnt got 5 replies, try to fix ET by resetting settings and restarting
             elif noreply == 5:
                 print("Warning, no reply from ET")
                 # This command may help but lets start with internal commands (this may mess up other channel)
-                # self.et.flush()
+                # flush, srcv, srci, off/on didnt work.
+                # self.output_on(channel)
+                # Turn output on (dont use fxn it has locker)
+                # self.et.write("LOAD:ABNO?".encode())
+                # self.et.reset_input_buffer()
                 # time.sleep(self.et_delay)
-                self.sourceV_measI(channel)
-                self.output_on(channel)
+                # self.et.reset_output_buffer()
+                # time.sleep(self.et_delay)
+                # self.srcV_measI(channel)
+
+                #self.et.write(("LOAD"+str(channel)+":TRIG MAN").encode())
+                #self.et.write("LOAD"+str(channel)+":TRIG E")
+
+                # time.sleep(self.sense_delay)
+                # err = self.et.readlines()
+                # print(err)
+                # self.et.write(("CH" + str(channel) + ":SW ON\n").encode())
+                # time.sleep(self.source_delay)
 
             # If we dont get a reply, try again, iterate no reply counter
-            elif (len(curr) == 0) or (curr[-1] is None):
+            if (len(curr) == 0) or (curr[-1] is None):
                 i -= 1
                 noreply += 1
 

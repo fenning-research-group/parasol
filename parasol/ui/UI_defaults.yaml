@@ -1,8 +1,8 @@
 RUN_UI:
   area : 1 # Area of the module in cm^2
-  jv_mode: 1
-  mpp_mode: 1
-  jv_frequency: 60*15 # seconds between JV scans
+  jv_mode: 0
+  mpp_mode: 0
+  jv_frequency: 900 # seconds between JV scans
   mpp_frequency: 60 # seconds between MPP scans
   v_min: -0.1 # Voltage minimum for JV/MPP scan
   v_max: 0.7 # Voltage maximum for JV/MPP scan
