@@ -38,11 +38,9 @@ class EastTester:
             et_num (int): Easttester number
         """
 
-        # Connect and setup lock
-        self.lock = Lock()
-        self.connect(et_num=et_num)
-
         # Get constants from hardwareconstants
+        self.time_out = constants["time_out"]
+        self.baud_rate = constants["baud_rate"]
         self.source_delay = constants["source_delay"]
         self.sense_delay = constants["sense_delay"]
         self.et_delay = constants["command_delay"]
@@ -52,6 +50,10 @@ class EastTester:
         self.et_v_min = constants["v_min"]
         self.voltage_range = constants["voltage_range"]
         self.current_range = constants["current_range"]
+
+        # Connect and setup lock
+        self.lock = Lock()
+        self.connect(et_num=et_num)
 
         # Set both channels to source voltage and measure current when initialized (1st is dummy index)
         # Added some time.sleep because sometimes Ch2 of ET5420 was not ready to receive commands
@@ -82,7 +84,7 @@ class EastTester:
             port = get_port(constants["device_identifiers"]["ET_3"])
 
         # Connect using serial, use highest transferrate and shortest timeout
-        self.et = serial.Serial(port, baudrate=115200, timeout=0.005)
+        self.et = serial.Serial(port, baudrate=self.baud_rate, timeout=self.time_out) # 115200, 0.005
 
     # untested
     def srcI_measV(self, channel: int) -> None:
@@ -275,25 +277,11 @@ class EastTester:
             # If we havnt got 5 replies, try to fix ET by resetting settings and restarting
             elif noreply == 5:
                 print("Warning, no reply from ET")
-                # This command may help but lets start with internal commands (this may mess up other channel)
-                # flush, srcv, srci, off/on didnt work.
-                # self.output_on(channel)
-                # Turn output on (dont use fxn it has locker)
-                # self.et.write("LOAD:ABNO?".encode())
-                # self.et.reset_input_buffer()
-                # time.sleep(self.et_delay)
-                # self.et.reset_output_buffer()
-                # time.sleep(self.et_delay)
-                # self.srcV_measI(channel)
+                return 0.000
+                # I have tried output_off, output_on, self.et.write("LOAD:ABNO?".encode()), 
+                # self.et.reset_output_buffer(), self.et.reset_input_buffer(), 
+                # self.srcV_measI(), self.srcI_measV(), self.et.close()
 
-                #self.et.write(("LOAD"+str(channel)+":TRIG MAN").encode())
-                #self.et.write("LOAD"+str(channel)+":TRIG E")
-
-                # time.sleep(self.sense_delay)
-                # err = self.et.readlines()
-                # print(err)
-                # self.et.write(("CH" + str(channel) + ":SW ON\n").encode())
-                # time.sleep(self.source_delay)
 
             # If we dont get a reply, try again, iterate no reply counter
             if (len(curr) == 0) or (curr[-1] is None):
