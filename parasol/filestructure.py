@@ -179,7 +179,7 @@ class FileStructure:
             str: name of MPP file
         """
 
-        mpp_file_path = f"{startdate}_{name}_{id}_all_MPP_1.csv"
+        mpp_file_path = f"{startdate}_{name}_{id}_all_MPP_{scan_count}.csv"
         return mpp_file_path
 
     def get_analyzed_file_name(

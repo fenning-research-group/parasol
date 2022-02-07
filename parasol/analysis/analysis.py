@@ -461,7 +461,15 @@ class Analysis:
             all_j.append(j)
             all_p.append(p)
 
-        return all_t, all_v, all_i, all_j, all_p
+        # Flatten the arrays so they are continuous
+        t_s = [item for sublist in all_t for item in sublist]
+        v_s = [item for sublist in all_v for item in sublist]
+        i_s = [item for sublist in all_i for item in sublist]
+        j_s = [item for sublist in all_j for item in sublist]
+        p_s = [item for sublist in all_p for item in sublist]
+
+        return t_s, v_s, i_s, j_s, p_s
+        # return all_t, all_v, all_i, all_j, all_p
 
     def load_mpp_file(self, mpp_file_path: str) -> np.ndarray:
         """Loads data for a single MPP file given by mpp_file_path, returns values
@@ -486,7 +494,7 @@ class Analysis:
         #     _ = next(reader)  # string
         #     _ = next(reader)  # module
         #     _ = next(reader)  # area
-        print(mpp_file_path)
+
         # Load rest of dataframe, split into paramters, and return
         all_data = np.loadtxt(mpp_file_path, delimiter=",", skiprows=8)
         all_data = np.transpose(all_data)
