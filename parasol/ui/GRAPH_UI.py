@@ -77,7 +77,7 @@ class GRAPH_UI(QMainWindow):
         # Manage savefigure button
         self.savefigure = self.findChild(QPushButton, "savefigure")
         self.savefigure.clicked.connect(self.savefigure_clicked)
-        self.savedir = defaults("save_dir")
+        self.savedir = defaults["save_dir"]
         if os.path.exists(self.savedir) == False:
             self.savedir = ""
 

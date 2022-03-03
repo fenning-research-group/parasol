@@ -197,27 +197,65 @@ class Controller:
         self.analysis.analyze_from_savepath(saveloc)
 
     # deappreciated
-    # def _make_mpp_file(self, id: int) -> None:
-    #     """Creates base file for MPP data
+    def make_mpp_file(self, id: int) -> None:
+        """Creates base file for MPP data
+
+        Args:
+            id (int): string number
+        """
+
+        # Get dictionary for test string
+        d = self.strings.get(id, None)
+
+        # Get date/time and make filepath
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        time_str = datetime.now().strftime("%H:%M:%S")
+        epoch_str = time.time()
+
+        # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
+        mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
+        mppfile = self.filestructure.get_mpp_file_name(
+            d["start_date"], d["name"], id, d["jv"]["scan_count"]
+        )
+
+        fpath = os.path.join(mppfolder, mppfile)
+
+        # If it doesnt exist, make it:
+        if os.path.exists(fpath) != True:
+
+            # Open file, write header/column names then fill
+            with open(fpath, "w", newline="") as f:
+                writer = csv.writer(f, delimiter=",")
+                writer.writerow(["Date:", date_str])
+                writer.writerow(["Time:", time_str])
+                writer.writerow(["epoch_time:", epoch_str])
+                writer.writerow(["String ID:", id])
+                writer.writerow(["Module ID:", d["module_channels"]])
+                writer.writerow(["Area (cm2):", d["area"]])
+                writer.writerow(
+                    [
+                        "Time (epoch)",
+                        "Voltage (V)",
+                        "Current (mA)",
+                        "Current Density (mA/cm2)",
+                        "Power Density (mW/cm2)",
+                    ]
+                )
+        
+        return fpath
+
+    # def make_mpp_file(self, fpath: str, d: dict) -> None:
+    #     """[summary]
 
     #     Args:
-    #         id (int): string number
+    #         fpath (str): path to file
+    #         d (dict): dictionary containing info
     #     """
 
-    #     # Get dictionary for test string
-    #     d = self.strings.get(id, None)
-
-    #     # Get date/time and make filepath
-    #     date_str = datetime.now().strftime("%Y-%m-%d")
-    #     time_str = datetime.now().strftime("%H:%M:%S")
-    #     epoch_str = time.time()
-
-    #     # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
     #     mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
     #     mppfile = self.filestructure.get_mpp_file_name(
     #         d["start_date"], d["name"], id, d["jv"]["scan_count"]
     #     )
-
     #     fpath = os.path.join(mppfolder, mppfile)
 
     #     # If it doesnt exist, make it:
@@ -241,35 +279,6 @@ class Controller:
     #                     "Power Density (mW/cm2)",
     #                 ]
     #             )
-
-    def make_mpp_file(self, fpath: str) -> None:
-        """[summary]
-
-        Args:
-            fpath (str): [description]
-        """
-
-        # If it doesnt exist, make it:
-        if os.path.exists(fpath) != True:
-
-            # Open file, write header/column names then fill
-            with open(fpath, "w", newline="") as f:
-                writer = csv.writer(f, delimiter=",")
-                writer.writerow(["Date:", date_str])
-                writer.writerow(["Time:", time_str])
-                writer.writerow(["epoch_time:", epoch_str])
-                writer.writerow(["String ID:", id])
-                writer.writerow(["Module ID:", d["module_channels"]])
-                writer.writerow(["Area (cm2):", d["area"]])
-                writer.writerow(
-                    [
-                        "Time (epoch)",
-                        "Voltage (V)",
-                        "Current (mA)",
-                        "Current Density (mA/cm2)",
-                        "Power Density (mW/cm2)",
-                    ]
-                )
 
     async def jv_worker(self, loop: asyncio.AbstractEventLoop) -> None:
         """Worker for JV sweeps
@@ -576,14 +585,14 @@ class Controller:
             d["mpp"]["vmpp"] = v
 
             # Get filepath to csv
-            mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
-            mppfile = self.filestructure.get_mpp_file_name(
-                d["start_date"], d["name"], id, d["jv"]["scan_count"]
-            )
-            fpath = os.path.join(mppfolder, mppfile)
+            # mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
+            # mppfile = self.filestructure.get_mpp_file_name(
+            #     d["start_date"], d["name"], id, d["jv"]["scan_count"]
+            # )
+            # fpath = os.path.join(mppfolder, mppfile)
 
-            # If it doesnt exist, create it
-            self.make_mpp_file(fpath)
+            # Get MPP file path, if it doesnt exist, create it
+            fpath = self.make_mpp_file(id)
 
             # Open file, append values to columns
             with open(fpath, "a", newline="") as f:

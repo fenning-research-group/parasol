@@ -219,52 +219,69 @@ class Grapher:
         """Plots MPPs for input MPP files
 
         Args:
-            mppfiles (list[str]): list of MPP files
+            mppfiles (list[str]): list of MPP files (same device)
             ax (plt.axes): axes
             **plt_kwargs : additional plot options
 
         Returns:
             plt.ax: plotted axes
         """
+
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
 
-        # Load MPP Files
+        # load mpp
         (
             all_t,
             all_v,
             all_i,
             all_j,
             all_p,
-        ) = self.analysis.load_mpp_files(mppfiles)
+        ) = self.analysis.load_mpp_files_grouped(mppfiles)
+
+        t1 = all_t
+        t_elapsed = t1 - t1[0]
+
+        ax.plot(
+            t_elapsed,
+            all_p,
+            #                color=colors[idx],
+            #                legend="Module #" + str(module_ids[idx]),
+            **plt_kwargs,
+        )
+
+            # Each all_param will be [[file1][file2][file3]]. This mimicks JV.
+            # e.g [[0,1,2],[3,4,5]]
+
+        
 
         # Make time data numpy array, calc time elapsed
         # all_t = np.array(all_t)
         # all_t_elapsed = all_t - all_t[0]
         # Create linear colormap that spans the number of files
-        colors = plt.cm.viridis(np.linspace(0, 1, len(mppfiles)))
+        # colors = plt.cm.viridis(np.linspace(0, 1, len(mppfiles)))
 
-        # Get testname and list of modules for title and lengend
-        testname = self.filestructure.filepath_to_runinfo(mppfiles[0])["name"]
-        testdate = self.filestructure.filepath_to_runinfo(mppfiles[0])["date"]
-        titlestr = testname + "( " + testdate + " )"
-        module_ids = []
-        for file in mppfiles:
-            module_ids.append(self.filestructure.filepath_to_runinfo(file)["module_id"])
+        # Get testname and list of modules for title and lengend using first file 
+        # testname = self.filestructure.filepath_to_runinfo(mppfiles[0])["name"]
+        # testdate = self.filestructure.filepath_to_runinfo(mppfiles[0])["date"]
+        # titlestr = testname + "( " + testdate + " )"
+        # module_ids = []
+        # for file in mppfiles:
+        #     module_ids.append(self.filestructure.filepath_to_runinfo(file)["module_id"])
 
         # Plot time versus power, add legends for every trace
-        for idx in range(len(all_t)):
-            t1 = all_t[idx]
-            t_elapsed = t1 - t1[0]
+        # for idx in range(len(all_t)):
+        #     t1 = all_t[idx]
+        #     t_elapsed = t1 - t1[0]
 
-            ax.plot(
-                t_elapsed,
-                all_p[idx],
-                #                color=colors[idx],
-                #                legend="Module #" + str(module_ids[idx]),
-                **plt_kwargs,
-            )
+        #     ax.plot(
+        #         t_elapsed,
+        #         all_p[idx],
+        #         #                color=colors[idx],
+        #         #                legend="Module #" + str(module_ids[idx]),
+        #         **plt_kwargs,
+        #     )
 
         # Customize plot and show
         ax.set_ylabel("MPPT MPP (mW/cm2)", weight="black")

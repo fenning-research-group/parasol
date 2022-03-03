@@ -461,6 +461,39 @@ class Analysis:
             all_j.append(j)
             all_p.append(p)
 
+        return all_t, all_v, all_i, all_j, all_p
+
+    def load_mpp_files_grouped(self, mpp_file_paths: list) -> list:
+        """Loads JV files contained in jv_file_paths, returns data
+
+        Args:
+            mpp_file_paths (list[str]): list of paths to mpp files
+
+        Returns:
+            list[np.ndarray]: list of time vectors
+            list[np.ndarray]: list of voltage vectors
+            list[np.ndarray]: list of FWD current vectors
+            list[np.ndarray]: list of FWD power vectors
+            list[np.ndarray]: list of REV current vectors
+            list[np.ndarray]: list of REV power vectors
+        """
+
+        # Create blank lists to fill with numpy arrays
+        all_t = []
+        all_v = []
+        all_i = []
+        all_j = []
+        all_p = []
+
+        for mpp_file_path in mpp_file_paths:
+
+            t, v, i, j, p = self.load_mpp_file(mpp_file_path)
+            all_t.append(t)
+            all_v.append(v)
+            all_i.append(i)
+            all_j.append(j)
+            all_p.append(p)
+
         # Flatten the arrays so they are continuous
         t_s = [item for sublist in all_t for item in sublist]
         v_s = [item for sublist in all_v for item in sublist]
@@ -469,8 +502,7 @@ class Analysis:
         p_s = [item for sublist in all_p for item in sublist]
 
         return t_s, v_s, i_s, j_s, p_s
-        # return all_t, all_v, all_i, all_j, all_p
-
+    
     def load_mpp_file(self, mpp_file_path: str) -> np.ndarray:
         """Loads data for a single MPP file given by mpp_file_path, returns values
 
