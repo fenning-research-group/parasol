@@ -240,7 +240,6 @@ class Grapher:
             all_p,
         ) = self.analysis.load_mpp_files(mppfiles)
 
-
         t1 = all_t
         t_elapsed = t1 - t1[0]
 
@@ -252,10 +251,8 @@ class Grapher:
             **plt_kwargs,
         )
 
-            # Each all_param will be [[file1][file2][file3]]. This mimicks JV.
-            # e.g [[0,1,2],[3,4,5]]
-
-        
+        # Each all_param will be [[file1][file2][file3]]. This mimicks JV.
+        # e.g [[0,1,2],[3,4,5]]
 
         # Make time data numpy array, calc time elapsed
         # all_t = np.array(all_t)
@@ -263,7 +260,7 @@ class Grapher:
         # Create linear colormap that spans the number of files
         # colors = plt.cm.viridis(np.linspace(0, 1, len(mppfiles)))
 
-        # Get testname and list of modules for title and lengend using first file 
+        # Get testname and list of modules for title and lengend using first file
         # testname = self.filestructure.filepath_to_runinfo(mppfiles[0])["name"]
         # testdate = self.filestructure.filepath_to_runinfo(mppfiles[0])["date"]
         # titlestr = testname + "( " + testdate + " )"

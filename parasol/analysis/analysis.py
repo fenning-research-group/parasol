@@ -358,7 +358,6 @@ class Analysis:
         return df_filtered_2
 
     # Loads JV files
-
     def load_jv_files(self, jv_file_paths: list) -> list:
         """Loads JV files contained in jv_file_paths, returns data
 
@@ -430,39 +429,6 @@ class Analysis:
 
         return t, v, j_fwd, p_fwd, j_rev, p_rev
 
-    # def load_mpp_files(self, mpp_file_paths: list) -> list:
-    #     """Loads JV files contained in jv_file_paths, returns data
-
-    #     Args:
-    #         mpp_file_paths (list[str]): list of paths to mpp files
-
-    #     Returns:
-    #         list[np.ndarray]: list of time vectors
-    #         list[np.ndarray]: list of voltage vectors
-    #         list[np.ndarray]: list of FWD current vectors
-    #         list[np.ndarray]: list of FWD power vectors
-    #         list[np.ndarray]: list of REV current vectors
-    #         list[np.ndarray]: list of REV power vectors
-    #     """
-
-    #     # Create blank lists to fill with numpy arrays
-    #     all_t = []
-    #     all_v = []
-    #     all_i = []
-    #     all_j = []
-    #     all_p = []
-
-    #     for mpp_file_path in mpp_file_paths:
-
-    #         t, v, i, j, p = self.load_mpp_file(mpp_file_path)
-    #         all_t.append(t)
-    #         all_v.append(v)
-    #         all_i.append(i)
-    #         all_j.append(j)
-    #         all_p.append(p)
-
-    #     return all_t, all_v, all_i, all_j, all_p
-
     def load_mpp_files(self, mpp_file_paths: list) -> np.ndarray:
         """Loads JV files contained in jv_file_paths, returns data
 
@@ -485,6 +451,7 @@ class Analysis:
         all_j = []
         all_p = []
 
+        # Extend the lists [a1,a2] +[b1,b2] = [a1,a2,b1,b2]
         for mpp_file_path in mpp_file_paths:
             t, v, i, j, p = self.load_mpp_file(mpp_file_path)
             all_t.extend(t)
@@ -493,7 +460,7 @@ class Analysis:
             all_j.extend(j)
             all_p.extend(p)
 
-        # Flatten the arrays so they are continuous
+        # Turn into numpy arrays
         t_s = np.asarray(all_t)
         v_s = np.asarray(all_v)
         i_s = np.asarray(all_i)
@@ -535,35 +502,35 @@ class Analysis:
         j = all_data[3]
         p = all_data[4]
 
-        # convert to list
+        # convert to lists --> ensures we dont have a float and converts np arrays
         if type(t) is np.ndarray:
             t2 = t.tolist()
         else:
             t2 = [t]
-        
+
         if type(v) is np.ndarray:
             v2 = v.tolist()
         else:
             v2 = [v]
-        
+
         if type(i) is np.ndarray:
             i2 = i.tolist()
         else:
             i2 = [i]
-        
+
         if type(j) is np.ndarray:
             j2 = j.tolist()
         else:
             j2 = [j]
-        
+
         if type(p) is np.ndarray:
             p2 = p.tolist()
         else:
             p2 = [p]
-
 
         return t2, v2, i2, j2, p2
 
 
 # TODO: should be able to fit between two points near jsc, mpp, voc to get values
 # TODO: should be able to fit to ideal diode equation to get values
+# TODO: MPP loadin could start from list not np array, then transpose

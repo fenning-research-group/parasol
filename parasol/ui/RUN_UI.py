@@ -178,7 +178,6 @@ class RUN_UI(QMainWindow):
         self.jvfrequency5.setText(str(defaults["jv_frequency"]))
         self.jvfrequency6.setText(str(defaults["jv_frequency"]))
 
-
         self.mppfrequency1 = self.findChild(QLineEdit, "MPPFrequencyInput_1")
         self.mppfrequency2 = self.findChild(QLineEdit, "MPPFrequencyInput_2")
         self.mppfrequency3 = self.findChild(QLineEdit, "MPPFrequencyInput_3")
@@ -192,7 +191,6 @@ class RUN_UI(QMainWindow):
         self.mppfrequency4.setText(str(defaults["mpp_frequency"]))
         self.mppfrequency5.setText(str(defaults["mpp_frequency"]))
         self.mppfrequency6.setText(str(defaults["mpp_frequency"]))
-        
 
         # Get JV min voltage, max voltage, and voltage step size
         self.vmin1 = self.findChild(QLineEdit, "VminInput_1")
@@ -222,7 +220,6 @@ class RUN_UI(QMainWindow):
         self.vmax4.setText(str(defaults["v_max"]))
         self.vmax5.setText(str(defaults["v_max"]))
         self.vmax6.setText(str(defaults["v_max"]))
-    
 
         self.vstep1 = self.findChild(QLineEdit, "VstepsInput_1")
         self.vstep2 = self.findChild(QLineEdit, "VstepsInput_2")
