@@ -18,21 +18,21 @@ class LabJack:
         # self.yoko = rm.open_resource(yoko_address)
         # self.yoko.timeout = constants["timeout"]
 
-    def get_temp() -> float:
+    def get_temp(self) -> float:
         """Gets the temperature"""
 
         temp = 27
 
         return temp
 
-    def get_rh() -> float:
+    def get_rh(self) -> float:
         """Gets the humidity"""
 
         rh = 50
 
         return rh
 
-    def get_intensity() -> float:
+    def get_intensity(self) -> float:
         """Gets the intensity"""
 
         intensity = 1

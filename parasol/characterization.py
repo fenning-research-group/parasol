@@ -235,9 +235,9 @@ class Characterization:
             flaot: intensity (# suns)
         """
 
-        time = time.time()
+        t = time.time()
         temp = labjack.get_temp()
         rh = labjack.get_rh()
-        intensity = labjack.get_intenisty()
+        intensity = labjack.get_intensity()
 
-        return time, temp, rh, intensity
+        return t, temp, rh, intensity

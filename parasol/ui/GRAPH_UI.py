@@ -28,8 +28,8 @@ from parasol.analysis.grapher import Grapher
 
 # Set module directory
 MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "UI_defaults.yaml"), "r") as f:
-    defaults = yaml.safe_load(f)["GRAPH_UI"]  # , Loader=yaml.FullLoader)["GRAPH_UI"]
+with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
+    defaults = yaml.safe_load(f)["filestructure"]  # , Loader=yaml.FullLoader)["relay"]
 
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
@@ -66,7 +66,7 @@ class GRAPH_UI(QMainWindow):
         # Load default root dir, set in UI
         self.rootdir = self.findChild(QLineEdit, "rootdir")
         # self.rootdir.setText(self.filestructure.get_root_dir())
-        self.rootdir.setText(defaults["root_dir"])
+        self.rootdir.setText(defaults["analysis_dir"])
         if os.path.exists(self.rootdir.text()) == False:
             self.rootdir.setText("")
 
@@ -261,6 +261,7 @@ class GRAPH_UI(QMainWindow):
 
     def setrootdir_clicked(self) -> None:
         """Manages setting root directory on button click"""
+
         file = QFileDialog.getExistingDirectory(
             self, "Select Directory", self.rootdir.text()
         )

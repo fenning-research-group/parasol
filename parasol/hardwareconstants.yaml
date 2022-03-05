@@ -1,5 +1,7 @@
 filestructure:
-  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location
+  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location raw data
+  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location for analysis
+  save_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Analysis\\" # Base save for plots
   # Note that base load location is set in UI_defaults.yaml
   num_modules: 24 # Number of modules
 
@@ -9,7 +11,6 @@ relay:
     vid: 1027
     serial_number : 'AQ01FVSHA'
     # location: None
-
   response_time: 0.1 # Seconds for relay switch to settle
 
 yokogawa:
@@ -38,14 +39,12 @@ easttester:
       location: "1-4.4"
   baud_rate: 115200 # Leave as is
   time_out: 0.005 # Seccond for timeout in serial
-
   source_delay: 1 # 0.5 # Seconds for source to settle (voltage stabilization) [0.25,0.25,0.5 had lag]
   sense_delay: 1 # 0.25 # Seconds for sense to return value
   command_delay: 1 #0.25 # 0.05 # Seconds between commands
   avg_num: 5 # Number of currents to avg for reading --> ~integration time
   max_voltage: 5 # Max voltage of 'low' range, 155 V for high range
   max_current: 3.3 # Max current of 'low' range, 22 A for high range
-  
   v_min: 0.1 # Min voltage registered by ET
   voltage_range: "LOW" # "LOW" or "HIGH"
   current_range: "LOW" # "LOW" or "HIGH"
@@ -58,3 +57,18 @@ analysis:
 
 controller:
   monitor_delay: 15 # Seconds between updates
+
+RUN_UI:
+  area : 1 # Area of the module in cm^2
+  jv_mode: 0
+  mpp_mode: 0
+  jv_frequency: 900 # seconds between JV scans
+  mpp_frequency: 60 # seconds between MPP scans
+  v_min: -0.1 # Voltage minimum for JV/MPP scan
+  v_max: 0.7 # Voltage maximum for JV/MPP scan
+  v_steps: 100 # Voltage steps for JV scan
+
+GRAPH_UI:
+  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base load location
+  # Note that base save location is set in hardwareconstants.yaml
+  save_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Analysis\\" # Base save  for plots

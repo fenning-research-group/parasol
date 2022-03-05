@@ -179,7 +179,12 @@ class Controller:
         return self.strings[id]["name"]
 
     def load_check_orientation(self, modules: list) -> None:
+        """Checks the orientation of the input modules by verifying that Jsc < 0 on the scanner.
 
+        Args:
+            modules (list[int]): modules to check
+
+        """
         check_task_future = asyncio.run_coroutine_threadsafe(
             self.random_task_timer(modules=modules), self.loop
         )
@@ -203,9 +208,10 @@ class Controller:
         self.tests_active -= 1
 
         if self.tests_active == 0:
+            time.sleep(self.monitor_delay)
             self.monitor_future.cancel()
-        # while 1 in self.monitor_queue:
-        #     self.monitor_queue.remove(1)
+        while 1 in self.monitor_queue:
+            self.monitor_queue.remove(1)
 
         # Destroy all future tasks for the string
         if id not in self.strings:
@@ -334,6 +340,12 @@ class Controller:
             print(f"Tracked {id}")
 
     async def check_orientation_worker(self, loop: asyncio.AbstractEventLoop) -> None:
+        """
+        Worker for checking orientation of select modules by verifying that Jsc < 0 on the scanner.
+
+        Args:
+            loop (asyncio.AbstractEventLoop): timeer loop to insert MPP worker into
+        """
 
         time.sleep(0.5)
         # While the loop is running, add mpp scans to queue
@@ -628,15 +640,23 @@ class Controller:
                 writer.writerow([t, v, i, j, p])
 
     def monitor_env(self, dummyid: int) -> None:
-        """ "
+        """
         Monitors environment using the Monitor class
+
+        Args:
+            dummyid (int): passes int 1 to the monitor class
         """
 
-        time, temp, rh, intensity = self.characterization.monitor_environment()
+        t, temp, rh, intensity = self.characterization.monitor_environment(self.monitor)
 
-        print("Monitoring environment: ", time, temp, rh, intensity)
+        print("Monitoring environment: ", t, temp, rh, intensity)
 
     def check_orientation(self, modules: list) -> None:
+        """Checks the orientation of the list of modules by verifying that Jsc > 0 using the scanner
+
+        Args:
+            modules (list[int]): list of modules
+        """
 
         correct_orientation = [None] * len(modules)
         for idx, module in enumerate(modules):
