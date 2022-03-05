@@ -503,26 +503,37 @@ class Analysis:
 
         # Fill with data
         with open(mpp_file_path) as f:
+            csvreader = reader(f, delimiter=",")
             for _ in range(7):
-                next(reader)
-            for line in reader:
-                t.append(line[0])
-                v.append(line[1])
-                i.append(line[2])
-                j.append(line[3])
-                p.append(line[4])
+                next(csvreader)
+            for line in csvreader:
+                t.append(float(line[0]))
+                v.append(float(line[1]))
+                i.append(float(line[2]))
+                j.append(float(line[3]))
+                p.append(float(line[4]))
 
         # convert to lists --> ensures we dont have a float and converts np arrays
-        if type(t) is list:
+        if type(t) is not list:
             t2 = [t]
-        if type(v) is list:
+        else:
+            t2 = t
+        if type(v) is not list:
             v2 = [v]
-        if type(i) is list:
+        else:
+            v2 = v
+        if type(i) is not list:
             i2 = [i]
-        if type(j) is list:
+        else:
+            i2 = i
+        if type(j) is not list:
             j2 = [j]
-        if type(p) is list:
+        else:
+            j2 = j
+        if type(p) is not list:
             p2 = [p]
+        else:
+            p2 = p
 
         return t2, v2, i2, j2, p2
 
