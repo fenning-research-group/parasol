@@ -42,8 +42,9 @@ class Controller:
         self.analysis = Analysis()
         self.filestructure = FileStructure()
 
-        # Get monitoring delay
-        # self.monitor_delay = constants["monitor_delay"]
+        # Get monitoring delay, create counter for tests active
+        self.monitor_delay = constants["monitor_delay"]
+        self.tests_active = 0
 
         # Initialize running variable, create root directory
         self.running = False
@@ -127,6 +128,16 @@ class Controller:
         mpp_future = asyncio.run_coroutine_threadsafe(self.mpp_timer(id=id), self.loop)
         mpp_future.add_done_callback(future_callback)
 
+        # If we are not monitoring the environment, start the monitor.
+        if self.tests_active == 0:
+            self.monitor_future = asyncio.run_coroutine_threadsafe(
+                self.monitor_timer(), self.loop
+            )
+            self.monitor_future.add_done_callback(future_callback)
+
+        # Incrtement number of tests active
+        self.tests_active += 1
+
         # Setup string dict with important information for running the program
         self.strings[id] = {
             "name": name,
@@ -163,10 +174,6 @@ class Controller:
             self.strings[id]["name"],
         ) = self.filestructure.make_module_subdir(name, module_channels, startdate)
 
-        # Create the base MPP file with header and no data (we will append to it)
-        # deappreciated
-        # self._make_mpp_file(id)
-
         return self.strings[id]["name"]
 
     def unload_string(self, id: int) -> None:
@@ -182,6 +189,14 @@ class Controller:
         # Get string saveloc
         d = self.strings.get(id, None)
         saveloc = d["_savedir"]
+
+        # Decrease number of tests active by one
+        self.tests_active -= 1
+
+        if self.tests_active == 0:
+            self.monitor_future.cancel()
+            # while 1 in self.monitor_queue:
+            #     self.monitor_queue.remove(1)
 
         # Destroy all future tasks for the string
         if id not in self.strings:
@@ -327,31 +342,31 @@ class Controller:
             await scan_future
             self.random_queue.task_done()
 
-    # async def monitor_worker(self, loop: asyncio.AbstractEventLoop) -> None:
-    #     """Worker for monitoring the string
+    async def monitor_worker(self, loop: asyncio.AbstractEventLoop) -> None:
+        """Worker for monitoring the string
 
-    #     Args:
-    #         loop (asyncio.AbstractEventLoop): timer loop to insert monitor worker into
-    #     """
+        Args:
+            loop (asyncio.AbstractEventLoop): timer loop to insert monitor worker into
+        """
 
-    #     # We need a sleep here or it never gets added to the queue
-    #     time.sleep(0.5)
-    #     # While the loop is running, add mpp scans to queue
-    #     while self.running:
-    #         id = await self.monitor_queue.get()
-    #         scan_future = asyncio.gather(
-    #             loop.run_in_executor(
-    #                 self.threadpool,
-    #                 self.monitor_env,
-    #             )
-    #         )
-    #         scan_future.add_done_callback(future_callback)
+        # We need a sleep here or it never gets added to the queue
+        time.sleep(0.5)
+        # While the loop is running, add mpp scans to queue
+        while self.running:
+            # id = await self.monitor_queue.get()
+            scan_future = asyncio.gather(
+                loop.run_in_executor(
+                    self.threadpool,
+                    self.monitor_env,
+                )
+            )
+            scan_future.add_done_callback(future_callback)
 
-    #         # Scan the string and let the user know
-    #         # print(f"Monitoring {id}")
-    #         await scan_future
-    #         self.monitor_queue.task_done()
-    #         # print(f"Monitored {id}")
+            # Scan the string and let the user know
+            # print(f"Monitoring {id}")
+            await scan_future
+            self.monitor_queue.task_done()
+            # print(f"Monitored {id}")
 
     # Create timer to do random tasks
     async def random_task_timer(self, modules: list) -> None:
@@ -389,15 +404,14 @@ class Controller:
             self.mpp_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["mpp"]["interval"])
 
-    # async def monitor_timer(self) -> None:
-    #     """Manages scanning for monitor worker
-    #     """
+    async def monitor_timer(self) -> None:
+        """Manages scanning for monitor worker"""
 
-    #     # Add worker to que and start when possible
-    #     await asyncio.sleep(1)
-    #     while self.running:
-    #         self.monitor_queue.put_nowait()
-    #         await asyncio.sleep(self.monitor_delay)
+        # Add worker to que and start when possible
+        await asyncio.sleep(1)
+        while self.running:
+            self.monitor_queue.put_nowait()
+            await asyncio.sleep(self.monitor_delay)
 
     def __make_background_event_loop(self) -> None:
         """Setup background event loop for schedueling tasks"""
@@ -413,7 +427,7 @@ class Controller:
         self.jv_queue = asyncio.Queue()
         self.mpp_queue = asyncio.Queue()
         self.random_queue = asyncio.Queue()
-        # self.monitor_queue = asyncio.Queue()
+        self.monitor_queue = asyncio.Queue()
         self.loop.run_forever()
 
     def start(self) -> None:
@@ -604,10 +618,12 @@ class Controller:
                 writer = csv.writer(f, delimiter=",")
                 writer.writerow([t, v, i, j, p])
 
-    # def monitor_env(self) -> None:
-    #     """"
-    #     Monitors environment using the Monitor class
-    #     """
+    def monitor_env(self) -> None:
+        """ "
+        Monitors environment using the Monitor class
+        """
+
+        print("Monitoring environment")
 
     # Creates workers to check orientaiton of string
     def load_check_orientation(self, modules: list) -> None:
