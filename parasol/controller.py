@@ -196,7 +196,6 @@ class Controller:
         print("Analysis saved at :", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
 
-    # deappreciated
     def make_mpp_file(self, id: int) -> None:
         """Creates base file for MPP data
 
@@ -217,7 +216,6 @@ class Controller:
         mppfile = self.filestructure.get_mpp_file_name(
             d["start_date"], d["name"], id, d["jv"]["scan_count"]
         )
-
         fpath = os.path.join(mppfolder, mppfile)
 
         # If it doesnt exist, make it:
@@ -243,42 +241,6 @@ class Controller:
                 )
         
         return fpath
-
-    # def make_mpp_file(self, fpath: str, d: dict) -> None:
-    #     """[summary]
-
-    #     Args:
-    #         fpath (str): path to file
-    #         d (dict): dictionary containing info
-    #     """
-
-    #     mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
-    #     mppfile = self.filestructure.get_mpp_file_name(
-    #         d["start_date"], d["name"], id, d["jv"]["scan_count"]
-    #     )
-    #     fpath = os.path.join(mppfolder, mppfile)
-
-    #     # If it doesnt exist, make it:
-    #     if os.path.exists(fpath) != True:
-
-    #         # Open file, write header/column names then fill
-    #         with open(fpath, "w", newline="") as f:
-    #             writer = csv.writer(f, delimiter=",")
-    #             writer.writerow(["Date:", date_str])
-    #             writer.writerow(["Time:", time_str])
-    #             writer.writerow(["epoch_time:", epoch_str])
-    #             writer.writerow(["String ID:", id])
-    #             writer.writerow(["Module ID:", d["module_channels"]])
-    #             writer.writerow(["Area (cm2):", d["area"]])
-    #             writer.writerow(
-    #                 [
-    #                     "Time (epoch)",
-    #                     "Voltage (V)",
-    #                     "Current (mA)",
-    #                     "Current Density (mA/cm2)",
-    #                     "Power Density (mW/cm2)",
-    #                 ]
-    #             )
 
     async def jv_worker(self, loop: asyncio.AbstractEventLoop) -> None:
         """Worker for JV sweeps
@@ -584,14 +546,7 @@ class Controller:
             d["mpp"]["last_voltages"][1] = v
             d["mpp"]["vmpp"] = v
 
-            # Get filepath to csv
-            # mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
-            # mppfile = self.filestructure.get_mpp_file_name(
-            #     d["start_date"], d["name"], id, d["jv"]["scan_count"]
-            # )
-            # fpath = os.path.join(mppfolder, mppfile)
-
-            # Get MPP file path, if it doesnt exist, create it
+            # Get MPP file path, if it doesnt exist, create it, iterate for each JV curve taken
             fpath = self.make_mpp_file(id)
 
             # Open file, append values to columns
@@ -630,7 +585,6 @@ class Controller:
     def __del__(self) -> None:
         """Stops que and program on exit"""
         self.stop()
-
 
 def future_callback(future):
     """Callback function triggered when a future completes. Allows errors to be seen outside event loop"""

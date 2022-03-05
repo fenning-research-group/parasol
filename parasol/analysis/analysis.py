@@ -430,19 +430,52 @@ class Analysis:
 
         return t, v, j_fwd, p_fwd, j_rev, p_rev
 
-    def load_mpp_files(self, mpp_file_paths: list) -> list:
+    # def load_mpp_files(self, mpp_file_paths: list) -> list:
+    #     """Loads JV files contained in jv_file_paths, returns data
+
+    #     Args:
+    #         mpp_file_paths (list[str]): list of paths to mpp files
+
+    #     Returns:
+    #         list[np.ndarray]: list of time vectors
+    #         list[np.ndarray]: list of voltage vectors
+    #         list[np.ndarray]: list of FWD current vectors
+    #         list[np.ndarray]: list of FWD power vectors
+    #         list[np.ndarray]: list of REV current vectors
+    #         list[np.ndarray]: list of REV power vectors
+    #     """
+
+    #     # Create blank lists to fill with numpy arrays
+    #     all_t = []
+    #     all_v = []
+    #     all_i = []
+    #     all_j = []
+    #     all_p = []
+
+    #     for mpp_file_path in mpp_file_paths:
+
+    #         t, v, i, j, p = self.load_mpp_file(mpp_file_path)
+    #         all_t.append(t)
+    #         all_v.append(v)
+    #         all_i.append(i)
+    #         all_j.append(j)
+    #         all_p.append(p)
+
+    #     return all_t, all_v, all_i, all_j, all_p
+
+    def load_mpp_files(self, mpp_file_paths: list) -> np.ndarray:
         """Loads JV files contained in jv_file_paths, returns data
 
         Args:
             mpp_file_paths (list[str]): list of paths to mpp files
 
         Returns:
-            list[np.ndarray]: list of time vectors
-            list[np.ndarray]: list of voltage vectors
-            list[np.ndarray]: list of FWD current vectors
-            list[np.ndarray]: list of FWD power vectors
-            list[np.ndarray]: list of REV current vectors
-            list[np.ndarray]: list of REV power vectors
+            np.ndarray: list of time vectors
+            np.ndarray: list of voltage vectors
+            np.ndarray: list of FWD current vectors
+            np.ndarray: list of FWD power vectors
+            np.ndarray: list of REV current vectors
+            np.ndarray: list of REV power vectors
         """
 
         # Create blank lists to fill with numpy arrays
@@ -453,68 +486,34 @@ class Analysis:
         all_p = []
 
         for mpp_file_path in mpp_file_paths:
-
             t, v, i, j, p = self.load_mpp_file(mpp_file_path)
-            all_t.append(t)
-            all_v.append(v)
-            all_i.append(i)
-            all_j.append(j)
-            all_p.append(p)
-
-        return all_t, all_v, all_i, all_j, all_p
-
-    def load_mpp_files_grouped(self, mpp_file_paths: list) -> list:
-        """Loads JV files contained in jv_file_paths, returns data
-
-        Args:
-            mpp_file_paths (list[str]): list of paths to mpp files
-
-        Returns:
-            list[np.ndarray]: list of time vectors
-            list[np.ndarray]: list of voltage vectors
-            list[np.ndarray]: list of FWD current vectors
-            list[np.ndarray]: list of FWD power vectors
-            list[np.ndarray]: list of REV current vectors
-            list[np.ndarray]: list of REV power vectors
-        """
-
-        # Create blank lists to fill with numpy arrays
-        all_t = []
-        all_v = []
-        all_i = []
-        all_j = []
-        all_p = []
-
-        for mpp_file_path in mpp_file_paths:
-
-            t, v, i, j, p = self.load_mpp_file(mpp_file_path)
-            all_t.append(t)
-            all_v.append(v)
-            all_i.append(i)
-            all_j.append(j)
-            all_p.append(p)
+            all_t.extend(t)
+            all_v.extend(v)
+            all_i.extend(i)
+            all_j.extend(j)
+            all_p.extend(p)
 
         # Flatten the arrays so they are continuous
-        t_s = [item for sublist in all_t for item in sublist]
-        v_s = [item for sublist in all_v for item in sublist]
-        i_s = [item for sublist in all_i for item in sublist]
-        j_s = [item for sublist in all_j for item in sublist]
-        p_s = [item for sublist in all_p for item in sublist]
+        t_s = np.asarray(all_t)
+        v_s = np.asarray(all_v)
+        i_s = np.asarray(all_i)
+        j_s = np.asarray(all_j)
+        p_s = np.asarray(all_p)
 
         return t_s, v_s, i_s, j_s, p_s
-    
-    def load_mpp_file(self, mpp_file_path: str) -> np.ndarray:
+
+    def load_mpp_file(self, mpp_file_path: str) -> list:
         """Loads data for a single MPP file given by mpp_file_path, returns values
 
         Args:
             mpp_file_path (string): path to MPP file
 
         Returns:
-            np.ndarray: time vector
-            np.ndarray: voltage vector
-            np.ndarray: current vector
-            np.ndarray: current denisty vector
-            np.ndarray: power denisty vector
+            list[float]: time vector
+            list[float]: voltage vector
+            list[float]: current vector
+            list[float]: current denisty vector
+            list[float]: power denisty vector
         """
 
         # Get the time information
@@ -528,7 +527,7 @@ class Analysis:
         #     _ = next(reader)  # area
 
         # Load rest of dataframe, split into paramters, and return
-        all_data = np.loadtxt(mpp_file_path, delimiter=",", skiprows=8)
+        all_data = np.loadtxt(mpp_file_path, delimiter=",", skiprows=7)
         all_data = np.transpose(all_data)
         t = all_data[0]
         v = all_data[1]
@@ -536,7 +535,34 @@ class Analysis:
         j = all_data[3]
         p = all_data[4]
 
-        return t, v, i, j, p
+        # convert to list
+        if type(t) is np.ndarray:
+            t2 = t.tolist()
+        else:
+            t2 = [t]
+        
+        if type(v) is np.ndarray:
+            v2 = v.tolist()
+        else:
+            v2 = [v]
+        
+        if type(i) is np.ndarray:
+            i2 = i.tolist()
+        else:
+            i2 = [i]
+        
+        if type(j) is np.ndarray:
+            j2 = j.tolist()
+        else:
+            j2 = [j]
+        
+        if type(p) is np.ndarray:
+            p2 = p.tolist()
+        else:
+            p2 = [p]
+
+
+        return t2, v2, i2, j2, p2
 
 
 # TODO: should be able to fit between two points near jsc, mpp, voc to get values

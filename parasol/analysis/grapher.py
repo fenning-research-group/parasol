@@ -238,7 +238,8 @@ class Grapher:
             all_i,
             all_j,
             all_p,
-        ) = self.analysis.load_mpp_files_grouped(mppfiles)
+        ) = self.analysis.load_mpp_files(mppfiles)
+
 
         t1 = all_t
         t_elapsed = t1 - t1[0]
