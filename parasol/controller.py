@@ -351,12 +351,9 @@ class Controller:
         time.sleep(0.5)
         # While the loop is running, add mpp scans to queue
         while self.running:
-            # id = await self.monitor_queue.get()
+            dummyid = await self.monitor_queue.get()
             scan_future = asyncio.gather(
-                loop.run_in_executor(
-                    self.threadpool,
-                    self.monitor_env,
-                )
+                loop.run_in_executor(self.threadpool, self.monitor_env, dummyid)
             )
             scan_future.add_done_callback(future_callback)
 
@@ -616,12 +613,12 @@ class Controller:
                 writer = csv.writer(f, delimiter=",")
                 writer.writerow([t, v, i, j, p])
 
-    def monitor_env(self) -> None:
+    def monitor_env(self, dummyid: int) -> None:
         """ "
         Monitors environment using the Monitor class
         """
 
-        print("Monitoring environment")
+        print("Monitoring environment", dummyid)
 
     # Creates workers to check orientaiton of string
     def load_check_orientation(self, modules: list) -> None:
