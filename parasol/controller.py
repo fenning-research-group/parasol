@@ -12,6 +12,7 @@ import time
 from parasol.hardware.relay import Relay
 from parasol.hardware.scanner import Scanner
 from parasol.hardware.easttester import EastTester
+from parasol.hardware.labjack import LabJack
 from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
@@ -24,6 +25,8 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 
 class Controller:
     """Controller package for PARASOL"""
+
+    # Initialize kit, Start/stop workers, File management
 
     def __init__(self) -> None:
         """Initializes the Controller class"""
@@ -39,6 +42,7 @@ class Controller:
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
+        self.monitor = LabJack()
 
         # Get monitoring delay, create counter for tests active
         self.monitor_delay = constants["monitor_delay"]
@@ -174,6 +178,13 @@ class Controller:
 
         return self.strings[id]["name"]
 
+    def load_check_orientation(self, modules: list) -> None:
+
+        check_task_future = asyncio.run_coroutine_threadsafe(
+            self.random_task_timer(modules=modules), self.loop
+        )
+        check_task_future.add_done_callback(future_callback)
+
     def unload_string(self, id: int) -> None:
         """Unloads a string of modules
 
@@ -265,6 +276,8 @@ class Controller:
 
         return fpath
 
+    # Workers
+
     async def jv_worker(self, loop: asyncio.AbstractEventLoop) -> None:
         """Worker for JV sweeps
 
@@ -320,7 +333,6 @@ class Controller:
             self.mpp_queue.task_done()
             print(f"Tracked {id}")
 
-    # Create worker to check on orientation
     async def check_orientation_worker(self, loop: asyncio.AbstractEventLoop) -> None:
 
         time.sleep(0.5)
@@ -341,7 +353,7 @@ class Controller:
             self.random_queue.task_done()
 
     async def monitor_worker(self, loop: asyncio.AbstractEventLoop) -> None:
-        """Worker for monitoring the string
+        """Worker for monitoring the evnironment
 
         Args:
             loop (asyncio.AbstractEventLoop): timer loop to insert monitor worker into
@@ -349,7 +361,7 @@ class Controller:
 
         # We need a sleep here or it never gets added to the queue
         time.sleep(0.5)
-        # While the loop is running, add mpp scans to queue
+        # While the loop is running, add monitor scans to queue
         while self.running:
             dummyid = await self.monitor_queue.get()
             scan_future = asyncio.gather(
@@ -357,13 +369,11 @@ class Controller:
             )
             scan_future.add_done_callback(future_callback)
 
-            # Scan the string and let the user know
-            # print(f"Monitoring {id}")
             await scan_future
             self.monitor_queue.task_done()
-            # print(f"Monitored {id}")
 
-    # Create timer to do random tasks
+    # Timers
+
     async def random_task_timer(self, modules: list) -> None:
         """Manages inserting random tasks
 
@@ -407,6 +417,8 @@ class Controller:
         while self.running:
             self.monitor_queue.put_nowait(1)
             await asyncio.sleep(self.monitor_delay)
+
+    # Event Loops
 
     def __make_background_event_loop(self) -> None:
         """Setup background event loop for schedueling tasks"""
@@ -480,6 +492,8 @@ class Controller:
         # Stop event loop
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
+
+    # Worker Functions
 
     def scan_jv(self, id: int) -> None:
         """Conduct a JV scan using Scanner class
@@ -618,17 +632,10 @@ class Controller:
         Monitors environment using the Monitor class
         """
 
-        print("Monitoring environment", dummyid)
+        time, temp, rh, intensity = self.characterization.monitor_environment()
 
-    # Creates workers to check orientaiton of string
-    def load_check_orientation(self, modules: list) -> None:
+        print("Monitoring environment: ", time, temp, rh, intensity)
 
-        check_task_future = asyncio.run_coroutine_threadsafe(
-            self.random_task_timer(modules=modules), self.loop
-        )
-        check_task_future.add_done_callback(future_callback)
-
-    # checks orientaiton of string
     def check_orientation(self, modules: list) -> None:
 
         correct_orientation = [None] * len(modules)

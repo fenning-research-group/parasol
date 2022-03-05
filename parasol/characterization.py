@@ -221,3 +221,23 @@ class Characterization:
             orientation_correct = False
 
         return orientation_correct
+
+    def monitor_environment(self, labjack: object) -> float:
+        """Monitors the labjack for temperature
+
+        Args:
+            labjack (object): pointer to the dontoller for the labjack
+
+        Returns:
+            float: time (epoch)
+            float: temperature (C)
+            float: humidity (%)
+            flaot: intensity (# suns)
+        """
+
+        time = time.time()
+        temp = labjack.get_temp()
+        rh = labjack.get_rh()
+        intensity = labjack.get_intenisty()
+
+        return time, temp, rh, intensity
