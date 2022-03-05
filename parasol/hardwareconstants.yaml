@@ -56,4 +56,5 @@ characterization:
 analysis:
   derivative_v_step : 0.05 # Voltage step for derivative (Rs, Rsh, Rch) in JV analysis
 
-
+controller:
+  montior_delay: 60 # Seconds between updates

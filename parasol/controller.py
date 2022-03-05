@@ -16,6 +16,13 @@ from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
 
+# Set module directory, import constants from yaml file
+MODULE_DIR = os.path.dirname(__file__)
+with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
+    constants = yaml.safe_load(f)[
+        "controller"
+    ]  # , Loader=yaml.FullLoader)["characterization"]
+
 
 class Controller:
     """Controller package for PARASOL"""
@@ -26,7 +33,7 @@ class Controller:
         # Connect to other modules
         self.relay = Relay()
         self.scanner = Scanner()
-        self.easttester = {
+        self.load = {
             "12": EastTester(et_num=1),
             "34": EastTester(et_num=2),
             "56": EastTester(et_num=3),
@@ -34,6 +41,9 @@ class Controller:
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
+
+        # Get monitoring delay
+        # self.monitor_delay = constants["monitor_delay"]
 
         # Initialize running variable, create root directory
         self.running = False
@@ -62,7 +72,7 @@ class Controller:
         self.strings = {}
 
         # Decide how many workers we will allow and start the queue
-        # 1 for Yoko, 6 for ET, 1 for random tasks
+        # 1 for scanner, 6 for load, 1 for random tasks
         self.threadpool = ThreadPoolExecutor(max_workers=8)
         self.start()
 
@@ -186,11 +196,11 @@ class Controller:
         while id in self.mpp_queue._queue:
             self.mpp_queue._queue.remove(id)
 
-        # Dont touch relays/yoko --> dont want to mess with other tests
-        # Reset ET
-        et_key, ch = self.et_channels[id]
-        et = self.easttester[et_key]
-        et.output_off(ch)
+        # Dont touch relays/scanner --> dont want to mess with other tests
+        # Reset load
+        load_key, ch = self.et_channels[id]
+        load = self.load[load_key]
+        load.output_off(ch)
 
         # Analyze the saveloc
         print("Analysis saved at :", saveloc)
@@ -239,7 +249,7 @@ class Controller:
                         "Power Density (mW/cm2)",
                     ]
                 )
-        
+
         return fpath
 
     async def jv_worker(self, loop: asyncio.AbstractEventLoop) -> None:
@@ -317,6 +327,32 @@ class Controller:
             await scan_future
             self.random_queue.task_done()
 
+    # async def monitor_worker(self, loop: asyncio.AbstractEventLoop) -> None:
+    #     """Worker for monitoring the string
+
+    #     Args:
+    #         loop (asyncio.AbstractEventLoop): timer loop to insert monitor worker into
+    #     """
+
+    #     # We need a sleep here or it never gets added to the queue
+    #     time.sleep(0.5)
+    #     # While the loop is running, add mpp scans to queue
+    #     while self.running:
+    #         id = await self.monitor_queue.get()
+    #         scan_future = asyncio.gather(
+    #             loop.run_in_executor(
+    #                 self.threadpool,
+    #                 self.monitor_env,
+    #             )
+    #         )
+    #         scan_future.add_done_callback(future_callback)
+
+    #         # Scan the string and let the user know
+    #         # print(f"Monitoring {id}")
+    #         await scan_future
+    #         self.monitor_queue.task_done()
+    #         # print(f"Monitored {id}")
+
     # Create timer to do random tasks
     async def random_task_timer(self, modules: list) -> None:
         """Manages inserting random tasks
@@ -353,6 +389,16 @@ class Controller:
             self.mpp_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["mpp"]["interval"])
 
+    # async def monitor_timer(self) -> None:
+    #     """Manages scanning for monitor worker
+    #     """
+
+    #     # Add worker to que and start when possible
+    #     await asyncio.sleep(1)
+    #     while self.running:
+    #         self.monitor_queue.put_nowait()
+    #         await asyncio.sleep(self.monitor_delay)
+
     def __make_background_event_loop(self) -> None:
         """Setup background event loop for schedueling tasks"""
 
@@ -367,6 +413,7 @@ class Controller:
         self.jv_queue = asyncio.Queue()
         self.mpp_queue = asyncio.Queue()
         self.random_queue = asyncio.Queue()
+        # self.monitor_queue = asyncio.Queue()
         self.loop.run_forever()
 
     def start(self) -> None:
@@ -377,10 +424,13 @@ class Controller:
         self.thread.start()
         time.sleep(0.5)
 
-        # Create JV worker for yokogawa
+        # Create Monitor worker for RH, Temp, illumination intensity
+        # asyncio.run_coroutine_threadsafe(self.monitor_worker(self.loop), self.loop)
+
+        # Create JV worker for scanner
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
 
-        # Create MPP workers for easttester (1 for each yoko channel)
+        # Create MPP workers for load
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
@@ -403,7 +453,7 @@ class Controller:
         # Turn off running
         self.running = False
 
-        # Reset yokogawa
+        # Reset scanner
         self.scanner.srcV_measI()
 
         # Cycle through all tests
@@ -413,10 +463,10 @@ class Controller:
             # Unload all strings
             self.unload_string(id)
 
-            # Reset east tester
-            et_key, ch = self.et_channels[id]
-            et = self.easttester[et_key]
-            et.srcV_measI(ch)
+            # Reset load
+            load_key, ch = self.et_channels[id]
+            load = self.load[load_key]
+            load.srcV_measI(ch)
 
         # Stop event loop
         self.loop.call_soon_threadsafe(self.loop.stop)
@@ -435,10 +485,10 @@ class Controller:
         # Emsure MPP isn't running.
         with d["lock"]:
 
-            # Turn off easttester output
-            et_key, ch = self.et_channels[id]
-            et = self.easttester[et_key]
-            et.output_off(ch)
+            # Turn off load output
+            load_key, ch = self.et_channels[id]
+            load = self.load[load_key]
+            load.output_off(ch)
 
             # Cycle through each device on the string
             for index, module in enumerate(d["module_channels"]):
@@ -501,11 +551,11 @@ class Controller:
             # Increase jv scan count
             d["jv"]["scan_count"] += 1
 
-            # Turn on easttester output at old vmpp if we have one
+            # Turn on load output at old vmpp if we have one
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
-                et.output_on(ch)
-                et.set_voltage(ch, vmp)
+                load.output_on(ch)
+                load.set_voltage(ch, vmp)
 
     def track_mpp(self, id: int) -> None:
         """Conduct an MPP scan using Easttester class
@@ -526,12 +576,12 @@ class Controller:
         # Ensure that JV isn't running
         with d["lock"]:
 
-            # Turn on easttester output, set voltage, measure current
-            et_key, ch = self.et_channels[id]
-            et = self.easttester[et_key]
+            # Turn on load output, set voltage, measure current
+            load_key, ch = self.et_channels[id]
+            load = self.load[load_key]
 
             # Scan mpp
-            t, v, i = self.characterization.track_mpp(d, et, ch, last_vmpp)
+            t, v, i = self.characterization.track_mpp(d, load, ch, last_vmpp)
 
             # Convert current to mA and calc j and p
             i *= 1000
@@ -554,6 +604,11 @@ class Controller:
                 writer = csv.writer(f, delimiter=",")
                 writer.writerow([t, v, i, j, p])
 
+    # def monitor_env(self) -> None:
+    #     """"
+    #     Monitors environment using the Monitor class
+    #     """
+
     # Creates workers to check orientaiton of string
     def load_check_orientation(self, modules: list) -> None:
 
@@ -562,7 +617,7 @@ class Controller:
         )
         check_task_future.add_done_callback(future_callback)
 
-    # checks orientaiton of string --> could proabbly devide string into modules and check each one but yoko use is low and we should be fine
+    # checks orientaiton of string
     def check_orientation(self, modules: list) -> None:
 
         correct_orientation = [None] * len(modules)
@@ -585,6 +640,7 @@ class Controller:
     def __del__(self) -> None:
         """Stops que and program on exit"""
         self.stop()
+
 
 def future_callback(future):
     """Callback function triggered when a future completes. Allows errors to be seen outside event loop"""
