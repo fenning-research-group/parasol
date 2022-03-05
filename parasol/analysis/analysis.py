@@ -3,6 +3,7 @@ import numpy as np
 import os
 import csv
 import yaml
+from csv import reader
 
 import math
 
@@ -493,39 +494,34 @@ class Analysis:
         #     _ = next(reader)  # module
         #     _ = next(reader)  # area
 
-        # Load rest of dataframe, split into paramters, and return
-        all_data = np.loadtxt(mpp_file_path, delimiter=",", skiprows=7)
-        all_data = np.transpose(all_data)
-        t = all_data[0]
-        v = all_data[1]
-        i = all_data[2]
-        j = all_data[3]
-        p = all_data[4]
+        # Initialie lists
+        t = []
+        v = []
+        i = []
+        j = []
+        p = []
+
+        # Fill with data
+        with open(mpp_file_path) as f:
+            for _ in range(7):
+                next(reader)
+            for line in reader:
+                t.append(line[0])
+                v.append(line[1])
+                i.append(line[2])
+                j.append(line[3])
+                p.append(line[4])
 
         # convert to lists --> ensures we dont have a float and converts np arrays
-        if type(t) is np.ndarray:
-            t2 = t.tolist()
-        else:
+        if type(t) is list:
             t2 = [t]
-
-        if type(v) is np.ndarray:
-            v2 = v.tolist()
-        else:
+        if type(v) is list:
             v2 = [v]
-
-        if type(i) is np.ndarray:
-            i2 = i.tolist()
-        else:
+        if type(i) is list:
             i2 = [i]
-
-        if type(j) is np.ndarray:
-            j2 = j.tolist()
-        else:
+        if type(j) is list:
             j2 = [j]
-
-        if type(p) is np.ndarray:
-            p2 = p.tolist()
-        else:
+        if type(p) is list:
             p2 = [p]
 
         return t2, v2, i2, j2, p2
@@ -533,4 +529,3 @@ class Analysis:
 
 # TODO: should be able to fit between two points near jsc, mpp, voc to get values
 # TODO: should be able to fit to ideal diode equation to get values
-# TODO: MPP loadin could start from list not np array, then transpose
