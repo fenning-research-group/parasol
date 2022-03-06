@@ -61,6 +61,8 @@ class FileStructure:
         """
         return self.analysis_folder
 
+    # Get folders
+
     def get_date_folder(self, startdate: str) -> str:
         """Returns the path to the date folder
 
@@ -134,6 +136,23 @@ class FileStructure:
             self.get_test_folder(startdate, name), "Analyzed"
         )
         return analyzed_folder
+
+    def get_environment_folder(self, timenow: datetime.datetime) -> str:
+        """Returns the path to the environment date folder xYYYY (365 files per folder)
+
+        Args:
+            timenow (datetime.datetime): datetime object
+
+        Returns:
+            str: path to date folder
+        """
+
+        env_folder = self.get_environment_dir()
+        date_folder = timenow.strftime("x%Y")
+
+        folder_path = os.path.join(env_folder, date_folder)
+
+        return folder_path
 
     # Make test folders given inputs
 
@@ -468,3 +487,17 @@ class FileStructure:
         return file_dict
 
     # def get_env_files(self, start_epoch, end_epoch) -> list
+
+    #     # get env dir and paths folders inside (years)
+    #     env_dir = self.get_environment_dir()
+    #     env_folders = self.get_subfolders(env_dir)
+
+    #     if int(env_folders.split("")[-1]) < start_epoch:
+    #         raise ValueError("Environment folder does not exist")
+
+    # get list of files in env folders
+
+    # for folder in range(env_folders):
+
+    # start_year = timenow.strftime("x%Y")
+    # end_year = timenow.strftime("x%Y")

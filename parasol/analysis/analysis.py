@@ -163,6 +163,9 @@ class Analysis:
                 all_p_rev,
             ) = self.load_jv_files(jv_file_paths)
 
+            # Get info from JV file name
+            d = self.filestructure.filepath_to_runinfo(jv_file_paths[idx])
+
             # Make time data numpy array, calc time elapsed
             all_t = np.array(all_t)
             all_t_elapsed = all_t - all_t[0]
@@ -183,9 +186,6 @@ class Analysis:
                 scalardict[k] = v
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
-
-            # Get info from JV file name
-            d = self.filestructure.filepath_to_runinfo(jv_file_paths[idx])
 
             # Create scalar dataframe
             scalar_df = pd.DataFrame(scalardict)

@@ -29,7 +29,7 @@ from parasol.analysis.grapher import Grapher
 # Set module directory
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    defaults = yaml.safe_load(f)["filestructure"]
+    defaults = yaml.safe_load(f)["GRAPH_UI"]
 
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
@@ -62,6 +62,38 @@ class GRAPH_UI(QMainWindow):
         # Load the ui file
         ui_path = os.path.join(MODULE_DIR, "GRAPH_UI.ui")
         uic.loadUi(ui_path, self)
+
+        # Make dict to hold y parameter names
+        self.plot_y_dict = {
+            1: defaults["y1"],
+            2: defaults["y2"],
+            3: defaults["y3"],
+            4: defaults["y4"],
+            5: defaults["y5"],
+            6: defaults["y6"],
+            7: defaults["y7"],
+            8: defaults["y8"],
+            9: defaults["y9"],
+            10: defaults["y10"],
+            11: defaults["y11"],
+            12: defaults["y12"],
+        }
+
+        # Make dict to hold x parameter names
+        self.plot_x_dict = {
+            1: defaults["x1"],
+            2: defaults["x2"],
+            3: defaults["x3"],
+            4: defaults["x4"],
+            5: defaults["x5"],
+            6: defaults["x6"],
+            7: defaults["x7"],
+            8: defaults["x8"],
+            9: defaults["x9"],
+            10: defaults["x10"],
+            11: defaults["x11"],
+            12: defaults["x12"],
+        }
 
         # Get file paths
         self.characterization_dir_loc = self.filestructure.get_characterization_dir()
@@ -114,47 +146,6 @@ class GRAPH_UI(QMainWindow):
             for rownum in range(nrows):
                 self.plot_axes_dict[idnum] = self.axes[colnum][rownum]
                 idnum += 1
-
-        # Make dict to hold y parameter names
-        self.plot_y_dict = {
-            1: self.grapher.variable_dict["FWD Jsc"],
-            2: self.grapher.variable_dict["FWD Voc"],
-            3: self.grapher.variable_dict["FWD FF"],
-            4: self.grapher.variable_dict["FWD PCE"],
-            5: self.grapher.variable_dict["REV Jsc"],
-            6: self.grapher.variable_dict["REV Voc"],
-            7: self.grapher.variable_dict["REV FF"],
-            8: self.grapher.variable_dict["REV PCE"],
-            9: [
-                self.grapher.variable_dict["FWD Rs"],
-                self.grapher.variable_dict["REV Rs"],
-            ],
-            10: [
-                self.grapher.variable_dict["FWD Rsh"],
-                self.grapher.variable_dict["REV Rsh"],
-            ],
-            11: [
-                self.grapher.variable_dict["FWD Rch"],
-                self.grapher.variable_dict["REV Rch"],
-            ],
-            12: "MPP",
-        }
-
-        # Make dict to hold x parameter names
-        self.plot_x_dict = {
-            1: self.grapher.variable_dict["Time Elapsed"],
-            2: self.grapher.variable_dict["Time Elapsed"],
-            3: self.grapher.variable_dict["Time Elapsed"],
-            4: self.grapher.variable_dict["Time Elapsed"],
-            5: self.grapher.variable_dict["Time Elapsed"],
-            6: self.grapher.variable_dict["Time Elapsed"],
-            7: self.grapher.variable_dict["Time Elapsed"],
-            8: self.grapher.variable_dict["Time Elapsed"],
-            9: self.grapher.variable_dict["Time Elapsed"],
-            10: self.grapher.variable_dict["Time Elapsed"],
-            11: self.grapher.variable_dict["Time Elapsed"],
-            12: self.grapher.variable_dict["Time Elapsed"],
-        }
 
         # Place figure in canvas, control resize policy, resize, place on UI, and set location
         self.canvas = FigureCanvas(self.figure)
@@ -356,7 +347,7 @@ class GRAPH_UI(QMainWindow):
                 rgbh = self.test_colors[test_folder]
 
                 # Pass to appropriate plotter to plot on given axes
-                if "MPP" in yparam:
+                if "MPPT MPP (mW/cm2)" in yparam:
                     self.grapher.plot_mpps(
                         mppfiles=mpp_file_lists[index], ax=axes, c=rgbh
                     )

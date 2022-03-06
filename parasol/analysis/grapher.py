@@ -43,6 +43,7 @@ class Grapher:
             "REV Vmp": "REV Vmp (V)",
             "REV Jmp": "REV Jmp (mA/cm2)",
             "REV Pmp": "REV Pmp (mW/cm2)",
+            "MPPT MPP": "MPPT MPP (mW/cm2)",
         }
         self.fwd_rev_cursor_dict = {
             0: ">",
@@ -60,6 +61,8 @@ class Grapher:
             9: "P",
             10: "X",
         }
+
+    # Plot Statistics for a single dataframe
 
     def plot_x_v_ys(self, df: pd.DataFrame, x: str, ys: list, **plt_kwargs) -> None:
         """Plots x vs. y for a set of ys (1 graph)
@@ -113,7 +116,7 @@ class Grapher:
 
         # return fig
 
-    # Plot JV scans for a single module
+    # Plot JV/MPPT scans for a single module folder
 
     def plot_module_jvs(self, jvfolder: str, **plt_kwargs) -> None:
         """Plot JVs in given JV folder
@@ -129,6 +132,23 @@ class Grapher:
 
         # Plot JVs for each module
         self.plot_jvs(jv_file_paths, **plt_kwargs)
+
+    def plot_string_mpp(self, mppfolder: str, **plt_kwargs) -> None:
+        """Plot MPP information in given MPP folder
+
+        Args:
+            mppfolder (str): path to MPP folder
+        """
+
+        # Create dictionary where dict[testfolder] = list of mpp files
+        mpp_dict = self.filestructure.map_test_files([mppfolder])
+
+        # Feed file into the dictionary to get a list of MPP files
+        mpp_file_paths = mpp_dict[mppfolder]
+
+        self.plot_mpps(self, mpp_file_paths, None, **plt_kwargs)
+
+    # These functions take axes and plot on them
 
     def plot_jvs(self, jvfiles: list, **plt_kwargs) -> None:
         """Plot JVs for input JV files
@@ -195,23 +215,6 @@ class Grapher:
         plt.title(titlestr)
         plt.show()
 
-    # Plot MPP Tracking for a single string
-
-    def plot_string_mpp(self, mppfolder: str, **plt_kwargs) -> None:
-        """Plot MPP information in given MPP folder
-
-        Args:
-            mppfolder (str): path to MPP folder
-        """
-
-        # Create dictionary where dict[testfolder] = list of mpp files
-        mpp_dict = self.filestructure.map_test_files([mppfolder])
-
-        # Feed file into the dictionary to get a list of MPP files
-        mpp_file_paths = mpp_dict[mppfolder]
-
-        self.plot_mpps(self, mpp_file_paths, None, **plt_kwargs)
-
     def plot_mpps(self, mppfiles: list, ax: plt.axes = None, **plt_kwargs) -> plt.axes:
         """Plots MPPs for input MPP files
 
@@ -243,52 +246,14 @@ class Grapher:
         ax.plot(
             t_elapsed,
             all_p,
-            #                color=colors[idx],
-            #                legend="Module #" + str(module_ids[idx]),
             **plt_kwargs,
         )
-
-        # Each all_param will be [[file1][file2][file3]]. This mimicks JV.
-        # e.g [[0,1,2],[3,4,5]]
-
-        # Make time data numpy array, calc time elapsed
-        # all_t = np.array(all_t)
-        # all_t_elapsed = all_t - all_t[0]
-        # Create linear colormap that spans the number of files
-        # colors = plt.cm.viridis(np.linspace(0, 1, len(mppfiles)))
-
-        # Get testname and list of modules for title and lengend using first file
-        # testname = self.filestructure.filepath_to_runinfo(mppfiles[0])["name"]
-        # testdate = self.filestructure.filepath_to_runinfo(mppfiles[0])["date"]
-        # titlestr = testname + "( " + testdate + " )"
-        # module_ids = []
-        # for file in mppfiles:
-        #     module_ids.append(self.filestructure.filepath_to_runinfo(file)["module_id"])
-
-        # Plot time versus power, add legends for every trace
-        # for idx in range(len(all_t)):
-        #     t1 = all_t[idx]
-        #     t_elapsed = t1 - t1[0]
-
-        #     ax.plot(
-        #         t_elapsed,
-        #         all_p[idx],
-        #         #                color=colors[idx],
-        #         #                legend="Module #" + str(module_ids[idx]),
-        #         **plt_kwargs,
-        #     )
 
         # Customize plot and show
         ax.set_ylabel("MPPT MPP (mW/cm2)", weight="black")
         ax.set_xlabel("Time Elapsed (sec)", weight="black")
-        # ax.set_title(titlestr)
-        # ax.legend(loc="lower left", frameon=False)
 
         return ax
-
-    # Plot x v y with color axis as different devices
-    # Plot x v y with color axis another parameter (z)
-    # THESE RUN ON AXES LIKE THEY SHOULD!
 
     def plot_xy_scalars(
         self, paramfiles: list, x: str, y: str, ax: plt.axes = None, **plt_kwargs
@@ -323,8 +288,6 @@ class Grapher:
         # Label axes, no title
         ax.set_ylabel(y, weight="black")
         ax.set_xlabel(x, weight="black")
-        # ax.set_title("")
-        # plt.tight_layout()
 
         # Return axes
         return ax
@@ -364,14 +327,13 @@ class Grapher:
                     x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx], **plt_kwargs
                 )
 
-        # Label axes , no title
+        # Label axes, no title
         ylab = ""
         for y in ys:
             ylab += str(y) + " / "
         ylab = ylab[:-3]
         ax.set_ylabel(ylab, weight="black")
         ax.set_xlabel(x, weight="black")
-        # ax.set_title("")
 
         # Return axes
         return ax
@@ -440,3 +402,71 @@ class Grapher:
 
         # Return axes
         return ax
+
+
+# TODO: plot_mpps take plot axes, plot_jvs should as well.
+
+
+# Remove for now:
+# def plot_mpps(self, mppfiles: list, ax: plt.axes = None, **plt_kwargs) -> plt.axes:
+#         """Plots MPPs for input MPP files
+
+#         Args:
+#             mppfiles (list[str]): list of MPP files (same device)
+#             ax (plt.axes): axes
+#             **plt_kwargs : additional plot options
+
+#         Returns:
+#             plt.ax: plotted axes
+#         """
+
+# If not passed axes, use last set
+# if ax is None:
+#     ax = plt.gca()
+
+# load mpp
+# (
+#     all_t,
+#     all_v,
+#     all_i,
+#     all_j,
+#     all_p,
+# ) = self.analysis.load_mpp_files(mppfiles)
+
+# Each all_param will be [[file1][file2][file3]]. This mimicks JV.
+# e.g [[0,1,2],[3,4,5]]
+
+# Make time data numpy array, calc time elapsed
+# all_t = np.array(all_t)
+# all_t_elapsed = all_t - all_t[0]
+# Create linear colormap that spans the number of files
+# colors = plt.cm.viridis(np.linspace(0, 1, len(mppfiles)))
+
+# Get testname and list of modules for title and lengend using first file
+# testname = self.filestructure.filepath_to_runinfo(mppfiles[0])["name"]
+# testdate = self.filestructure.filepath_to_runinfo(mppfiles[0])["date"]
+# titlestr = testname + "( " + testdate + " )"
+# module_ids = []
+# for file in mppfiles:
+#     module_ids.append(self.filestructure.filepath_to_runinfo(file)["module_id"])
+
+# # Plot time versus power, add legends for every trace
+# for idx in range(len(all_t)):
+#     t1 = all_t[idx]
+#     t_elapsed = t1 - t1[0]
+
+#     ax.plot(
+#         t_elapsed,
+#         all_p[idx],
+#         #                color=colors[idx],
+#         #                legend="Module #" + str(module_ids[idx]),
+#         **plt_kwargs,
+#     )
+
+# # Customize plot and show
+# ax.set_ylabel("MPPT MPP (mW/cm2)", weight="black")
+# ax.set_xlabel("Time Elapsed (sec)", weight="black")
+# ax.set_title(titlestr)
+# ax.legend(loc="lower left", frameon=False)
+
+# return ax

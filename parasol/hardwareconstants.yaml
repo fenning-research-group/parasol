@@ -76,3 +76,40 @@ RUN_UI:
   v_min: -0.1 # Voltage minimum for JV/MPP scan
   v_max: 0.7 # Voltage maximum for JV/MPP scan
   v_steps: 100 # Voltage steps for JV scan
+
+GRAPH_UI:
+
+  # Options include: 
+    # "Time (Epoch)", "Time Elapsed (s)"
+    # "FWD Jsc (mA/cm2)", "FWD Voc (V)", "FWD FF (%)", "FWD PCE (%)"
+    # "FWD Rs (Ohm/cm2)", "FWD Rsh (Ohm/cm2)", "FWD Rch (Ohm/cm2)"
+    # "FWD Vmp (V)", "FWD Jmp (mA/cm2)", "FWD Pmp (mW/cm2)"
+    # "REV Jsc (mA/cm2)", "REV Voc (V)", "REV FF (%)", "REV PCE (%)"
+    # "REV Rs (Ohm/cm2)", "REV Rsh (Ohm/cm2)", "REV Rch (Ohm/cm2)"
+    # "REV Vmp (V)", "REV Jmp (mA/cm2)", "REV Pmp (mW/cm2)", "MPPT MPP (mW/cm2)"
+
+  x1: "Time Elapsed (s)" # graph1 x data
+  x2: "Time Elapsed (s)" # graph2 x data
+  x3: "Time Elapsed (s)" # graph3 x data
+  x4: "Time Elapsed (s)" # graph4 x data
+  x5: "Time Elapsed (s)" # graph5 x data
+  x6: "Time Elapsed (s)" # graph6 x data
+  x7: "Time Elapsed (s)" # graph7 x data
+  x8: "Time Elapsed (s)" # graph8 x data
+  x9: "Time Elapsed (s)" # graph9 x data
+  x10: "Time Elapsed (s)" # graph10 x data
+  x11: "Time Elapsed (s)" # graph11 x data
+  x12: "Time Elapsed (s)" # graph12 x data
+
+  y1: "FWD Jsc (mA/cm2)" # graph1 y data
+  y2: "FWD Voc (V)" # graph2 y data
+  y3: "FWD FF (%)" # graph3 y data
+  y4: "FWD PCE (%)" # graph4 y data
+  y5: "REV Jsc (mA/cm2)" # graph5 y data
+  y6: "REV Voc (V)" # graph6 y data
+  y7: "REV FF (%)" # graph7 y data
+  y8: "REV PCE (%)" # graph8 y data
+  y9: "FWD Rs (Ohm/cm2)", "REV Rs (Ohm/cm2)" # graph9 y data
+  y10: "FWD Rsh (Ohm/cm2)", "REV Rsh (Ohm/cm2)" # graph10 y data
+  y11: "FWD Rch (Ohm/cm2)", "REV Rch (Ohm/cm2)" # graph11 y data
+  y12: "MPPT MPP (mW/cm2)" # graph12 y data

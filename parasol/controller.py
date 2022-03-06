@@ -53,7 +53,7 @@ class Controller:
         self.characterizationdir = self.filestructure.get_characterization_dir()
         if not os.path.exists(self.characterizationdir):
             os.mkdir(self.characterizationdir)
-        self.monitordir = self.filestructure.get_environment_dir()
+        self.monitordir = self.filestructure.get_environment_folder()
         if not os.path.exists(self.monitordir):
             os.mkdir(self.monitordir)
 
@@ -290,12 +290,12 @@ class Controller:
         # Get date/time and make filepath
         currentime = datetime.now()
 
-        # Get environment folder and filepath (split by day)
-        envfolder = self.filestructure.get_environment_dir()
+        # Get environment folder, file
+        envfolder = self.filestructure.get_environment_folder()
         envfile = self.filestructure.get_env_file_name(currentime)
         fpath = os.path.join(envfolder, envfile)
 
-        # If it doesnt exist, make it:
+        # Make file if it doesnt exist
         # if os.path.exists(fpath) != True:
 
         #     # Open file, write header/column names then fill
