@@ -232,7 +232,7 @@ class FileStructure:
         analyzed_file_path = f"{startdate}_{name}_{id}_{module_channel}_Scalars_1.csv"
         return analyzed_file_path
 
-    def get_env_file_name(timenow: datetime.datetime) -> str:
+    def get_env_file_name(self, timenow: datetime.datetime) -> str:
         """Returns the environment file name xYYYYMMDD_epochtime.csv
 
         Args:
@@ -251,7 +251,7 @@ class FileStructure:
         dtday = int(timenow.day)
 
         # create epoch pointer to this date
-        epoch = datetime.datetime(dtyear, dtmonth, dtday, 0, 0).timestamp()
+        epoch = int(datetime.datetime(dtyear, dtmonth, dtday, 0, 0).timestamp())
 
         # build filename from standard date and epoch date
         env_file_path = f"{xyyyymmdd}_{epoch}.csv"
