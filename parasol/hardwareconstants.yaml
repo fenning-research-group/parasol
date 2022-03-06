@@ -79,15 +79,6 @@ RUN_UI:
 
 GRAPH_UI:
 
-  # Options include: 
-  # "Time (Epoch)", "Time Elapsed (s)"
-  # "FWD Jsc (mA/cm2)", "FWD Voc (V)", "FWD FF (%)", "FWD PCE (%)"
-  # "FWD Rs (Ohm/cm2)", "FWD Rsh (Ohm/cm2)", "FWD Rch (Ohm/cm2)"
-  # "FWD Vmp (V)", "FWD Jmp (mA/cm2)", "FWD Pmp (mW/cm2)"
-  # "REV Jsc (mA/cm2)", "REV Voc (V)", "REV FF (%)", "REV PCE (%)"
-  # "REV Rs (Ohm/cm2)", "REV Rsh (Ohm/cm2)", "REV Rch (Ohm/cm2)"
-  # "REV Vmp (V)", "REV Jmp (mA/cm2)", "REV Pmp (mW/cm2)", "MPPT MPP (mW/cm2)"
-
   x1: "Time Elapsed (s)" # graph1 x data
   x2: "Time Elapsed (s)" # graph2 x data
   x3: "Time Elapsed (s)" # graph3 x data
@@ -109,7 +100,7 @@ GRAPH_UI:
   y6: "REV Voc (V)" # graph6 y data
   y7: "REV FF (%)" # graph7 y data
   y8: "REV PCE (%)" # graph8 y data
-  y9: "FWD Rs (Ohm/cm2)", "REV Rs (Ohm/cm2)" # graph9 y data
-  y10: "FWD Rsh (Ohm/cm2)", "REV Rsh (Ohm/cm2)" # graph10 y data
-  y11: "FWD Rch (Ohm/cm2)", "REV Rch (Ohm/cm2)" # graph11 y data
+  y9: ["FWD Rs (Ohm/cm2)", "REV Rs (Ohm/cm2)"] # graph9 y data
+  y10: ["FWD Rsh (Ohm/cm2)", "REV Rsh (Ohm/cm2)"] # graph10 y data
+  y11: ["FWD Rch (Ohm/cm2)", "REV Rch (Ohm/cm2)"] # graph11 y data
   y12: "MPPT MPP (mW/cm2)" # graph12 y data

@@ -53,7 +53,7 @@ class Controller:
         self.characterizationdir = self.filestructure.get_characterization_dir()
         if not os.path.exists(self.characterizationdir):
             os.mkdir(self.characterizationdir)
-        self.monitordir = self.filestructure.get_environment_folder()
+        self.monitordir = self.filestructure.get_environment_dir()
         if not os.path.exists(self.monitordir):
             os.mkdir(self.monitordir)
 
@@ -291,7 +291,7 @@ class Controller:
         currentime = datetime.now()
 
         # Get environment folder, file
-        envfolder = self.filestructure.get_environment_folder()
+        envfolder = self.filestructure.get_environment_folder(currentime)
         envfile = self.filestructure.get_env_file_name(currentime)
         fpath = os.path.join(envfolder, envfile)
 
