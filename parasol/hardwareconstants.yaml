@@ -80,13 +80,13 @@ RUN_UI:
 GRAPH_UI:
 
   # Options include: 
-    # "Time (Epoch)", "Time Elapsed (s)"
-    # "FWD Jsc (mA/cm2)", "FWD Voc (V)", "FWD FF (%)", "FWD PCE (%)"
-    # "FWD Rs (Ohm/cm2)", "FWD Rsh (Ohm/cm2)", "FWD Rch (Ohm/cm2)"
-    # "FWD Vmp (V)", "FWD Jmp (mA/cm2)", "FWD Pmp (mW/cm2)"
-    # "REV Jsc (mA/cm2)", "REV Voc (V)", "REV FF (%)", "REV PCE (%)"
-    # "REV Rs (Ohm/cm2)", "REV Rsh (Ohm/cm2)", "REV Rch (Ohm/cm2)"
-    # "REV Vmp (V)", "REV Jmp (mA/cm2)", "REV Pmp (mW/cm2)", "MPPT MPP (mW/cm2)"
+  # "Time (Epoch)", "Time Elapsed (s)"
+  # "FWD Jsc (mA/cm2)", "FWD Voc (V)", "FWD FF (%)", "FWD PCE (%)"
+  # "FWD Rs (Ohm/cm2)", "FWD Rsh (Ohm/cm2)", "FWD Rch (Ohm/cm2)"
+  # "FWD Vmp (V)", "FWD Jmp (mA/cm2)", "FWD Pmp (mW/cm2)"
+  # "REV Jsc (mA/cm2)", "REV Voc (V)", "REV FF (%)", "REV PCE (%)"
+  # "REV Rs (Ohm/cm2)", "REV Rsh (Ohm/cm2)", "REV Rch (Ohm/cm2)"
+  # "REV Vmp (V)", "REV Jmp (mA/cm2)", "REV Pmp (mW/cm2)", "MPPT MPP (mW/cm2)"
 
   x1: "Time Elapsed (s)" # graph1 x data
   x2: "Time Elapsed (s)" # graph2 x data
