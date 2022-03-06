@@ -48,11 +48,14 @@ class Controller:
         self.monitor_delay = constants["monitor_delay"]
         self.tests_active = 0
 
-        # Initialize running variable, create root directory
+        # Initialize running variable, create characterization/monitor directory
         self.running = False
-        self.rootdir = self.filestructure.get_root_dir()
-        if not os.path.exists(self.rootdir):
-            os.mkdir(self.rootdir)
+        self.characterizationdir = self.filestructure.get_characterization_dir()
+        if not os.path.exists(self.characterizationdir):
+            os.mkdir(self.characterizationdir)
+        self.monitordir = self.filestructure.get_environment_dir()
+        if not os.path.exists(self.monitordir):
+            os.mkdir(self.monitordir)
 
         # Maps string ID to ET port (which of the 3 ET) and channel
         self.et_channels = {
@@ -204,15 +207,6 @@ class Controller:
         d = self.strings.get(id, None)
         saveloc = d["_savedir"]
 
-        # Decrease number of tests active by one
-        self.tests_active -= 1
-
-        if self.tests_active == 0:
-            time.sleep(self.monitor_delay)
-            self.monitor_future.cancel()
-        while 1 in self.monitor_queue:
-            self.monitor_queue.remove(1)
-
         # Destroy all future tasks for the string
         if id not in self.strings:
             raise ValueError(f"String {id} not loaded!")
@@ -225,6 +219,14 @@ class Controller:
             self.jv_queue._queue.remove(id)
         while id in self.mpp_queue._queue:
             self.mpp_queue._queue.remove(id)
+
+        # Decrease number of tests active by one
+        self.tests_active -= 1
+        if self.tests_active == 0:
+            time.sleep(self.monitor_delay)
+            self.monitor_future.cancel()
+        # while 1 in self.monitor_queue:
+        #     self.monitor_queue.remove(1)
 
         # Dont touch relays/scanner --> dont want to mess with other tests
         # Reset load

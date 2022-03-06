@@ -1,8 +1,8 @@
 filestructure:
-  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location raw data
-  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base save location for analysis
-  save_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Analysis\\" # Base save for plots
-  # Note that base load location is set in UI_defaults.yaml
+  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" # Root directory
+  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" # Analysis directory
+  # cell characteriation in root_dir\\Characterization\\
+  # environment characteriation in root_dir\\Environment\\
   num_modules: 24 # Number of modules
 
 relay:
@@ -49,6 +49,15 @@ easttester:
   voltage_range: "LOW" # "LOW" or "HIGH"
   current_range: "LOW" # "LOW" or "HIGH"
 
+labjack:
+  # device_identifiers:
+    # pid: 24577
+    # vid: 1027
+    # serial_number : 'AQ01FVSHA'
+    # location: None
+  # timeout: 0.1 # Seconds for relay switch to settle
+  # delay: 1 # Seconds between commands
+
 characterization:
   mppt_voltage_step: 0.01 # Volts
 
@@ -60,15 +69,10 @@ controller:
 
 RUN_UI:
   area : 1 # Area of the module in cm^2
-  jv_mode: 0
-  mpp_mode: 0
+  jv_mode: 0 # Default JV mode
+  mpp_mode: 0 # Default MPP mode
   jv_frequency: 900 # seconds between JV scans
   mpp_frequency: 60 # seconds between MPP scans
   v_min: -0.1 # Voltage minimum for JV/MPP scan
   v_max: 0.7 # Voltage maximum for JV/MPP scan
   v_steps: 100 # Voltage steps for JV scan
-
-GRAPH_UI:
-  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Data\\" # Base load location
-  # Note that base save location is set in hardwareconstants.yaml
-  save_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\JV_Analysis\\" # Base save  for plots

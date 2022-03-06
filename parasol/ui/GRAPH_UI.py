@@ -29,7 +29,7 @@ from parasol.analysis.grapher import Grapher
 # Set module directory
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    defaults = yaml.safe_load(f)["filestructure"]  # , Loader=yaml.FullLoader)["relay"]
+    defaults = yaml.safe_load(f)["filestructure"]
 
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
@@ -63,12 +63,17 @@ class GRAPH_UI(QMainWindow):
         ui_path = os.path.join(MODULE_DIR, "GRAPH_UI.ui")
         uic.loadUi(ui_path, self)
 
-        # Load default root dir, set in UI
+        # Get file paths
+        self.characterization_dir_loc = self.filestructure.get_characterization_dir()
         self.rootdir = self.findChild(QLineEdit, "rootdir")
-        # self.rootdir.setText(self.filestructure.get_root_dir())
-        self.rootdir.setText(defaults["analysis_dir"])
+        self.rootdir.setText(self.characterization_dir_loc)
         if os.path.exists(self.rootdir.text()) == False:
             self.rootdir.setText("")
+
+        self.analysis_dir_loc = self.filestructure.get_analysis_dir()
+        self.savedir = self.analysis_dir_loc
+        if os.path.exists(self.savedir) == False:
+            self.savedir = ""
 
         # Manage rootdir button
         self.setrootdir = self.findChild(QPushButton, "setrootdir")
@@ -77,9 +82,6 @@ class GRAPH_UI(QMainWindow):
         # Manage savefigure button
         self.savefigure = self.findChild(QPushButton, "savefigure")
         self.savefigure.clicked.connect(self.savefigure_clicked)
-        self.savedir = defaults["save_dir"]
-        if os.path.exists(self.savedir) == False:
-            self.savedir = ""
 
         # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
         self.alltestfolders = self.findChild(QListWidget, "AllTestFolders")

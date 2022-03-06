@@ -19,9 +19,6 @@ class Grapher:
         self.filestructure = FileStructure()
         self.analysis = Analysis()
 
-        # Get path to root directory (test folder)
-        self.rootdir = self.filestructure.get_root_dir()
-
         # Define dictionaries for plotting
         self.variable_dict = {
             "Time": "Time (Epoch)",

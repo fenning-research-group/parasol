@@ -15,9 +15,16 @@ class FileStructure:
     def __init__(self) -> None:
         """Initializes the FileStructure class"""
 
-        # get root directory and number of modules
+        # load constants
         self.root_folder = constants["root_dir"]
+        self.analysis_folder = constants["analysis_dir"]
         self.NUM_MODULES = constants["num_modules"]
+
+        # Create paths to cell characterization and environment monitoring folders
+        self.characterization_folder = os.path.join(
+            self.root_folder, "Characterization"
+        )
+        self.environment_folder = os.path.join(self.root_folder, "Environment")
 
     # Get folder paths given inputs, make paths
 
@@ -29,6 +36,30 @@ class FileStructure:
         """
         return self.root_folder
 
+    def get_characterization_dir(self) -> str:
+        """Returns the path to the characterization directory
+
+        Returns:
+            str: path to characterization directory
+        """
+        return self.characterization_folder
+
+    def get_environment_dir(self) -> str:
+        """Returns the path to the monitor directory
+
+        Returns:
+            str: path to monitor directory
+        """
+        return self.environment_folder
+
+    def get_analysis_dir(self) -> str:
+        """Returns the path to the analysis directory
+
+        Returns:
+            str: path to analysis directory
+        """
+        return self.analysis_folder
+
     def get_date_folder(self, startdate: str) -> str:
         """Returns the path to the date folder
 
@@ -39,7 +70,7 @@ class FileStructure:
             str: path to date folder
         """
 
-        date_folder = os.path.join(self.root_folder, startdate)
+        date_folder = os.path.join(self.characterization_folder, startdate)
         return date_folder
 
     def get_test_folder(self, startdate: str, name: str) -> str:
@@ -53,7 +84,9 @@ class FileStructure:
             str: path to test folder
         """
 
-        test_folder = os.path.join(self.root_folder, startdate, f"{startdate}_{name}")
+        test_folder = os.path.join(
+            self.characterization_folder, startdate, f"{startdate}_{name}"
+        )
         return test_folder
 
     def get_mpp_folder(self, startdate: str, name: str) -> str:
@@ -263,12 +296,12 @@ class FileStructure:
 
         # If no root directory specified, use default
         if rootdir is None:
-            root_folder = self.root_folder
+            characterization_folder = self.characterization_folder
         else:
-            root_folder = rootdir
+            characterization_folder = rootdir
 
         # get date folders
-        self.date_folders = self.get_subfolders(root_folder)
+        self.date_folders = self.get_subfolders(characterization_folder)
 
         # Make blank list for folders
         test_folders = []
