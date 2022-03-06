@@ -284,6 +284,35 @@ class Controller:
 
         return fpath
 
+    def make_env_file(self) -> None:
+        """Creates base file for environmental monitoring data"""
+
+        # Get date/time and make filepath
+        currentime = datetime.now()
+
+        # Get environment folder and filepath (split by day)
+        envfolder = self.filestructure.get_environment_dir()
+        envfile = self.filestructure.get_env_file_name(currentime)
+        fpath = os.path.join(envfolder, envfile)
+
+        # If it doesnt exist, make it:
+        # if os.path.exists(fpath) != True:
+
+        #     # Open file, write header/column names then fill
+        #     with open(fpath, "w", newline="") as f:
+        #         writer = csv.writer(f, delimiter=",")
+        #         writer.writerow([" Date:", date_str])
+        #         writer.writerow(
+        #             [
+        #                 "Time (epoch)",
+        #                 "Temperature (C)",
+        #                 "RH (%)",
+        #                 "Intensity (# suns)",
+        #             ]
+        #         )
+
+        return fpath
+
     # Workers
 
     async def jv_worker(self, loop: asyncio.AbstractEventLoop) -> None:
@@ -651,7 +680,12 @@ class Controller:
 
         t, temp, rh, intensity = self.characterization.monitor_environment(self.monitor)
 
-        print("Monitoring environment: ", t, temp, rh, intensity)
+        fpath = self.make_env_file()
+        # with open(fpath, "a", newline="") as f:
+        #     writer = csv.writer(f, delimiter=",")
+        #     writer.writerow([t, temp, rh, intensity])
+
+        print("Monitoring environment: ", fpath, t, temp, rh, intensity)
 
     def check_orientation(self, modules: list) -> None:
         """Checks the orientation of the list of modules by verifying that Jsc > 0 using the scanner
