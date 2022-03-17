@@ -414,6 +414,8 @@ class Analysis:
         first_t = f"x{(epochstamps[0])[1:9]}"
         last_t = f"x{(epochstamps[-1])[1:9]}"
 
+        print(epochstamps[0])
+
         # epochstamps[0].timestamp().strftime("x%Y%m%d")
         # last_t = epochstamps[-1].timestamp().strftime("x%Y%m%d")
 

@@ -689,8 +689,6 @@ class Controller:
             writer = csv.writer(f, delimiter=",")
             writer.writerow([t, temp, rh, intensity])
 
-        print("Monitoring environment: ", fpath, t, temp, rh, intensity)
-
     def check_orientation(self, modules: list) -> None:
         """Checks the orientation of the list of modules by verifying that Jsc > 0 using the scanner
 
