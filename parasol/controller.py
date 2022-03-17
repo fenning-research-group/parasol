@@ -293,6 +293,8 @@ class Controller:
 
         # Get environment folder, file
         envfolder = self.filestructure.get_environment_folder(cdate)
+        if not os.path.exists(envfolder):
+            os.mkdir(envfolder)
         envfile = self.filestructure.get_environment_file_name(cdate)
         fpath = os.path.join(envfolder, envfile)
 
