@@ -101,7 +101,7 @@ class Controller:
 
         Args:
             id (int): string number
-            startdate (string): start date for test (XYYYYMMDD)
+            startdate (string): start date for test (xYYYYMMDD)
             name (string): test name (basename, no _idx added)
             area (float): area of each module on string
             jv_mode (int): JV mode (#'s correspond to option # in UI)
@@ -288,11 +288,12 @@ class Controller:
         """Creates base file for environmental monitoring data"""
 
         # Get date/time and make filepath
-        currentime = datetime.now()
+        currenttime = datetime.now()
+        cdate = currenttime.strftime("x%Y%m%d")
 
         # Get environment folder, file
-        envfolder = self.filestructure.get_environment_folder(currentime)
-        envfile = self.filestructure.get_env_file_name(currentime)
+        envfolder = self.filestructure.get_environment_folder(cdate)
+        envfile = self.filestructure.get_environment_file_name(cdate)
         fpath = os.path.join(envfolder, envfile)
 
         # Make file if it doesnt exist
@@ -551,7 +552,7 @@ class Controller:
         # Emsure MPP isn't running.
         with d["lock"]:
 
-            # Turn off load output
+            # Turn off load output (outputoff is locked)
             load_key, ch = self.et_channels[id]
             load = self.load[load_key]
             load.output_off(ch)
@@ -618,6 +619,7 @@ class Controller:
             d["jv"]["scan_count"] += 1
 
             # Turn on load output at old vmpp if we have one
+            # (outputon and setvoltage is locked)
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 load.output_on(ch)

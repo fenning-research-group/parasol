@@ -84,7 +84,9 @@ class EastTester:
             port = get_port(constants["device_identifiers"]["ET_3"])
 
         # Connect using serial, use highest transferrate and shortest timeout
-        self.et = serial.Serial(port, baudrate=self.baud_rate, timeout=self.time_out) # 115200, 0.005
+        self.et = serial.Serial(
+            port, baudrate=self.baud_rate, timeout=self.time_out
+        )  # 115200, 0.005
 
     # untested
     def srcI_measV(self, channel: int) -> None:
@@ -185,7 +187,7 @@ class EastTester:
         self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
         time.sleep(self.et_delay)
 
-    @et_lock  # ET lock at highest level of functions
+    @et_lock
     def output_on(self, channel: int) -> None:
         """Turns output on
 
@@ -198,7 +200,7 @@ class EastTester:
             self.source_delay
         )  # if this delay reduced we get issues in measuring current (first point low)
 
-    @et_lock  # ET lock at highest level of functions
+    @et_lock
     def output_off(self, channel: int) -> None:
         """Turns output off
 
@@ -211,7 +213,7 @@ class EastTester:
             self.source_delay
         )  # if this delay reduced we get issues in measuring current (first point low)
 
-    # @et_lock
+    @et_lock
     def set_voltage(self, channel: int, voltage: float) -> None:
         """Sets voltage
 
@@ -225,11 +227,26 @@ class EastTester:
             self._sourcing_current[channel] = False
 
         # Set voltage and wait
-        self.et.write(("VOLT" + str(channel) + ":CV %f\n" % (voltage)).encode())
+        self.et.write(("VOLT" + str(channel) + ":CV %.4f\n" % (voltage)).encode())
         time.sleep(self.source_delay)
 
-    # untested
-    # @et_lock
+    def _set_voltage(self, channel: int, voltage: float) -> None:
+        """Sets voltage without locking
+
+        Args:
+            channel (int or string): eastester channel to alter
+            voltage (float): desired voltage (V)
+        """
+        # If we are in wrong mode, switch
+        if self._sourcing_current[channel] == True:
+            self.srcV_measI(channel)
+            self._sourcing_current[channel] = False
+
+        # Set voltage and wait
+        self.et.write(("VOLT" + str(channel) + ":CV %.4f\n" % (voltage)).encode())
+        time.sleep(self.source_delay)
+
+    @et_lock
     def set_current(self, channel: int, current: float) -> None:
         """Sets current
 
@@ -244,10 +261,26 @@ class EastTester:
             self._sourcing_current[channel] = True
 
         # set current and wait
-        self.et.write(("CURR" + str(channel) + ":CC %f\n" % (current)).encode())
+        self.et.write(("CURR" + str(channel) + ":CC %.4f\n" % (current)).encode())
         time.sleep(self.source_delay)
 
-    # @et_lock
+    def _set_current(self, channel: int, current: float) -> None:
+        """Sets current
+
+        Args:
+            channel (int or string): eastester channel to alter
+            current (float): desired current (A)
+        """
+
+        # If we are in wrong mode, switch
+        if self._sourcing_current[channel] == False:
+            self.srcI_measV(channel)
+            self._sourcing_current[channel] = True
+
+        # set current and wait
+        self.et.write(("CURR" + str(channel) + ":CC %.4f\n" % (current)).encode())
+        time.sleep(self.source_delay)
+
     def measure_current(self, channel: int) -> float:
         """Measures current several times and then averages (number defined in hardwareconstants.yaml)
 
@@ -278,10 +311,9 @@ class EastTester:
             elif noreply == 5:
                 print("Warning, no reply from ET")
                 return 0.000
-                # I have tried output_off, output_on, self.et.write("LOAD:ABNO?".encode()), 
-                # self.et.reset_output_buffer(), self.et.reset_input_buffer(), 
+                # I have tried output_off, output_on, self.et.write("LOAD:ABNO?".encode()),
+                # self.et.reset_output_buffer(), self.et.reset_input_buffer(),
                 # self.srcV_measI(), self.srcI_measV(), self.et.close()
-
 
             # If we dont get a reply, try again, iterate no reply counter
             if (len(curr) == 0) or (curr[-1] is None):
@@ -308,8 +340,6 @@ class EastTester:
 
         return curr_tot
 
-    # untested
-    # @et_lock
     def measure_voltage(self, channel: int) -> float:
         """Measures voltage several times and then averages (number defined in hardwareconstants.yaml)
 
@@ -338,7 +368,7 @@ class EastTester:
         return volt_tot
 
     # untested
-    @et_lock  # ET lock at highest level of functions
+    @et_lock
     def voc(self, channel: int) -> float:
         """Gets open circut voltage: V where I = 0
 
@@ -350,13 +380,13 @@ class EastTester:
         """
 
         # Set current to 0, measure voltage
-        self.set_current(channel, 0)
+        self._set_current(channel, 0)
         voc = self.measure_voltage(channel)
 
         return voc
 
     # untested
-    @et_lock  # ET lock at highest level of functions
+    @et_lock
     def isc(self, channel: int) -> float:
         """Gets short circut current: I where V = 0
 
@@ -368,12 +398,12 @@ class EastTester:
         """
 
         # Set voltage to 0, measure current
-        self.set_voltage(channel, 0)
+        self._set_voltage(channel, 0)
         isc = self.measure_current(channel)
 
         return isc
 
-    @et_lock  # ET lock at highest level of functions
+    @et_lock
     def set_V_measure_I(self, channel: int, voltage: float) -> float:
         """Sets voltage and measures current
 
@@ -386,11 +416,12 @@ class EastTester:
         """
 
         # Set voltage, wait, measure current
-        self.set_voltage(channel, voltage)
+        self._set_voltage(channel, voltage)
         curr = self.measure_current(channel)
         return curr
 
-    @et_lock  # ET lock at highest level of functions
+    # untested
+    @et_lock
     def set_I_measure_V(self, channel: int, voltage: float) -> float:
         """Sets current and measures voltage
 
@@ -403,6 +434,6 @@ class EastTester:
         """
 
         # Set current, wait, measure voltage
-        self.set_current(channel, voltage)
+        self._set_current(channel, voltage)
         volt = self.measure_voltage(channel)
         return volt

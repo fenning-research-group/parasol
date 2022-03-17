@@ -4,14 +4,14 @@ import os
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f)["labjack"]  # , Loader=yaml.FullLoader)["relay"]
+    constants = yaml.safe_load(f)["labjack"]
 
 
 class LabJack:
-    """Scanner package for PARASOL"""
+    """SLabjack package for PARASOL"""
 
     def __init__(self) -> None:
-        """Initliazes the Scanner class for Yokogawa GS610"""
+        """Initliazes the Labjack class for Labjack"""
 
         # Get constants
         # self.timeout = constants["timeout"]
@@ -21,7 +21,7 @@ class LabJack:
         self.connect()
 
     def connect(self) -> None:
-        """Connects to the yokogawa"""
+        """Connects to the Labjack"""
 
         print("connected")
 

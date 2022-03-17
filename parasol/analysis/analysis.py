@@ -79,7 +79,7 @@ class Analysis:
 
         return analyzed_waves
 
-    # Workhorse functions for check_test and analyze_from_savepath
+    # Workhorse functions for check_test
 
     def check_pmps(self, jv_folders: list, jv_dict: dict) -> list:
         """Loads the JV files, calculates and returns time, FWD Pmp, and REV Pmp
@@ -132,6 +132,7 @@ class Analysis:
 
         return t_vals, pmp_fwd_vals, pmp_rev_vals
 
+    # Workhorse functions for analyze_from_savepath
     def analyze_jv_files(
         self, jv_folders: list, jv_dict: dict, analyzed_folder: str
     ) -> list:
@@ -187,8 +188,18 @@ class Analysis:
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
 
+            # Can break this function here to seperate into multiple parts. Analyze JV, analyze ENV, Analyze MPP. tack on mpp and env to scalardict. Final function to write csv.
+
             # Create scalar dataframe
             scalar_df = pd.DataFrame(scalardict)
+
+            # Get dataframe for env data, append to list
+            t = np.asarray([t_epoch for t_epoch in all_t])
+            env_df = self.interp_env_matrix(t)
+
+            for col in range(len(env_df)) - 1:
+                idx = col + 1
+                scalar_df.join(env_df.iloc[idx])
 
             # Filter dataframe
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
@@ -358,7 +369,60 @@ class Analysis:
 
         return df_filtered_2
 
-    # Loads JV files
+    # Create and interpolate env monitors from time data
+
+    def create_env_matrix(self, startdate: str, enddate: str) -> pd.DataFrame:
+        """Creates a dataframe of all the env monitor data from the database
+
+        Args:
+            startdate (str): start date for the dataframe
+            enddate (str): end date for the dataframe
+
+        Returns:
+            pd.DataFrame: dataframe of all env monitor data
+        """
+
+        # Get file paths seperated by environmental date folder
+        filepaths = self.filestructure.get_env_files(startdate, enddate)
+
+        # Make 1D list of filepahts for loading
+        one_d = []
+        for subfolder in filepaths:
+            for path in subfolder:
+                one_d.append(path)
+
+        # Pass list, get numpy arrays of all the data
+        t, temp, rh, intensity = self.load_env_files(one_d)
+
+        df_data = zip(t, temp, rh, intensity)
+        df_cols = ["Time (epoch)", "Temperaure (C)", "RH (%)", "Intensity (mW/m2)"]
+
+        df = pd.DataFrame(data=df_data, columns=df_cols)
+
+        return df
+
+    def interp_env_matrix(self, epochstamps: np.ndarray) -> pd.DataFrame:
+        """Interpolates the env matrix to the timestamps
+
+        Args:
+            timestamps (np.ndarray): list of timestamps to interpolate to
+
+        Returns:
+            pd.DataFrame: interpolated dataframe
+        """
+        # grab first and last timestamp
+        first_t = epochstamps[0].timestamp().strftime("x%Y%m%d")
+        last_t = epochstamps[-1].timestamp().strftime("x%Y%m%d")
+
+        # create dataframe from first and last timestamps
+        df = self.create_env_matrix(first_t, last_t)
+
+        # Interpolate to the timestamps
+        df_interp = df.set_index("Time (epoch)").reindex(epochstamps).interpolate()
+
+        return df_interp
+
+    # Loads various files into program
     def load_jv_files(self, jv_file_paths: list) -> list:
         """Loads JV files contained in jv_file_paths, returns data
 
@@ -536,6 +600,61 @@ class Analysis:
             p2 = p
 
         return t2, v2, i2, j2, p2
+
+    def load_env_files(self, env_file_paths: list) -> np.ndarray:
+        """Loads env files contained in env_file_paths, returns data
+
+        Args:
+            env_file_paths (list[str]): list of paths to env files
+
+        Returns:
+            np.ndarray: list of epoch time vectors
+            np.ndarray: list of temperature vectors
+            np.ndarray: list of relative humidity vectors
+            np.ndarray: list of intensity vectors
+        """
+
+        # Create blank lists to fill with numpy arrays
+        all_t = []
+        all_temp = []
+        all_rh = []
+        all_int = []
+
+        # Extend the lists [a1,a2] +[b1,b2] = [a1,a2,b1,b2]
+        for env_file_path in env_file_paths:
+            t, temp, rh, intensity = self.load_env_file(env_file_path)
+            all_t.extend(t)
+            all_temp.extend(temp)
+            all_rh.extend(rh)
+            all_int.extend(intensity)
+
+        # Turn into numpy arrays
+        t_s = np.asarray(all_t)
+        temp_s = np.asarray(all_temp)
+        rh_s = np.asarray(all_rh)
+        int_s = np.asarray(all_int)
+
+        return t_s, temp_s, rh_s, int_s
+
+    def load_env_file(self, env_file_path: str) -> list:
+        """Loads Environmental File
+
+        Args:
+
+        Returns:
+            list[float]: epoch time
+            list[float]: temperature
+            list[float]: relative humidity
+            list[float]: intensity
+        """
+        with open(env_file_path) as f:
+            csvreader = reader(f, delimiter=",")
+            for line in csvreader:
+                t = float(line[0])
+                temp = float(line[1])
+                rh = float(line[2])
+                intensity = float(line[3])
+        return t, temp, rh, intensity
 
 
 # TODO: should be able to fit between two points near jsc, mpp, voc to get values

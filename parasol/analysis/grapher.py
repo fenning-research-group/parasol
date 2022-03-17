@@ -62,7 +62,7 @@ class Grapher:
             10: "X",
         }
 
-    # Plot Statistics for a single dataframe
+    # Plot Statistics for a single dataframe --> used in check test
 
     def plot_x_v_ys(self, df: pd.DataFrame, x: str, ys: list, **plt_kwargs) -> None:
         """Plots x vs. y for a set of ys (1 graph)
