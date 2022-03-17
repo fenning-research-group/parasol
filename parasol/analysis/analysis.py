@@ -411,8 +411,11 @@ class Analysis:
             pd.DataFrame: interpolated dataframe
         """
         # grab first and last timestamp
-        first_t = epochstamps[0].timestamp().strftime("x%Y%m%d")
-        last_t = epochstamps[-1].timestamp().strftime("x%Y%m%d")
+        first_t = f"x{(epochstamps[0])[1:9]}"
+        last_t = f"x{(epochstamps[-1])[1:9]}"
+
+        # epochstamps[0].timestamp().strftime("x%Y%m%d")
+        # last_t = epochstamps[-1].timestamp().strftime("x%Y%m%d")
 
         # create dataframe from first and last timestamps
         df = self.create_env_matrix(first_t, last_t)
