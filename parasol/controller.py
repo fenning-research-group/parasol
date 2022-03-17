@@ -297,20 +297,20 @@ class Controller:
         fpath = os.path.join(envfolder, envfile)
 
         # Make file if it doesnt exist
-        # if os.path.exists(fpath) != True:
+        if os.path.exists(fpath) != True:
 
-        #     # Open file, write header/column names then fill
-        #     with open(fpath, "w", newline="") as f:
-        #         writer = csv.writer(f, delimiter=",")
-        #         writer.writerow([" Date:", date_str])
-        #         writer.writerow(
-        #             [
-        #                 "Time (epoch)",
-        #                 "Temperature (C)",
-        #                 "RH (%)",
-        #                 "Intensity (# suns)",
-        #             ]
-        #         )
+            # Open file, write header/column names then fill
+            with open(fpath, "w", newline="") as f:
+                writer = csv.writer(f, delimiter=",")
+                writer.writerow([" Date:", date_str])
+                writer.writerow(
+                    [
+                        "Time (epoch)",
+                        "Temperature (C)",
+                        "RH (%)",
+                        "Intensity (# suns)",
+                    ]
+                )
 
         return fpath
 
@@ -683,9 +683,9 @@ class Controller:
         t, temp, rh, intensity = self.characterization.monitor_environment(self.monitor)
 
         fpath = self.make_env_file()
-        # with open(fpath, "a", newline="") as f:
-        #     writer = csv.writer(f, delimiter=",")
-        #     writer.writerow([t, temp, rh, intensity])
+        with open(fpath, "a", newline="") as f:
+            writer = csv.writer(f, delimiter=",")
+            writer.writerow([t, temp, rh, intensity])
 
         print("Monitoring environment: ", fpath, t, temp, rh, intensity)
 
