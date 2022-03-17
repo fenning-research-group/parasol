@@ -304,7 +304,7 @@ class Controller:
             # Open file, write header/column names then fill
             with open(fpath, "w", newline="") as f:
                 writer = csv.writer(f, delimiter=",")
-                writer.writerow([" Date:", date_str])
+                writer.writerow([" Date:", cdate])
                 writer.writerow(
                     [
                         "Time (epoch)",
