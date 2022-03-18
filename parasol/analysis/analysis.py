@@ -3,6 +3,7 @@ import numpy as np
 import os
 import csv
 import yaml
+from datetime import datetime
 from csv import reader
 
 import math
@@ -197,9 +198,8 @@ class Analysis:
             t = np.asarray([t_epoch for t_epoch in all_t])
             env_df = self.interp_env_matrix(t)
 
-            for col in range(len(env_df)) - 1:
-                idx = col + 1
-                scalar_df.join(env_df.iloc[idx])
+            for col in range(1,len(env_df)):
+                scalar_df.join(env_df.iloc[col])
 
             # Filter dataframe
             scalar_df_filtered = self.filter_jv_parameters(scalar_df)
@@ -395,7 +395,7 @@ class Analysis:
         t, temp, rh, intensity = self.load_env_files(one_d)
 
         df_data = zip(t, temp, rh, intensity)
-        df_cols = ["Time (epoch)", "Temperaure (C)", "RH (%)", "Intensity (mW/m2)"]
+        df_cols = ["Time (Epoch)", "Temperaure (C)", "RH (%)", "Intensity (mW/m2)"]
 
         df = pd.DataFrame(data=df_data, columns=df_cols)
 
@@ -411,20 +411,17 @@ class Analysis:
             pd.DataFrame: interpolated dataframe
         """
         # grab first and last timestamp
-        first_t = f"x{(epochstamps[0])[1:9]}"
-        last_t = f"x{(epochstamps[-1])[1:9]}"
-
-        print(epochstamps[0])
-
-        # epochstamps[0].timestamp().strftime("x%Y%m%d")
-        # last_t = epochstamps[-1].timestamp().strftime("x%Y%m%d")
+        
+        first_t = datetime.fromtimestamp(float(epochstamps[0])).strftime("x%Y%m%d")
+        last_t = datetime.fromtimestamp(float(epochstamps[-1])).strftime("x%Y%m%d")
 
         # create dataframe from first and last timestamps
         df = self.create_env_matrix(first_t, last_t)
-
+        print(df)
         # Interpolate to the timestamps
-        df_interp = df.set_index("Time (epoch)").reindex(epochstamps).interpolate()
-
+        
+        df_interp = df.set_index("Time (Epoch)").reindex(epochstamps).interpolate(method='values')
+        print(df_interp)
         return df_interp
 
     # Loads various files into program
@@ -652,13 +649,18 @@ class Analysis:
             list[float]: relative humidity
             list[float]: intensity
         """
+        t = []
+        temp = []
+        rh = []
+        intensity = []
+
         with open(env_file_path) as f:
             csvreader = reader(f, delimiter=",")
             for line in csvreader:
-                t = float(line[0])
-                temp = float(line[1])
-                rh = float(line[2])
-                intensity = float(line[3])
+                t.append(float(line[0]))
+                temp.append(float(line[1]))
+                rh.append(float(line[2]))
+                intensity.append(float(line[3]))
         return t, temp, rh, intensity
 
 

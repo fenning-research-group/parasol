@@ -506,7 +506,8 @@ class FileStructure:
             files = self.get_subfiles(env_folder)
 
             for file in files:
-                dates.append(int(dates[1:5]))
+                filename = os.path.basename(file)
+                dates.append(int(filename[1:9]))
 
             # sort files by scan number, create paths to files
             files_chronological = [x for _, x in sorted(zip(dates, files))]
@@ -572,7 +573,9 @@ class FileStructure:
         # Get list of folders in date range
         used_env_folders = []
         for folder in all_env_folders:
-            if start_year <= int(folder[1:5]) <= end_year:
+            foldername = os.path.basename(folder)
+
+            if start_year <= float(foldername[1:5]) <= end_year:
                 used_env_folders.append(folder)
 
         # get map of folders
