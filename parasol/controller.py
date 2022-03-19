@@ -219,7 +219,6 @@ class Controller:
             self.jv_queue._queue.remove(id)
         while id in self.mpp_queue._queue:
             self.mpp_queue._queue.remove(id)
-        
 
         # Decrease number of tests active by one
         self.tests_active -= 1
@@ -227,8 +226,6 @@ class Controller:
             time.sleep(self.monitor_delay)
             # error that NoneType not subsriptable if unload after jv scan
             self.monitor_future.cancel()
-
-
 
         # Dont touch relays/scanner --> dont want to mess with other tests
         # Reset load
@@ -239,7 +236,6 @@ class Controller:
         # Analyze the saveloc
         print("Analysis saved at :", saveloc)
         self.analysis.analyze_from_savepath(saveloc)
-
 
     def make_mpp_file(self, id: int) -> None:
         """Creates base file for MPP data

@@ -519,7 +519,7 @@ class FileStructure:
             # could ensure its between dates here as well x220318
             for idx, file in enumerate(files_chronological):
 
-                if (start_date <= dates[idx] <= end_date):
+                if start_date <= dates[idx] <= end_date:
                     paths_chronological.append(os.path.join(env_folder, file))
 
             env_dict[env_folder] = paths_chronological

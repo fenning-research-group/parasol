@@ -77,7 +77,9 @@ class Analysis:
         mpp_dict = self.filestructure.map_test_files(mpp_folder)
 
         # Analyze JV files: For each module export scalars_{module}.csv
-        analyzed_waves = self.analyze_files(jv_folders, jv_dict, mpp_folder, mpp_dict, analyzed_folder[0])
+        analyzed_waves = self.analyze_files(
+            jv_folders, jv_dict, mpp_folder, mpp_dict, analyzed_folder[0]
+        )
 
         return analyzed_waves
 
@@ -137,7 +139,12 @@ class Analysis:
     # Workhorse functions for analyze_from_savepath
 
     def analyze_files(
-        self, jv_folders: list, jv_dict: dict, mpp_folder: list, mpp_dict: dict, analyzed_folder: str
+        self,
+        jv_folders: list,
+        jv_dict: dict,
+        mpp_folder: list,
+        mpp_dict: dict,
+        analyzed_folder: str,
     ) -> list:
         """Cycle through JV files, analyze, and make output file for parameters
 
@@ -197,7 +204,7 @@ class Analysis:
             # interpolate env data reforms the large matrix every time right now.
             t = np.asarray([t_epoch for t_epoch in all_t])
             env_headers, env_data = self.interp_env_data(t)
-            for idx in range(1,len(env_headers)):
+            for idx in range(1, len(env_headers)):
                 scalardict[env_headers[idx]] = env_data[idx]
 
             # Create scalar dataframe
@@ -366,7 +373,6 @@ class Analysis:
             for path in subfolder:
                 one_d.append(path)
 
-
         # Pass list, get numpy arrays of all the data
         t, temp, rh, intensity = self.load_env_files(one_d)
 
@@ -391,17 +397,17 @@ class Analysis:
         first_t = datetime.fromtimestamp(float(epochstamps[0])).strftime("x%Y%m%d")
         last_t = datetime.fromtimestamp(float(epochstamps[-1])).strftime("x%Y%m%d")
 
-        # create dataframe from first and last timestamps, first column is t 
-        df_headers,df_data = self.get_env_data(first_t, last_t)
-        
+        # create dataframe from first and last timestamps, first column is t
+        df_headers, df_data = self.get_env_data(first_t, last_t)
+
         # start data with time
         df2_data = [df_data[0]]
-        
+
         # grab time, interp epoch stamps to datatime
         x = df_data[0]
-        for idx in range(1,len(df_data)):
-            
-            interp_data = np.interp(epochstamps,x, df_data[idx])         
+        for idx in range(1, len(df_data)):
+
+            interp_data = np.interp(epochstamps, x, df_data[idx])
             df2_data.append(interp_data)
 
         return df_headers, df2_data
@@ -432,8 +438,6 @@ class Analysis:
         df_filtered_2 = df_filtered.reset_index(drop=True)
 
         return df_filtered_2
-
-
 
     # Loads various files into program
     def load_jv_files(self, jv_file_paths: list) -> list:
@@ -667,7 +671,7 @@ class Analysis:
 
         with open(env_file_path) as f:
             csvreader = reader(f, delimiter=",")
-            next(csvreader) # skip header
+            next(csvreader)  # skip header
             for line in csvreader:
                 t.append(float(line[0]))
                 temp.append(float(line[1]))
