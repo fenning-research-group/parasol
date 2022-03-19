@@ -74,9 +74,10 @@ class Analysis:
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
+        mpp_dict = self.filestructure.map_test_files(mpp_folder)
 
         # Analyze JV files: For each module export scalars_{module}.csv
-        analyzed_waves = self.analyze_jv_files(jv_folders, jv_dict, analyzed_folder[0])
+        analyzed_waves = self.analyze_files(jv_folders, jv_dict, mpp_folder, mpp_dict, analyzed_folder[0])
 
         return analyzed_waves
 
@@ -134,14 +135,17 @@ class Analysis:
         return t_vals, pmp_fwd_vals, pmp_rev_vals
 
     # Workhorse functions for analyze_from_savepath
-    def analyze_jv_files(
-        self, jv_folders: list, jv_dict: dict, analyzed_folder: str
+
+    def analyze_files(
+        self, jv_folders: list, jv_dict: dict, mpp_folder: list, mpp_dict: dict, analyzed_folder: str
     ) -> list:
         """Cycle through JV files, analyze, and make output file for parameters
 
         Args:
              jv_folders (list[str]): list of jv folders
              jv_dict (dict): dictionary mapping jv folders to file paths
+             mpp_folders (list[str]): list of mpp folders
+             mpp_dict (dict): dictionary mapping mpp folders to file paths
              analyzed_folder (str): analyzed folder path
 
          Returns:
@@ -190,19 +194,17 @@ class Analysis:
                 scalardict[k] = v
 
             # Can break this function here to seperate into multiple parts. Analyze JV, analyze ENV, Analyze MPP. tack on mpp and env to scalardict. Final function to write csv.
+            # interpolate env data reforms the large matrix every time right now.
+            t = np.asarray([t_epoch for t_epoch in all_t])
+            env_headers, env_data = self.interp_env_data(t)
+            for idx in range(1,len(env_headers)):
+                scalardict[env_headers[idx]] = env_data[idx]
 
             # Create scalar dataframe
             scalar_df = pd.DataFrame(scalardict)
 
-            # Get dataframe for env data, append to list
-            t = np.asarray([t_epoch for t_epoch in all_t])
-            env_df = self.interp_env_matrix(t)
-
-            for col in range(1,len(env_df)):
-                scalar_df.join(env_df.iloc[col])
-
             # Filter dataframe
-            scalar_df_filtered = self.filter_jv_parameters(scalar_df)
+            scalar_df_filtered = self.filter_parameters(scalar_df)
 
             # Save dataframe to csv
             analysis_file = self.filestructure.get_analyzed_file_name(
@@ -342,7 +344,69 @@ class Analysis:
 
         return returndict
 
-    def filter_jv_parameters(self, df: pd.DataFrame) -> pd.DataFrame:
+    def get_env_data(self, startdate: str, enddate: str) -> list:
+        """Creates a dataframe of all the env monitor data from the database
+
+        Args:
+            startdate (str): start date for the dataframe
+            enddate (str): end date for the dataframe
+
+        Returns:
+            list(str): headers for interpolated dataframe
+            list(float): data for interpolated dataframe
+
+        """
+
+        # Get file paths seperated by environmental date folder
+        filepaths = self.filestructure.get_env_files(startdate, enddate)
+
+        # Make 1D list of filepahts for loading
+        one_d = []
+        for subfolder in filepaths:
+            for path in subfolder:
+                one_d.append(path)
+
+
+        # Pass list, get numpy arrays of all the data
+        t, temp, rh, intensity = self.load_env_files(one_d)
+
+        # zip and make dataframe
+        df_data = [t, temp, rh, intensity]
+        df_headers = ["Time (Epoch)", "Temperature (C)", "RH (%)", "Intensity (mW/m2)"]
+
+        return df_headers, df_data
+
+    def interp_env_data(self, epochstamps: np.ndarray) -> list:
+        """Interpolates the env matrix to the timestamps
+
+        Args:
+            epochstamps (np.ndarray): list of timestamps to interpolate to
+
+        Returns:
+            list(str): headers for interpolated dataframe
+            list(float): data for interpolated dataframe
+        """
+
+        # grab first and last timestamp
+        first_t = datetime.fromtimestamp(float(epochstamps[0])).strftime("x%Y%m%d")
+        last_t = datetime.fromtimestamp(float(epochstamps[-1])).strftime("x%Y%m%d")
+
+        # create dataframe from first and last timestamps, first column is t 
+        df_headers,df_data = self.get_env_data(first_t, last_t)
+        
+        # start data with time
+        df2_data = [df_data[0]]
+        
+        # grab time, interp epoch stamps to datatime
+        x = df_data[0]
+        for idx in range(1,len(df_data)):
+            
+            interp_data = np.interp(epochstamps,x, df_data[idx])         
+            df2_data.append(interp_data)
+
+        return df_headers, df2_data
+
+    def filter_parameters(self, df: pd.DataFrame) -> pd.DataFrame:
         """Lightly filters input Scalars dataframe to ensure values are reslistic
 
         Args:
@@ -369,60 +433,7 @@ class Analysis:
 
         return df_filtered_2
 
-    # Create and interpolate env monitors from time data
 
-    def create_env_matrix(self, startdate: str, enddate: str) -> pd.DataFrame:
-        """Creates a dataframe of all the env monitor data from the database
-
-        Args:
-            startdate (str): start date for the dataframe
-            enddate (str): end date for the dataframe
-
-        Returns:
-            pd.DataFrame: dataframe of all env monitor data
-        """
-
-        # Get file paths seperated by environmental date folder
-        filepaths = self.filestructure.get_env_files(startdate, enddate)
-
-        # Make 1D list of filepahts for loading
-        one_d = []
-        for subfolder in filepaths:
-            for path in subfolder:
-                one_d.append(path)
-
-        # Pass list, get numpy arrays of all the data
-        t, temp, rh, intensity = self.load_env_files(one_d)
-
-        df_data = zip(t, temp, rh, intensity)
-        df_cols = ["Time (Epoch)", "Temperaure (C)", "RH (%)", "Intensity (mW/m2)"]
-
-        df = pd.DataFrame(data=df_data, columns=df_cols)
-
-        return df
-
-    def interp_env_matrix(self, epochstamps: np.ndarray) -> pd.DataFrame:
-        """Interpolates the env matrix to the timestamps
-
-        Args:
-            timestamps (np.ndarray): list of timestamps to interpolate to
-
-        Returns:
-            pd.DataFrame: interpolated dataframe
-        """
-        # grab first and last timestamp
-        
-        first_t = datetime.fromtimestamp(float(epochstamps[0])).strftime("x%Y%m%d")
-        last_t = datetime.fromtimestamp(float(epochstamps[-1])).strftime("x%Y%m%d")
-
-        # create dataframe from first and last timestamps
-        df = self.create_env_matrix(first_t, last_t)
-        print(df)
-        # Interpolate to the timestamps
-        
-        df_interp = df.set_index("Time (Epoch)").reindex(epochstamps).interpolate(method='values')
-        print(df_interp)
-        return df_interp
 
     # Loads various files into program
     def load_jv_files(self, jv_file_paths: list) -> list:
@@ -656,6 +667,7 @@ class Analysis:
 
         with open(env_file_path) as f:
             csvreader = reader(f, delimiter=",")
+            next(csvreader) # skip header
             for line in csvreader:
                 t.append(float(line[0]))
                 temp.append(float(line[1]))

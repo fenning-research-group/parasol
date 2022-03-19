@@ -483,18 +483,22 @@ class FileStructure:
 
         return file_dict
 
-    def map_env_files(self, env_folders: list) -> dict:
+    def map_env_files(self, env_folders: list, startdate: str, enddate: str) -> dict:
         """Creates a dictionary maping test folders to their subfolders
 
         Args:
             env_folders (list[str]): paths to env folders
-
+            startdate (str): end date in xYYYYMMDD format
+            enddate (str): start date in xYYYYMMDD format
         Returns:
             dict: file_dict[folder] = [file_paths]
         """
 
         # create dictionary mapping MPP, JV, and Anlayzed folders to test folder
         env_dict = {}
+
+        start_date = float(startdate[1:9])
+        end_date = float(enddate[1:9])
 
         for env_folder in env_folders:
 
@@ -511,8 +515,12 @@ class FileStructure:
 
             # sort files by scan number, create paths to files
             files_chronological = [x for _, x in sorted(zip(dates, files))]
-            for file in files_chronological:
-                paths_chronological.append(os.path.join(env_folder, file))
+
+            # could ensure its between dates here as well x220318
+            for idx, file in enumerate(files_chronological):
+
+                if (start_date <= dates[idx] <= end_date):
+                    paths_chronological.append(os.path.join(env_folder, file))
 
             env_dict[env_folder] = paths_chronological
 
@@ -578,8 +586,8 @@ class FileStructure:
             if start_year <= float(foldername[1:5]) <= end_year:
                 used_env_folders.append(folder)
 
-        # get map of folders
-        folder_map = self.map_env_files(used_env_folders)
+        # get map of folders (gets all files in a folder (max 365 per folder))
+        folder_map = self.map_env_files(used_env_folders, startdate, enddate)
         env_files = []
         for folder in used_env_folders:
             env_files.append(folder_map[folder])
