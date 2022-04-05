@@ -26,6 +26,7 @@ class FileStructure:
             self.root_folder, "Characterization"
         )
         self.environment_folder = os.path.join(self.root_folder, "Environment")
+        self.log_folder = os.path.join(self.root_folder, "Logs")
 
     # Get base folder directories given inputs, make paths
 
@@ -52,6 +53,14 @@ class FileStructure:
             str: path to monitor directory
         """
         return self.environment_folder
+
+    def get_log_dir(self) -> str:
+        """_summary_
+
+        Returns:
+            str: path to log directory
+        """
+        return self.log_folder
 
     def get_analysis_dir(self) -> str:
         """Returns the path to the analysis directory

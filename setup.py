@@ -14,11 +14,12 @@ setup(
     description="Control of Fenning Research Group outdoor testbed",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    author="Rishi Kumar, Deniz Cakan, Sean P. Dunfield",
-    author_email="rek010@eng.ucsd.edu, dcakan@eng.ucsd.edu, sdunfield@eng.ucsd.edu",
+    author="Sean P. Dunfield, Rishi Kumar, Deniz Cakan",
+    author_email="sdunfield@eng.ucsd.edu, rek010@eng.ucsd.edu, dcakan@eng.ucsd.edu",
     download_url="https://github.com/fenning-research-group/parasol",
     license="MIT",
     install_requires=[
+        "pandas",
         "numpy",
         "pyvisa",
         "asyncio",
@@ -28,9 +29,16 @@ setup(
         "PyQt5",
     ],
     packages=find_packages(),
-    package_data={"hardware": ["*.yaml"]},
+    package_data={"": ["hardwareconstants.yaml"]},
     include_package_data=True,
-    keywords=["materials", "science", "machine", "automation"],
+    keywords=[
+        "materials",
+        "science",
+        "machine",
+        "automation",
+        "stability",
+        "photovoltaic",
+    ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
         "Development Status :: 4 - Beta",
@@ -42,9 +50,4 @@ setup(
         "Topic :: Scientific/Engineering :: Chemistry",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
-    # entry_points={
-    #     'console_scripts': [
-    #         'meg = megnet.cli.meg:main',
-    #     ]
-    # }
 )
