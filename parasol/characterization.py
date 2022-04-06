@@ -107,20 +107,26 @@ class Characterization:
         """
 
         mpp_mode = d["mpp"]["mode"]
+
         # MPP mode 0 is constant perturb and observe
         if mpp_mode == 0:
 
-            # Get voltage step (make sure we are moving toward the MPP)
+            # Get voltage step
+            # If we just have one scan, use native voltage step
             if (d["mpp"]["last_powers"][0] is None) or (
                 d["mpp"]["last_powers"][1] is None
             ):
                 voltage_step = self.et_voltage_step
+            # If we have two scans saved:
             else:
+                # if the most recent voltage > voltage before it, use native voltage step (+)
                 if d["mpp"]["last_voltages"][1] >= d["mpp"]["last_voltages"][0]:
                     voltage_step = self.et_voltage_step
+                # if the most recent voltae < voltage before it, use opposite voltage step (-)
                 else:
                     voltage_step = -self.et_voltage_step
 
+                # if power is decreasing, invert voltage step to move in the other direction
                 if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
                     voltage_step *= -1
 
@@ -130,6 +136,10 @@ class Characterization:
             # Ensure voltage is between the easttesters max and min values
             if (v <= d["mpp"]["vmin"]) or (v >= d["mpp"]["vmax"]):
                 v = vmpp_last - 2 * voltage_step
+
+            # If we have read 1 on current (floor), set v to voltage step to not get stuck near max voltage
+            if d["mpp"]["last_currents"][1] <= 1:
+                v = voltage_step
 
             # get time, set voltage measure current
             t = time.time()
