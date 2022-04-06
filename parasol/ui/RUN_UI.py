@@ -707,7 +707,10 @@ class RUN_UI(QMainWindow):
         d["name"] = updated_name
 
         # Lock values/buttons
-        self.lock_values(id)
+        if 1 <= id <= 6:
+            self.lock_values(id)
+        else:
+            print("Please check the boxes for the devices you would like to load.")
 
     # Run unload in a new thread to not interfere with other measurments active
     @run_async_thread
