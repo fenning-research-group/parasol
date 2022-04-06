@@ -268,11 +268,11 @@ class Controller:
         # Decrease number of tests active by one
         self.tests_active -= 1
         if self.tests_active == 0:
-            self.logger.debug(f"Canceling Monitoring")
+            self.logger.debug(f"Canceling environmental monitoring")
             time.sleep(self.monitor_delay)
             # error that NoneType not subsriptable if unload after jv scan
             self.monitor_future.cancel()
-            self.logger.info(f"Monitoring canceled")
+            self.logger.info(f"Environmental monitoring canceled")
 
         # Dont touch relays/scanner --> dont want to mess with other tests
         # Reset load
@@ -773,7 +773,7 @@ class Controller:
             writer = csv.writer(f, delimiter=",")
             writer.writerow([t, temp, rh, intensity])
 
-        self.logger.debug(f"Writing Monitoring file")
+        self.logger.debug(f"Writing Monitoring file at {fpath}")
         self.logger.debug(f"Monitored environment")
 
     def check_orientation(self, modules: list) -> None:
@@ -807,7 +807,9 @@ class Controller:
 
         # Return True if orientation is correct, False otherwise
         for module in modules:
-            self.logger.info(f"Module {module} orientation correct: {correct_orientation[idx]}")
+            self.logger.info(
+                f"Module {module} orientation correct: {correct_orientation[idx]}"
+            )
 
         self.logger.info(f"Checked orientation of modules {modules}")
 

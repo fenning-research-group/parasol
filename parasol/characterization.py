@@ -111,36 +111,48 @@ class Characterization:
         # MPP mode 0 is constant perturb and observe
         if mpp_mode == 0:
 
-            # Get voltage step
             # If we just have one scan, use native voltage step
             if (d["mpp"]["last_powers"][0] is None) or (
                 d["mpp"]["last_powers"][1] is None
             ):
                 voltage_step = self.et_voltage_step
-            # If we have two scans saved:
+
+            # If we have two scans saved work out direction of voltage step
             else:
-                # if the most recent voltage > voltage before it, use native voltage step (+)
+                # if the most recent voltage >= voltage before it, use native voltage step (+)
                 if d["mpp"]["last_voltages"][1] >= d["mpp"]["last_voltages"][0]:
                     voltage_step = self.et_voltage_step
-                # if the most recent voltae < voltage before it, use opposite voltage step (-)
+                # if the most recent voltage < voltage before it, use opposite voltage step (-)
                 else:
                     voltage_step = -self.et_voltage_step
 
-                # if power is decreasing, invert voltage step to move in the other direction
+                # moving in (0): (+)
+                # moving in (+) direction: (+)
+                # moving in (-) direction: (-)
+
+                # if power isnt increasing, invert voltage step to move in the other direction
                 if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
                     voltage_step *= -1
 
+                # moving in the (0) direction, increasing on power: (+)
+                # moving in the (0) direction, decreasing in power (-)
+                # moving in the (+) direction, increasing on power (+)
+                # moving in the (+) direction, decreasing on power (+)
+                # moving in the (-) direction, decreasing in power: (+)
+                # moving in the (-) direction, increasing in power: (-)
+
             # set the voltage
+            # waking up this should step from vstep to 2*vstep
             v = vmpp_last + voltage_step
 
-            # Ensure voltage is between the easttesters max and min values
+            # Ensure voltage is between the easttesters max and min values, else step in the other direction
             if (v <= d["mpp"]["vmin"]) or (v >= d["mpp"]["vmax"]):
                 v = vmpp_last - 2 * voltage_step
 
             # If we have read 1 on current (floor), set v to voltage step to not get stuck near max voltage
             if d["mpp"]["last_currents"][1] is not None:
-                if d["mpp"]["last_currents"][1]<= 1:
-                    v = self.et_voltage_step
+                if 0 <= d["mpp"]["last_currents"][1] <= 1:
+                    v = voltage_step
 
             # get time, set voltage measure current
             t = time.time()
