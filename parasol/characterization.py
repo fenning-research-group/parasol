@@ -138,8 +138,9 @@ class Characterization:
                 v = vmpp_last - 2 * voltage_step
 
             # If we have read 1 on current (floor), set v to voltage step to not get stuck near max voltage
-            if d["mpp"]["last_currents"][1] <= 1:
-                v = voltage_step
+            if d["mpp"]["last_currents"][1] is not None:
+                if d["mpp"]["last_currents"][1]<= 1:
+                    v = voltage_step
 
             # get time, set voltage measure current
             t = time.time()
