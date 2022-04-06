@@ -30,11 +30,11 @@ class Controller:
 
     # Initialize kit, Start/stop workers, File management
 
-    def __init__(self, logging=True) -> None:
+    def __init__(self, logging_on=True) -> None:
         """Initializes the Controller class
 
         Args:
-            Logging (boolean): Option to log or not, default True
+            logging_on (boolean): Option to log or not, default True
         """
 
         # Connect to other modules
@@ -105,7 +105,7 @@ class Controller:
         sh.setFormatter(sh_formatter)
 
         # Options to not log
-        if logging is True:
+        if logging_on:
             self.logger.addHandler(fh)
             self.logger.addHandler(sh)
 
@@ -200,6 +200,7 @@ class Controller:
                 "interval": mpp_interval,
                 "vmin": 0.1,
                 "vmax": jv_vmax,
+                "last_currents": [None, None],
                 "last_powers": [None, None],
                 "last_voltages": [None, None],
                 "_future": mpp_future,
@@ -694,7 +695,7 @@ class Controller:
                 load.set_voltage(ch, vmp)
                 self.logger.debug(f"Turned on load output for string {id}")
 
-        self.loggerinfo(f"Scanned {id}")
+        self.logger.info(f"Scanned {id}")
 
     def track_mpp(self, id: int) -> None:
         """Conduct an MPP scan using Easttester class
@@ -721,7 +722,7 @@ class Controller:
             load_key, ch = self.et_channels[id]
             load = self.load[load_key]
 
-            # Scan mpp
+            # Scan mpp (pass last MPP to it)
             self.logger.debug(f"Tracking MPP for {id}")
             t, v, i = self.characterization.track_mpp(d, load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
@@ -734,9 +735,13 @@ class Controller:
             # Update dictionary by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = p
-            d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
 
+            d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
             d["mpp"]["last_voltages"][1] = v
+
+            d["mpp"]["last_currents"][0] = d["mpp"]["last_currents"][1]
+            d["mpp"]["last_currents"][1] = i
+
             d["mpp"]["vmpp"] = v
 
             # Get MPP file path, if it doesnt exist, create it, iterate for each JV curve taken
@@ -768,6 +773,7 @@ class Controller:
             writer = csv.writer(f, delimiter=",")
             writer.writerow([t, temp, rh, intensity])
 
+        self.logger.debug(f"Writing Monitoring file")
         self.logger.debug(f"Monitored environment")
 
     def check_orientation(self, modules: list) -> None:
