@@ -519,7 +519,7 @@ class Controller:
 
         # If we have an issue in the loop, alter the user
         def exception_handler(loop, context):
-            print("Exception raised in Controller loop")
+            self.logger.info(f"Exception raised in Controller loop")
 
         # Start event loop, add jv workers and mpp workers
         self.loop = asyncio.new_event_loop()
@@ -807,7 +807,7 @@ class Controller:
 
         # Return True if orientation is correct, False otherwise
         for module in modules:
-            print(f"Module {module} orientation correct: {correct_orientation[idx]}")
+            self.logger.info(f"Module {module} orientation correct: {correct_orientation[idx]}")
 
         self.logger.info(f"Checked orientation of modules {modules}")
 
