@@ -664,7 +664,8 @@ class RUN_UI(QMainWindow):
         mpp_mode = int(d["mpp"]["mode"])
         mpp_interval = float(d["mpp"]["interval"])
 
-        if module_channels is not None:
+        # Ensure at least one module channel is checked
+        if len(module_channels) > 0:
 
             # Call Load String from controller
             updated_name = self.controller.load_string(
