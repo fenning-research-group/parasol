@@ -664,51 +664,56 @@ class RUN_UI(QMainWindow):
         mpp_mode = int(d["mpp"]["mode"])
         mpp_interval = float(d["mpp"]["interval"])
 
-        # Call Load String from controller
-        updated_name = self.controller.load_string(
-            id,
-            start_date,
-            name,
-            area,
-            jv_mode,
-            mpp_mode,
-            module_channels,
-            jv_interval,
-            mpp_interval,
-            jv_vmin,
-            jv_vmax,
-            jv_steps,
-        )
-
-        # reconstruct savedir from name and date
-        updated_savedir = self.filestructure.get_test_folder(start_date, updated_name)
-
-        # Update saveloc, name
-        if id == 1:
-            self.name1.setText(updated_name)
-            self.savedir1 = updated_savedir
-        elif id == 2:
-            self.name2.setText(updated_name)
-            self.savedir2 = updated_savedir
-        elif id == 3:
-            self.name3.setText(updated_name)
-            self.savedir3 = updated_savedir
-        elif id == 4:
-            self.name4.setText(updated_name)
-            self.savedir4 = updated_savedir
-        elif id == 5:
-            self.name5.setText(updated_name)
-            self.savedir5 = updated_savedir
-        elif id == 6:
-            self.name6.setText(updated_name)
-            self.savedir6 = updated_savedir
-
-        d["_savedir"] = updated_savedir
-        d["name"] = updated_name
-
-        # Lock values/buttons
         if 1 <= id <= 6:
+
+            # Call Load String from controller
+            updated_name = self.controller.load_string(
+                id,
+                start_date,
+                name,
+                area,
+                jv_mode,
+                mpp_mode,
+                module_channels,
+                jv_interval,
+                mpp_interval,
+                jv_vmin,
+                jv_vmax,
+                jv_steps,
+            )
+
+            # reconstruct savedir from name and date
+            updated_savedir = self.filestructure.get_test_folder(
+                start_date, updated_name
+            )
+
+            # Update saveloc, name
+            if id == 1:
+                self.name1.setText(updated_name)
+                self.savedir1 = updated_savedir
+            elif id == 2:
+                self.name2.setText(updated_name)
+                self.savedir2 = updated_savedir
+            elif id == 3:
+                self.name3.setText(updated_name)
+                self.savedir3 = updated_savedir
+            elif id == 4:
+                self.name4.setText(updated_name)
+                self.savedir4 = updated_savedir
+            elif id == 5:
+                self.name5.setText(updated_name)
+                self.savedir5 = updated_savedir
+            elif id == 6:
+                self.name6.setText(updated_name)
+                self.savedir6 = updated_savedir
+
+            # alter dictionary
+            d["_savedir"] = updated_savedir
+            d["name"] = updated_name
+
+            # lock values
             self.lock_values(id)
+
         else:
             print("Please check the boxes for the devices you would like to load.")
 
