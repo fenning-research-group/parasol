@@ -126,14 +126,11 @@ class Characterization:
                 else:
                     voltage_step = -self.et_voltage_step
 
-                # moving in (0): (+)
-                # moving in (+) direction: (+)
-                # moving in (-) direction: (-)
-
                 # if power isnt increasing, invert voltage step to move in the other direction
                 if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
                     voltage_step *= -1
 
+                # voltage_step = self.et_voltage_step*(+ or -)
                 # moving in the (0) direction, increasing on power: (+)
                 # moving in the (0) direction, decreasing in power (-)
                 # moving in the (+) direction, increasing on power (+)
@@ -141,18 +138,20 @@ class Characterization:
                 # moving in the (-) direction, decreasing in power: (+)
                 # moving in the (-) direction, increasing in power: (-)
 
-            # set the voltage
-            # waking up this should step from vstep to 2*vstep
+            # set the voltage equal to last voltage + voltage step (determined above)
             v = vmpp_last + voltage_step
 
-            # Ensure voltage is between the easttesters max and min values, else step in the other direction
-            if (v <= d["mpp"]["vmin"]) or (v >= d["mpp"]["vmax"]):
+            # Ensure min v,0 < voltage < max v, else step in the other direction
+            if (v <= max(d["mpp"]["vmin"], 0)) or (v >= d["mpp"]["vmax"]):
                 v = vmpp_last - 2 * voltage_step
 
-            # If we have read 1 on current (floor), set v to voltage step to not get stuck near max voltage
+            # If we read 0 to 1 current (floor), set v to maximum of (voltage step, vmin + voltagestep)
+            # Removing this section of code causes the ET to read 1/0 and ramp in voltage to max voltage
             if d["mpp"]["last_currents"][1] is not None:
                 if 0 <= d["mpp"]["last_currents"][1] <= 1:
-                    v = voltage_step
+                    v = max(
+                        self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
+                    )
 
             # get time, set voltage measure current
             t = time.time()
