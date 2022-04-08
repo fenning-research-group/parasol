@@ -274,108 +274,107 @@ class Characterization:
         # # Modified perturb and observe: taken from David Sanz Morales Thesis
         # # http://lib.tkk.fi/Dipl/2010/urn100399.pdf
         # elif mpp_mode == 3:
-
-        #      # If we have not tracked yet, step in standard direction from MPP calc from JV, else run algorithm
-        #     if (d["mpp"]["last_powers"][0] is None) or (
-        #             d["mpp"]["last_powers"][1] is None
-        #         ):
-        #             v= vmpp_last + self.et_voltage_step
-        #             t = time.time()
-        #             i = easttester.set_V_measure_I(ch, v)
-
-        #     else:
-
-        #         # Standard perturb and observe logic
-        #         if delta_p == 0:
-        #             v_increase = 0
-        #         elif delta_i < 0:
-        #             if delta_i / delta_p == 0:
-        #                 v_increase = 0
-        #             elif delta_i / delta_p < 0:
-        #                 v_increase = 1
-        #             else:
-        #                 v_increase = -1
-        #         else:
-        #             if delta_v / delta_p == 0:
-        #                 v_increase = 0
-        #             elif delta_v / delta_p > 0:
-        #                 v_increase = 1
-        #             else:
-        #                 v_increase = -1
-
-        #         # set direction of v
-        #         v = vmpp_last + v_increase * self.et_voltage_step
-
-        #         # ensure we are within bounds and in correct quadrant
-        #         if v <= max(d["mpp"]["vmin"], 0):
-        #             v = vmpp_last + 2 * self.et_voltage_step
-        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"[1] < 0]):
-        #             v = vmpp_last - 2 * self.et_voltage_step
-
-        #         # ensure we arent sitting in the noise --> may not need anymore
-        #         if 0 <= d["mpp"]["last_currents"][1] <= 1:
-        #             v = max(self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step)
-
-        #         # bias at calc point and last point, determine greater value
-        #         t = time.time()
-        #         i1 = easttester.set_V_measure_I(ch, vmpp_last)
-        #         i2 = easttester.set_v_measure_I(ch, v)
-
-        #         if i2 > i1:
-        #             i = i2
-        #             v = v
-        #         else:
-        #             i = i1
-        #             v = vmpp_last
-
-        # MPP mode 0 is constant perturb and observe
         if mpp_mode == 0:
-
-            # If we just have one scan, use native voltage step
+            # If we have not tracked yet, step in standard direction from MPP calc from JV, else run algorithm
             if (d["mpp"]["last_powers"][0] is None) or (
                 d["mpp"]["last_powers"][1] is None
             ):
-                voltage_step = self.et_voltage_step
+                v = vmpp_last + self.et_voltage_step
+                t = time.time()
+                i = easttester.set_V_measure_I(ch, v)
 
-            # If we have two scans saved work out direction of voltage step
             else:
-                # if the most recent voltage >= voltage before it, use native voltage step (+)
-                if d["mpp"]["last_voltages"][1] >= d["mpp"]["last_voltages"][0]:
-                    voltage_step = self.et_voltage_step
-                # if the most recent voltage < voltage before it, use opposite voltage step (-)
+
+                # calcualte changes in I, P, V
+                delta_v = d["mpp"]["Last_voltages"][1] - d["mpp"]["Last_voltages"][0]
+                delta_i = d["mpp"]["Last_currents"][1] - d["mpp"]["Last_currents"][0]
+                delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
+
+                # Modified perturb and observe logic
+                if delta_p == 0:
+                    v_increase = 0
+                elif delta_i < 0:
+                    if delta_i / delta_p == 0:
+                        v_increase = 0
+                    elif delta_i / delta_p < 0:
+                        v_increase = 1
+                    else:
+                        v_increase = -1
                 else:
-                    voltage_step = -self.et_voltage_step
+                    if delta_v / delta_p == 0:
+                        v_increase = 0
+                    elif delta_v / delta_p > 0:
+                        v_increase = 1
+                    else:
+                        v_increase = -1
 
-                # if power isnt increasing, invert voltage step to move in the other direction
-                if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
-                    voltage_step *= -1
+                # set direction of v
+                v = vmpp_last + v_increase * self.et_voltage_step
 
-                # voltage_step = self.et_voltage_step*(+ or -)
-                # moving in the (0) direction, increasing on power: (+)
-                # moving in the (0) direction, decreasing in power (-)
-                # moving in the (+) direction, increasing on power (+)
-                # moving in the (+) direction, decreasing on power (+)
-                # moving in the (-) direction, decreasing in power: (+)
-                # moving in the (-) direction, increasing in power: (-)
+                # ensure we are within bounds and in correct quadrant
+                if v <= max(d["mpp"]["vmin"], 0):
+                    v = vmpp_last + 2 * self.et_voltage_step
+                elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"[1] < 0]):
+                    v = vmpp_last - 2 * self.et_voltage_step
 
-            # set the voltage equal to last voltage + voltage step (determined above)
-            v = vmpp_last + voltage_step
+                # ensure we arent sitting in the noise --> may not need anymore
+                # if 0 <= d["mpp"]["last_currents"][1] <= 1:
+                #     v = max(
+                #         self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
+                #     )
 
-            # Ensure min v,0 < voltage < max v, else step in the other direction
-            if (v <= max(d["mpp"]["vmin"], 0)) or (v >= d["mpp"]["vmax"]):
-                v = vmpp_last - 2 * voltage_step
+                # bias at calc point and last point, determine greater value
+                t = time.time()
+                i = easttester.set_V_measure_I(ch, v)
 
-            # If we read 0 to 1 current (floor), set v to maximum of (voltage step, vmin + voltagestep)
-            # Removing this section of code causes the ET to read 1/0 and ramp in voltage to max voltage
-            if d["mpp"]["last_currents"][1] is not None:
-                if 0 <= d["mpp"]["last_currents"][1] <= 1:
-                    v = max(
-                        self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
-                    )
+        # # MPP mode 0 is constant perturb and observe
+        # if mpp_mode == 0:
 
-            # get time, set voltage measure current
-            t = time.time()
-            i = easttester.set_V_measure_I(ch, v)
+        #     # If we just have one scan, use native voltage step
+        #     if (d["mpp"]["last_powers"][0] is None) or (
+        #         d["mpp"]["last_powers"][1] is None
+        #     ):
+        #         voltage_step = self.et_voltage_step
+
+        #     # If we have two scans saved work out direction of voltage step
+        #     else:
+        #         # if the most recent voltage >= voltage before it, use native voltage step (+)
+        #         if d["mpp"]["last_voltages"][1] >= d["mpp"]["last_voltages"][0]:
+        #             voltage_step = self.et_voltage_step
+        #         # if the most recent voltage < voltage before it, use opposite voltage step (-)
+        #         else:
+        #             voltage_step = -self.et_voltage_step
+
+        #         # if power isnt increasing, invert voltage step to move in the other direction
+        #         if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
+        #             voltage_step *= -1
+
+        #         # voltage_step = self.et_voltage_step*(+ or -)
+        #         # moving in the (0) direction, increasing on power: (+)
+        #         # moving in the (0) direction, decreasing in power (-)
+        #         # moving in the (+) direction, increasing on power (+)
+        #         # moving in the (+) direction, decreasing on power (+)
+        #         # moving in the (-) direction, decreasing in power: (+)
+        #         # moving in the (-) direction, increasing in power: (-)
+
+        #     # set the voltage equal to last voltage + voltage step (determined above)
+        #     v = vmpp_last + voltage_step
+
+        #     # Ensure min v,0 < voltage < max v, else step in the other direction
+        #     if (v <= max(d["mpp"]["vmin"], 0)) or (v >= d["mpp"]["vmax"]):
+        #         v = vmpp_last - 2 * voltage_step
+
+        #     # If we read 0 to 1 current (floor), set v to maximum of (voltage step, vmin + voltagestep)
+        #     # Removing this section of code causes the ET to read 1/0 and ramp in voltage to max voltage
+        #     if d["mpp"]["last_currents"][1] is not None:
+        #         if 0 <= d["mpp"]["last_currents"][1] <= 1:
+        #             v = max(
+        #                 self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
+        #             )
+
+        #     # get time, set voltage measure current
+        #     t = time.time()
+        #     i = easttester.set_V_measure_I(ch, v)
 
         # Mode = 1, bias at 75% of Voc
         elif mpp_mode == 1:

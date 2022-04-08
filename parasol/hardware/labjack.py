@@ -16,7 +16,7 @@ class ExtendedList(list):
         self.extended = None
 
 
-class Labjack:
+class LabJack:
     """General LabJack U6-PRO class for monitoring environmental data"""
 
     def __init__(self) -> None:
