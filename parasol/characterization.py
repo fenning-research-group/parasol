@@ -143,7 +143,7 @@ class Characterization:
         #         # ensure we are within bounds and in correct quadrant
         #         if v <= max(d["mpp"]["vmin"], 0):
         #             v = vmpp_last + 2 * self.et_voltage_step
-        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"[1] < 0]):
+        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0):
         #             v = vmpp_last - 2 * self.et_voltage_step
 
         #         # ensure we arent sitting in the noise
@@ -189,7 +189,7 @@ class Characterization:
         #         # ensure we are within bounds and in correct quadrant
         #         if v <= max(d["mpp"]["vmin"], 0):
         #             v = vmpp_last + 2 * self.et_voltage_step
-        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"[1] < 0]):
+        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0):
         #             v = vmpp_last - 2 * self.et_voltage_step
 
         #         # ensure we arent sitting in the noise
@@ -244,7 +244,7 @@ class Characterization:
         #         # ensure we are within bounds and in correct quadrant
         #         if v <= max(d["mpp"]["vmin"], 0):
         #             v = vmpp_last + 2 * self.et_voltage_step
-        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"[1] < 0]):
+        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0):
         #             v = vmpp_last - 2 * self.et_voltage_step
 
         #         # ensure we arent sitting in the noise
@@ -274,6 +274,8 @@ class Characterization:
         # # Modified perturb and observe: taken from David Sanz Morales Thesis
         # # http://lib.tkk.fi/Dipl/2010/urn100399.pdf
         # elif mpp_mode == 3:
+
+        # Note that right now currents, vmin, and vmax are floats, others are np.floats
         if mpp_mode == 0:
             # If we have not tracked yet, step in standard direction from MPP calc from JV, else run algorithm
             if (d["mpp"]["last_powers"][0] is None) or (
@@ -284,12 +286,11 @@ class Characterization:
                 i = easttester.set_V_measure_I(ch, v)
 
             else:
-
                 # calcualte changes in I, P, V
                 delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
                 delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
                 delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
-
+                
                 # Modified perturb and observe logic
                 if delta_p == 0:
                     v_increase = 0
@@ -312,9 +313,9 @@ class Characterization:
                 v = vmpp_last + v_increase * self.et_voltage_step
 
                 # ensure we are within bounds and in correct quadrant
-                if v <= max(d["mpp"]["vmin"], 0):
+                if v <= max(d["mpp"]["vmin"], 0.0):
                     v = vmpp_last + 2 * self.et_voltage_step
-                elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"[1] < 0]):
+                elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0.0):
                     v = vmpp_last - 2 * self.et_voltage_step
 
                 # ensure we arent sitting in the noise --> may not need anymore
@@ -327,7 +328,7 @@ class Characterization:
                 t = time.time()
                 i = easttester.set_V_measure_I(ch, v)
 
-        # # MPP mode 0 is constant perturb and observe
+        # # Old MPP mode 0 is constant perturb and observe
         # if mpp_mode == 0:
 
         #     # If we just have one scan, use native voltage step
