@@ -50,13 +50,14 @@ easttester:
   current_range: "LOW" # "LOW" or "HIGH"
 
 labjack:
-  # device_identifiers:
-    # pid: 24577
-    # vid: 1027
-    # serial_number : 'AQ01FVSHA'
-    # location: None
-  # timeout: 0.1 # Seconds for relay switch to settle
-  # delay: 1 # Seconds between commands
+  thermocouple_port: 0 # AIN Port for thermocouple
+  photodiode_port: 1 # AIN Port for photodoide
+  hygrometer_port: 3 # AIN Port for hygrometer
+
+  average_num: 10 # Number of readings to average
+  delay_time: 0.01 # Seconds to wait between readings
+
+  # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py
 
 characterization:
   mppt_voltage_step: 0.01 # Volts

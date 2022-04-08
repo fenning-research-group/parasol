@@ -198,7 +198,7 @@ class Controller:
             "mpp": {
                 "mode": mpp_mode,
                 "interval": mpp_interval,
-                "vmin": 0.1,
+                "vmin": jv_vmin,
                 "vmax": jv_vmax,
                 "last_currents": [None, None],
                 "last_powers": [None, None],

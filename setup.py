@@ -27,6 +27,7 @@ setup(
         "pyserial",
         "matplotlib",
         "PyQt5",
+        "LabJackPython",
     ],
     packages=find_packages(),
     package_data={"": ["hardwareconstants.yaml"]},
