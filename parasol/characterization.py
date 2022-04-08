@@ -122,8 +122,8 @@ class Characterization:
         #     else:
 
         #         # calcualte changes in I, P, V
-        #         delta_v = d["mpp"]["Last_voltages"][1] - d["mpp"]["Last_voltages"][0]
-        #         delta_i = d["mpp"]["Last_currents"][1] - d["mpp"]["Last_currents"][0]
+        #         delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
+        #         delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
         #         delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
 
         #         # apply standard perturb and observe logic
@@ -168,8 +168,8 @@ class Characterization:
         #     else:
 
         #         # calcualte changes in I, P, V
-        #         delta_v = d["mpp"]["Last_voltages"][1] - d["mpp"]["Last_voltages"][0]
-        #         delta_i = d["mpp"]["Last_currents"][1] - d["mpp"]["Last_currents"][0]
+        #         delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
+        #         delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
         #         delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
 
         #         # standard perturb and observe logic
@@ -223,8 +223,8 @@ class Characterization:
         #     else:
 
         #         # calcualte changes in I, P, V
-        #         delta_v = d["mpp"]["Last_voltages"][1] - d["mpp"]["Last_voltages"][0]
-        #         delta_i = d["mpp"]["Last_currents"][1] - d["mpp"]["Last_currents"][0]
+        #         delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
+        #         delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
         #         delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
 
         #         # standard perturb and observe logic
@@ -286,8 +286,8 @@ class Characterization:
             else:
 
                 # calcualte changes in I, P, V
-                delta_v = d["mpp"]["Last_voltages"][1] - d["mpp"]["Last_voltages"][0]
-                delta_i = d["mpp"]["Last_currents"][1] - d["mpp"]["Last_currents"][0]
+                delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
+                delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
                 delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
 
                 # Modified perturb and observe logic
