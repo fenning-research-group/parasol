@@ -292,6 +292,8 @@ class Characterization:
                 delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
                 
                 # Modified perturb and observe logic
+                # Not working great
+                # If we get stuck at 0 then dv = 0 and we get v_inc = 0 unless we decrease in energy.
                 if delta_p == 0:
                     v_increase = 0
                 elif delta_i < 0:
@@ -319,10 +321,10 @@ class Characterization:
                     v = vmpp_last - 2 * self.et_voltage_step
 
                 # ensure we arent sitting in the noise --> may not need anymore
-                # if 0 <= d["mpp"]["last_currents"][1] <= 1:
-                #     v = max(
-                #         self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
-                #     )
+                if 0 <= d["mpp"]["last_currents"][1] <= 1:
+                    v = max(
+                        self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
+                    )
 
                 # bias at calc point and last point, determine greater value
                 t = time.time()
