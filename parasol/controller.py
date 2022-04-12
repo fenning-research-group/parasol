@@ -86,6 +86,9 @@ class Controller:
         }
         self.strings = {}
 
+        # Create list of threads to hold threads
+        self.active_threads = []
+
         # Create Logger
         date = datetime.now().strftime("%Y%m%d")
         self.logger = logging.getLogger("PARASOL")
@@ -287,9 +290,13 @@ class Controller:
         load.output_off(ch)
         self.logger.debug(f"Load reset for {id}")
 
-        # Analyze the saveloc
+        # Analyze the saveloc in a new thread, append to list of active threads
         self.logger.debug(f"Saving analysis at : {saveloc}")
-        Thread(target=self.analysis.analyze_from_savepath, args=(saveloc,)).start()
+        analyze_thread = Thread(
+            target=self.analysis.analyze_from_savepath, args=(saveloc,)
+        )
+        analyze_thread.start()
+        self.active_threads.append(analyze_thread)
         # self.analysis.analyze_from_savepath(saveloc)
         self.logger.info(f"Analysis saved at : {saveloc}")
 
@@ -613,6 +620,9 @@ class Controller:
         # Get dictionary information
         d = self.strings.get(id, None)
 
+        if d is None:
+            return
+
         # Emsure MPP isn't running.
         with d["lock"]:
 
@@ -713,6 +723,9 @@ class Controller:
         self.logger.debug(f"Tracking {id}")
 
         d = self.strings.get(id, None)
+
+        if d is None:
+            return
 
         # Get last MPP, will be none if JV not filled
         last_vmpp = self.characterization.calc_last_vmp(d)

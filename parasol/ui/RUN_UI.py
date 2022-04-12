@@ -1231,6 +1231,10 @@ class RUN_UI(QMainWindow):
         app.exec_()
 
     def __del__(self) -> None:
-        for thread in threading.enumerate:
+        for thread in threading.enumerate():
+            thread.join()
+            print(thread.name)
+
+        for thread in self.controller.active_threads:
             thread.join()
             print(thread.name)
