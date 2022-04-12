@@ -290,7 +290,7 @@ class Characterization:
                 delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
                 delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
                 delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
-                
+
                 # Modified perturb and observe logic
                 # Not working great
                 # If we get stuck at 0 then dv = 0 and we get v_inc = 0 unless we decrease in energy.

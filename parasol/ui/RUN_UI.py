@@ -17,6 +17,7 @@ from parasol.filestructure import FileStructure
 
 from multiprocessing import Process
 from threading import Thread
+import threading
 
 # Set module directory, load yaml preferences
 MODULE_DIR = os.path.dirname(__file__)
@@ -43,6 +44,8 @@ def run_async_thread(func):
 
     # import modules needed
     from threading import Thread
+
+    # from threading import enumerate
     from functools import wraps
 
     # wrapper function
@@ -1226,3 +1229,7 @@ class RUN_UI(QMainWindow):
         # exexcutes the GUI
         app = QApplication(sys.argv)
         app.exec_()
+
+    def __del__(self) -> None:
+        for thread in threading.enumerate():
+            thread.join()

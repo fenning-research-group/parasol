@@ -240,6 +240,7 @@ class Controller:
         Raises:
             ValueError: string ID not loaded
         """
+        # The error is happening here, 100% sure
 
         # Log unload
         self.logger.debug(f"Unloading string {id}")
@@ -266,12 +267,16 @@ class Controller:
         self.logger.debug(f"Removed tasks from que for {id}")
 
         # Decrease number of tests active by one
+        # maybe add sleep here
         self.tests_active -= 1
         if self.tests_active == 0:
             self.logger.debug(f"Canceling environmental monitoring")
             time.sleep(self.monitor_delay)
             # error that NoneType not subsriptable if unload after jv scan
             self.monitor_future.cancel()
+            # NEW
+            while 1 in self.monitor_queue._queue:
+                self.monitor_queue._queue.remove(1)
             self.logger.info(f"Environmental monitoring canceled")
 
         # Dont touch relays/scanner --> dont want to mess with other tests

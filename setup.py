@@ -10,7 +10,7 @@ with open(os.path.join(this_dir, "README.md"), encoding="utf-8") as f:
 # set of commands for github
 setup(
     name="parasol",
-    version="0.1",
+    version="0.2.dev",
     description="Control of Fenning Research Group outdoor testbed",
     long_description=long_description,
     long_description_content_type="text/markdown",
