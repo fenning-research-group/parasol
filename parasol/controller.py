@@ -289,7 +289,8 @@ class Controller:
 
         # Analyze the saveloc
         self.logger.debug(f"Saving analysis at : {saveloc}")
-        self.analysis.analyze_from_savepath(saveloc)
+        Thread(target=self.analysis.analyze_from_savepath, args=(saveloc,)).start()
+        # self.analysis.analyze_from_savepath(saveloc)
         self.logger.info(f"Analysis saved at : {saveloc}")
 
     def make_mpp_file(self, id: int) -> None:

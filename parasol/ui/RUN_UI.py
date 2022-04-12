@@ -80,16 +80,6 @@ def _check_test(jv_paths: list, mpp_paths: list) -> None:
     )
 
 
-# _unload_string function outside of the class so that we can use multithreading on it
-def _unload_string(stringid: int) -> None:
-
-    # Get controller class
-    controller = Controller()
-
-    # Call unload string
-    controller.unload_string(stringid)
-
-
 # Main function
 class RUN_UI(QMainWindow):
     """Run UI package for PARASOL"""
@@ -750,8 +740,7 @@ class RUN_UI(QMainWindow):
         self.unlock_values(id)
 
         # Call Unload String from controller
-        # self.controller.unload_string(id)
-        threading.Thread(target=_unload_string, args=(id,)).start()
+        self.controller.unload_string(id)
 
         # get dictionary
         d = self.strings[id]
@@ -1242,6 +1231,6 @@ class RUN_UI(QMainWindow):
         app.exec_()
 
     def __del__(self) -> None:
-        for thread in threading.enumerate():
+        for thread in threading.enumerate:
             thread.join()
             print(thread.name)
