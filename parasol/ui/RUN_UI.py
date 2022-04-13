@@ -1231,10 +1231,19 @@ class RUN_UI(QMainWindow):
         app.exec_()
 
     def __del__(self) -> None:
-        for thread in threading.enumerate():
-            thread.join()
-            print(thread.name)
+        print("Shutting Down")
 
-        for thread in self.controller.active_threads:
-            thread.join()
-            print(thread.name)
+    def closeEvent(self, *args, **kwargs):
+        super(RUN_UI, self).closeEvent(*args, **kwargs)
+        
+        print("close event")
+        # for any string that has not been unloaded yet, unload
+        # for stringid in self.strings.keys():
+        #     id = int(stringid)
+        #     self.unload(id)
+        #     print("ids", id)
+
+        # # for any thread still running join
+        # for thread in threading.enumerate():
+        #     thread.join()
+        #     print("threads", thread.name)

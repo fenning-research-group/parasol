@@ -250,54 +250,62 @@ class Controller:
 
         # Get string saveloc
         d = self.strings.get(id, None)
-        saveloc = d["_savedir"]
-
-        # Destroy all future tasks for the string
         if id not in self.strings:
             raise ValueError(f"String {id} not loaded!")
-        self.logger.debug(f"Canceling tasks for {id}")
-        self.strings[id]["jv"]["_future"].cancel()
-        self.strings[id]["mpp"]["_future"].cancel()
-        self.logger.debug(f"Canceled tasks for {id}")
+        
+        with d["lock"]:
 
-        # Delete the stringid from the dict, remove from queue
-        self.logger.debug(f"Removing tasks from que for {id}")
+            saveloc = d["_savedir"] #seems this savedir is an issue
+
+            # Destroy all future tasks for the string
+            if id not in self.strings:
+                raise ValueError(f"String {id} not loaded!")
+            self.logger.debug(f"Canceling tasks for {id}")
+            self.strings[id]["jv"]["_future"].cancel()
+            self.strings[id]["mpp"]["_future"].cancel()
+            self.logger.debug(f"Canceled tasks for {id}")
+
+            # Delete the stringid from the dict, remove from queue
+            self.logger.debug(f"Removing tasks from que for {id}")
+            # del self.strings[id]
+            while id in self.jv_queue._queue:
+                self.jv_queue._queue.remove(id)
+            while id in self.mpp_queue._queue:
+                self.mpp_queue._queue.remove(id)
+            self.logger.debug(f"Removed tasks from que for {id}")
+
+            # Decrease number of tests active by one
+            # maybe add sleep here
+            self.tests_active -= 1
+            if self.tests_active == 0:
+                self.logger.debug(f"Canceling environmental monitoring")
+                time.sleep(self.monitor_delay)
+                # error that NoneType not subsriptable if unload after jv scan
+                self.monitor_future.cancel()
+                # NEW
+                while 1 in self.monitor_queue._queue:
+                    self.monitor_queue._queue.remove(1)
+                self.logger.info(f"Environmental monitoring canceled")
+
+            # Dont touch relays/scanner --> dont want to mess with other tests
+            # Reset load
+            self.logger.debug(f"Resetting load for {id}")
+            load_key, ch = self.et_channels[id]
+            load = self.load[load_key]
+            load.output_off(ch)
+            self.logger.debug(f"Load reset for {id}")
+
+            # Analyze the saveloc in a new thread, append to list of active threads
+            self.logger.debug(f"Saving analysis at : {saveloc}")
+            analyze_thread = Thread(
+                target=self.analysis.analyze_from_savepath, args=(saveloc,)
+            )
+            analyze_thread.start()
+            self.active_threads.append(analyze_thread)
+            # self.analysis.analyze_from_savepath(saveloc)
+
         del self.strings[id]
-        while id in self.jv_queue._queue:
-            self.jv_queue._queue.remove(id)
-        while id in self.mpp_queue._queue:
-            self.mpp_queue._queue.remove(id)
-        self.logger.debug(f"Removed tasks from que for {id}")
 
-        # Decrease number of tests active by one
-        # maybe add sleep here
-        self.tests_active -= 1
-        if self.tests_active == 0:
-            self.logger.debug(f"Canceling environmental monitoring")
-            time.sleep(self.monitor_delay)
-            # error that NoneType not subsriptable if unload after jv scan
-            self.monitor_future.cancel()
-            # NEW
-            while 1 in self.monitor_queue._queue:
-                self.monitor_queue._queue.remove(1)
-            self.logger.info(f"Environmental monitoring canceled")
-
-        # Dont touch relays/scanner --> dont want to mess with other tests
-        # Reset load
-        self.logger.debug(f"Resetting load for {id}")
-        load_key, ch = self.et_channels[id]
-        load = self.load[load_key]
-        load.output_off(ch)
-        self.logger.debug(f"Load reset for {id}")
-
-        # Analyze the saveloc in a new thread, append to list of active threads
-        self.logger.debug(f"Saving analysis at : {saveloc}")
-        analyze_thread = Thread(
-            target=self.analysis.analyze_from_savepath, args=(saveloc,)
-        )
-        analyze_thread.start()
-        self.active_threads.append(analyze_thread)
-        # self.analysis.analyze_from_savepath(saveloc)
         self.logger.info(f"Analysis saved at : {saveloc}")
 
     def make_mpp_file(self, id: int) -> None:
@@ -621,6 +629,7 @@ class Controller:
         d = self.strings.get(id, None)
 
         if d is None:
+            print("d was none, mpp")
             return
 
         # Emsure MPP isn't running.
@@ -725,17 +734,18 @@ class Controller:
         d = self.strings.get(id, None)
 
         if d is None:
-            return
-
-        # Get last MPP, will be none if JV not filled
-        last_vmpp = self.characterization.calc_last_vmp(d)
-
-        # If we dont have a Vmpp, skip
-        if last_vmpp is None:
+            print("d was none, jv")
             return
 
         # Ensure that JV isn't running
         with d["lock"]:
+
+            # Get last MPP, will be none if JV not filled
+            last_vmpp = self.characterization.calc_last_vmp(d)
+
+            # If we dont have a Vmpp, skip
+            if last_vmpp is None:
+                return
 
             # Turn on load output, set voltage, measure current
             load_key, ch = self.et_channels[id]
