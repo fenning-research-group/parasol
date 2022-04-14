@@ -1233,13 +1233,25 @@ class RUN_UI(QMainWindow):
     def __del__(self) -> None:
         print("Shutting Down")
 
-    def closeEvent(self, *args, **kwargs):
+    def closeEvent(self, event):#*args, **kwargs):
         """Closes the GUI"""
 
-        super(RUN_UI, self).closeEvent(*args, **kwargs)
+        reply = QMessageBox.question(
+            self, "Message",
+            "Are you sure you want to quit? Closing will unload all devices and render the UI unresponsive until all data analysis is complete.",
+            QMessageBox.Close | QMessageBox.Cancel, QMessageBox.Cancel)
 
-        # Stop controller (unload everything, reset hardware)
-        self.controller.stop()
+        if reply == QMessageBox.Close:
 
-        # Quit the application
-        self.app.quit()
+            # Stop controller (unload everything, reset hardware)
+            self.controller.stop()
+
+            # Quit the application
+            self.app.quit()
+
+            # Close
+            event.accept()
+
+        else:
+            event.ignore()
+
