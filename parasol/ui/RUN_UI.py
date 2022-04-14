@@ -1238,15 +1238,8 @@ class RUN_UI(QMainWindow):
 
         super(RUN_UI, self).closeEvent(*args, **kwargs)
 
-        quit_msg = "Are you sure you want to exit the program?"
-        reply = QtGui.QMessageBox.question(
-            self, "Message", quit_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No
-        )
+        # Stop controller (unload everything, reset hardware)
+        self.controller.stop()
 
-        if reply == QtGui.QMessageBox.Yes:
-
-            # Stop controller (unload everything, reset hardware)
-            self.controller.stop()
-
-            # Quit the application
-            self.app.quit()
+        # Quit the application
+        self.app.quit()
