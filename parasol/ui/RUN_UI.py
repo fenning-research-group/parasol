@@ -1,8 +1,7 @@
 import PyQt5
 from PyQt5.QtWidgets import QMainWindow, QApplication, QCheckBox, QComboBox
 from PyQt5.QtWidgets import QPushButton, QLineEdit
-from PyQt5 import QtCore
-from PyQt5 import uic
+from PyQt5 import QtCore, uic, QtGui
 import sys
 import os
 from datetime import datetime
@@ -1235,27 +1234,19 @@ class RUN_UI(QMainWindow):
         print("Shutting Down")
 
     def closeEvent(self, *args, **kwargs):
-        super(RUN_UI, self).closeEvent(*args, **kwargs)       
+        """Closes the GUI"""
 
-        # ids = list(self.controller.strings.keys())
-        # for id in ids:
-        #     self.controller.unload_string(id)
+        super(RUN_UI, self).closeEvent(*args, **kwargs)
 
-        self.controller.stop()
+        quit_msg = "Are you sure you want to exit the program?"
+        reply = QtGui.QMessageBox.question(
+            self, "Message", quit_msg, QtGui.QMessageBox.Yes, QtGui.QMessageBox.No
+        )
 
-        self.app.quit()
+        if reply == QtGui.QMessageBox.Yes:
 
-        # for any string that has not been unloaded yet, unload
-        # for stringid in self.controller.strings.keys():
-        #     print("strid: ", stringid)
-        #     id = int(stringid)
-        #     #self.unload(id)
-        #     self.controller.unload_string(id)
+            # Stop controller (unload everything, reset hardware)
+            self.controller.stop()
 
-        # while self.controller.running is True:
-        #     time.sleep(5)
-
-        # for any thread still running join
-        # for thread in threading.enumerate():
-        #     thread.join()
-        #     print("threads", thread.name)
+            # Quit the application
+            self.app.quit()

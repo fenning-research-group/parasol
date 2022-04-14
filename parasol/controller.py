@@ -89,7 +89,7 @@ class Controller:
         self.active_threads = []
 
         # Create a list of active strings
-        self.active_strings = [False]*(6+1)
+        self.active_strings = [False] * (6 + 1)
 
         # Create Logger
         date = datetime.now().strftime("%Y%m%d")
@@ -180,7 +180,7 @@ class Controller:
             self.logger.info(f"Started environmental monitoring")
 
         # Make string active
-        self.active_strings[id]=True
+        self.active_strings[id] = True
 
         # Setup string dict with important information for running the program
         self.strings[id] = {
@@ -253,10 +253,10 @@ class Controller:
         d = self.strings.get(id, None)
         if id not in self.strings:
             raise ValueError(f"String {id} not loaded!")
-        
+
         with d["lock"]:
 
-            saveloc = d["_savedir"] 
+            saveloc = d["_savedir"]
 
             # Destroy all future tasks for the string
             if id not in self.strings:
@@ -274,9 +274,9 @@ class Controller:
             while id in self.mpp_queue._queue:
                 self.mpp_queue._queue.remove(id)
             self.logger.debug(f"Removed tasks from que for {id}")
-            
+
             # Decrease number of tests active by one
-            self.active_strings[id]=False
+            self.active_strings[id] = False
 
             # If we have no active tests, stop monitoring
             if not any(self.active_strings):
@@ -288,12 +288,11 @@ class Controller:
                 #     self.monitor_queue._queue.remove(1)
                 self.logger.info(f"Environmental monitoring canceled")
 
-
             # Turn load output off
             self.logger.debug(f"Resetting load for {id}")
             load_key, ch = self.et_channels[id]
             load = self.load[load_key]
-            load.srcV_measI(ch) 
+            load.srcV_measI(ch)
             load.output_off(ch)
             self.logger.debug(f"Load reset for {id}")
 
@@ -589,20 +588,13 @@ class Controller:
         for id in ids:
             self.unload_string(id)
 
+        # cancel loops, join threads
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
         # force wait until all active strings have been terminated
         # while any(self.active_strings):
         #     time.sleep(1)
-
-        # Reset easttesters -- not needed this is already done in unload
-        # for id in ids:
-        #     self.logger.debug(f"Resetting load for string {id}")
-        #     load_key, ch = self.et_channels[id]
-        #     load = self.load[load_key]
-        #     load.srcV_measI(ch)
-        #     self.logger.debug(f"Load reset for string {id}")
 
         # # Close all channels on the relay
         # self.logger.debug(f"Turning off relays")
@@ -612,14 +604,11 @@ class Controller:
         # # Reset scanner
         # self.logger.debug(f"Resetting scanner")
         # self.scanner.srcV_measI()
+        # self.scanner.output_off()
         # self.logger.debug(f"Scanner reset")
 
         # Turn off running
         # self.running = False
-
-        # Stop event loop
-        # self.loop.call_soon_threadsafe(self.loop.stop)
-        # self.thread.join()
 
     # Worker Functions
 
@@ -750,12 +739,10 @@ class Controller:
 
         # Ensure that JV isn't running
         with d["lock"]:
-            
 
             if self.active_strings[id] == False:
                 self.logger.info(f"Last MPP scan of string {id} aborted")
                 return
-
 
             # Get last MPP, will be none if JV not filled
             last_vmpp = self.characterization.calc_last_vmp(d)
