@@ -18,6 +18,7 @@ from parasol.filestructure import FileStructure
 from multiprocessing import Process
 from threading import Thread
 import threading
+import time
 
 # Set module directory, load yaml preferences
 MODULE_DIR = os.path.dirname(__file__)
@@ -1226,24 +1227,35 @@ class RUN_UI(QMainWindow):
     def launch_gui(self) -> None:
         """Launches GUI"""
 
-        # exexcutes the GUI
-        app = QApplication(sys.argv)
-        app.exec_()
+        # executes the GUI
+        self.app = QApplication(sys.argv)
+        self.app.exec_()
 
     def __del__(self) -> None:
         print("Shutting Down")
 
     def closeEvent(self, *args, **kwargs):
-        super(RUN_UI, self).closeEvent(*args, **kwargs)
-        
-        print("close event")
-        # for any string that has not been unloaded yet, unload
-        # for stringid in self.strings.keys():
-        #     id = int(stringid)
-        #     self.unload(id)
-        #     print("ids", id)
+        super(RUN_UI, self).closeEvent(*args, **kwargs)       
 
-        # # for any thread still running join
+        # ids = list(self.controller.strings.keys())
+        # for id in ids:
+        #     self.controller.unload_string(id)
+
+        self.controller.stop()
+
+        self.app.quit()
+
+        # for any string that has not been unloaded yet, unload
+        # for stringid in self.controller.strings.keys():
+        #     print("strid: ", stringid)
+        #     id = int(stringid)
+        #     #self.unload(id)
+        #     self.controller.unload_string(id)
+
+        # while self.controller.running is True:
+        #     time.sleep(5)
+
+        # for any thread still running join
         # for thread in threading.enumerate():
         #     thread.join()
         #     print("threads", thread.name)

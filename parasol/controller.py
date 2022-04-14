@@ -50,9 +50,8 @@ class Controller:
         self.filestructure = FileStructure()
         self.monitor = LabJack()
 
-        # Get monitoring delay, create counter for tests active
+        # Get monitoring delay
         self.monitor_delay = constants["monitor_delay"]
-        self.tests_active = 0
 
         # Initialize running variable, create characterization/monitor/logging directory
         self.running = False
@@ -86,8 +85,11 @@ class Controller:
         }
         self.strings = {}
 
-        # Create list of threads to hold threads
+        # Create list of threads
         self.active_threads = []
+
+        # Create a list of active strings
+        self.active_strings = [False]*(6+1)
 
         # Create Logger
         date = datetime.now().strftime("%Y%m%d")
@@ -169,7 +171,7 @@ class Controller:
         mpp_future.add_done_callback(future_callback)
 
         # If we are not monitoring the environment, start the monitor, let user know
-        if self.tests_active == 0:
+        if not any(self.active_strings):
             self.logger.debug(f"Starting environmental monitoring")
             self.monitor_future = asyncio.run_coroutine_threadsafe(
                 self.monitor_timer(), self.loop
@@ -177,8 +179,8 @@ class Controller:
             self.monitor_future.add_done_callback(future_callback)
             self.logger.info(f"Started environmental monitoring")
 
-        # Incrtement number of tests active
-        self.tests_active += 1
+        # Make string active
+        self.active_strings[id]=True
 
         # Setup string dict with important information for running the program
         self.strings[id] = {
@@ -243,7 +245,6 @@ class Controller:
         Raises:
             ValueError: string ID not loaded
         """
-        # The error is happening here, 100% sure
 
         # Log unload
         self.logger.debug(f"Unloading string {id}")
@@ -255,7 +256,7 @@ class Controller:
         
         with d["lock"]:
 
-            saveloc = d["_savedir"] #seems this savedir is an issue
+            saveloc = d["_savedir"] 
 
             # Destroy all future tasks for the string
             if id not in self.strings:
@@ -267,31 +268,32 @@ class Controller:
 
             # Delete the stringid from the dict, remove from queue
             self.logger.debug(f"Removing tasks from que for {id}")
-            # del self.strings[id]
+            # # del self.strings[id]
             while id in self.jv_queue._queue:
                 self.jv_queue._queue.remove(id)
             while id in self.mpp_queue._queue:
                 self.mpp_queue._queue.remove(id)
             self.logger.debug(f"Removed tasks from que for {id}")
-
+            
             # Decrease number of tests active by one
-            # maybe add sleep here
-            self.tests_active -= 1
-            if self.tests_active == 0:
+            self.active_strings[id]=False
+
+            # If we have no active tests, stop monitoring
+            if not any(self.active_strings):
                 self.logger.debug(f"Canceling environmental monitoring")
                 time.sleep(self.monitor_delay)
-                # error that NoneType not subsriptable if unload after jv scan
                 self.monitor_future.cancel()
-                # NEW
-                while 1 in self.monitor_queue._queue:
-                    self.monitor_queue._queue.remove(1)
+                # NEW commented this out. i think it may throw errors occasionally.
+                # while 1 in self.monitor_queue._queue:
+                #     self.monitor_queue._queue.remove(1)
                 self.logger.info(f"Environmental monitoring canceled")
 
-            # Dont touch relays/scanner --> dont want to mess with other tests
-            # Reset load
+
+            # Turn load output off
             self.logger.debug(f"Resetting load for {id}")
             load_key, ch = self.et_channels[id]
             load = self.load[load_key]
+            load.srcV_measI(ch) 
             load.output_off(ch)
             self.logger.debug(f"Load reset for {id}")
 
@@ -302,7 +304,6 @@ class Controller:
             )
             analyze_thread.start()
             self.active_threads.append(analyze_thread)
-            # self.analysis.analyze_from_savepath(saveloc)
 
         del self.strings[id]
 
@@ -583,36 +584,42 @@ class Controller:
     def stop(self) -> None:
         """Delete workers,  stop queue, and reset hardware"""
 
-        # Close all channels
-        self.logger.debug(f"Turning off relays")
-        self.relay.all_off()
-        self.logger.debug(f"Turned off relays")
-
-        # Turn off running
-        self.running = False
-
-        # Reset scanner
-        self.logger.debug(f"Resetting scanner")
-        self.scanner.srcV_measI()
-        self.logger.debug(f"Scanner reset")
-
-        # Cycle through all tests
+        # Unload all strings
         ids = list(self.strings.keys())
         for id in ids:
-
-            # Unload all strings (already gets logged in unload)
             self.unload_string(id)
 
-            # Reset load
-            self.logger.debug(f"Resetting load for string {id}")
-            load_key, ch = self.et_channels[id]
-            load = self.load[load_key]
-            load.srcV_measI(ch)
-            self.logger.debug(f"Load reset for string {id}")
-
-        # Stop event loop
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
+
+        # force wait until all active strings have been terminated
+        # while any(self.active_strings):
+        #     time.sleep(1)
+
+        # Reset easttesters -- not needed this is already done in unload
+        # for id in ids:
+        #     self.logger.debug(f"Resetting load for string {id}")
+        #     load_key, ch = self.et_channels[id]
+        #     load = self.load[load_key]
+        #     load.srcV_measI(ch)
+        #     self.logger.debug(f"Load reset for string {id}")
+
+        # # Close all channels on the relay
+        # self.logger.debug(f"Turning off relays")
+        # self.relay.all_off()
+        # self.logger.debug(f"Turned off relays")
+
+        # # Reset scanner
+        # self.logger.debug(f"Resetting scanner")
+        # self.scanner.srcV_measI()
+        # self.logger.debug(f"Scanner reset")
+
+        # Turn off running
+        # self.running = False
+
+        # Stop event loop
+        # self.loop.call_soon_threadsafe(self.loop.stop)
+        # self.thread.join()
 
     # Worker Functions
 
@@ -629,11 +636,15 @@ class Controller:
         d = self.strings.get(id, None)
 
         if d is None:
-            print("d was none, mpp")
+            self.logger.info(f"Empty dictionary passed to MPPT")
             return
 
-        # Emsure MPP isn't running.
+        # Ensure MPP isn't running.
         with d["lock"]:
+
+            if self.active_strings[id] == False:
+                self.logger.info(f"Last JV scan of string {id} aborted")
+                return
 
             # Turn off load output (outputoff is locked)
             self.logger.debug(f"Turning off load output for string {id}")
@@ -720,7 +731,7 @@ class Controller:
                 load.set_voltage(ch, vmp)
                 self.logger.debug(f"Turned on load output for string {id}")
 
-        self.logger.info(f"Scanned {id}")
+            self.logger.info(f"Scanned {id}")
 
     def track_mpp(self, id: int) -> None:
         """Conduct an MPP scan using Easttester class
@@ -734,11 +745,17 @@ class Controller:
         d = self.strings.get(id, None)
 
         if d is None:
-            print("d was none, jv")
+            self.logger.info(f"Empty dictionary passed to JV")
             return
 
         # Ensure that JV isn't running
         with d["lock"]:
+            
+
+            if self.active_strings[id] == False:
+                self.logger.info(f"Last MPP scan of string {id} aborted")
+                return
+
 
             # Get last MPP, will be none if JV not filled
             last_vmpp = self.characterization.calc_last_vmp(d)
@@ -783,7 +800,7 @@ class Controller:
 
             self.logger.debug(f"Writing MPP file for {id} at {fpath}")
 
-        self.logger.info(f"Tracked {id}")
+            self.logger.info(f"Tracked {id}")
 
     def monitor_env(self, dummyid: int) -> None:
         """

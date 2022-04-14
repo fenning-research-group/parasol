@@ -11,7 +11,7 @@ relay:
     vid: 1027
     serial_number : 'AQ01FVSHA'
     # location: None
-  response_time: 0.1 # Seconds for relay switch to settle
+  response_time: 0.5 # changed from 0.1 4/13/2022 # Seconds for relay switch to settle
 
 yokogawa:
   address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
@@ -66,14 +66,14 @@ analysis:
   derivative_v_step : 0.05 # Voltage step for derivative (Rs, Rsh, Rch) in JV analysis
 
 controller:
-  monitor_delay: 15 # Seconds between updates
+  monitor_delay: 15 # Seconds between environmental monitoring 
 
 RUN_UI:
   area : 1 # Area of the module in cm^2
   jv_mode: 0 # Default JV mode
   mpp_mode: 0 # Default MPP mode
-  jv_frequency: 900 # seconds between JV scans
-  mpp_frequency: 60 # seconds between MPP scans
+  jv_frequency: 60 # seconds between JV scans
+  mpp_frequency: 20 # seconds between MPP scans
   v_min: -0.1 # Voltage minimum for JV/MPP scan
   v_max: 0.7 # Voltage maximum for JV/MPP scan
   v_steps: 100 # Voltage steps for JV scan
