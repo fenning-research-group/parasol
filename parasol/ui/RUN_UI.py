@@ -1221,7 +1221,7 @@ class RUN_UI(QMainWindow):
         """Checks orientation of test 6"""
         self.checkorientation(6)
 
-    # Launches GUI
+    # Launches & closes GUI
 
     def launch_gui(self) -> None:
         """Launches GUI"""
@@ -1233,8 +1233,8 @@ class RUN_UI(QMainWindow):
     def __del__(self) -> None:
         print("Shutting Down")
 
-    def closeEvent(self, event):#*args, **kwargs):
-        """Closes the GUI"""
+    def closeEvent(self, event):
+        """Confirms & closes the GUI"""
 
         reply = QMessageBox.question(
             self, "Message",
