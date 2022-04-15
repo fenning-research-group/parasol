@@ -6,6 +6,7 @@ import sys
 import os
 from datetime import datetime
 import yaml
+import time
 from multiprocessing import Process
 
 from parasol.controller import Controller
@@ -109,7 +110,7 @@ def RUNNER():
             self.savedir6 = None
 
             # Load the ui file
-            ui_path = os.path.join(MODULE_DIR, "RUN_UI2.ui")
+            ui_path = os.path.join(MODULE_DIR, "RUN_UI.ui")
             uic.loadUi(ui_path, self)
             self.show()
 
@@ -636,9 +637,6 @@ def RUNNER():
                 stringid (int): string id
             """
 
-            # Notify user
-            print("Loading string: " + str(stringid))
-
             # Update values
             self.update_loaded_modules()
             self.update_dictionaries()
@@ -711,9 +709,8 @@ def RUNNER():
                 # Lock user inputs
                 self.lock_values(id)
 
-            # TODO:REMMOVE PRINTS
-            else:
-                print("Please check the boxes for the devices you would like to load.")
+            # else:
+            # TODO: notify user
 
         # Run unload in a new thread to not interfere with other measurments active
         @run_async_thread
@@ -723,8 +720,6 @@ def RUNNER():
             Args:
                 stringid (int): string id
             """
-
-            print("Unloading string: " + str(stringid))
 
             # Get id
             id = int(stringid)
@@ -759,16 +754,12 @@ def RUNNER():
                 self.savedir6 = saveloc
                 d["_savedir"] = saveloc
 
-            print("String " + str(stringid) + " unload successful")
-
         def checktest(self, stringid: int) -> None:
             """Checks the test using the string id with the commands in analysis.py & grapher.py
 
             Args:
                 stringid (int): string id
             """
-
-            print("Checking string: " + str(stringid))
 
             # Get useful info from wave
             id = int(stringid)
@@ -807,7 +798,15 @@ def RUNNER():
 
             # Check orientation of modules
             # TODO: THIS NO LONGER WORKS AS NO PRINT STATEMENT IS THERE
+            # AS THIS STARTS A WORKER/LIST ITS HARD TO GET A RETURN HERE
             self.controller.load_check_orientation(module_channels)
+
+            message = None
+            while message is None:
+                time.sleep(1)
+                message = self.controller.pass_message(self)
+
+            QMessageBox.about(self, "Module Orientation", f"{message}")
 
         ################################################################################
         # Buttons / Duplicated Functions
@@ -1222,13 +1221,13 @@ def RUNNER():
             self.checkorientation(6)
 
         # TODO: might delete this, its never run
-        def __del__(self) -> None:
-            print("Shutting Down")
+        # def __del__(self) -> None:
+        #     print("Shutting Down")
 
         def closeEvent(self, event):
             """Confirms & closes the GUI upon X being clicked"""
 
-            # Generate box asking for close confirmation (doesnt hold up program)
+            # Generate box asking for close confirmation that doesnt hold up program
             reply = QMessageBox.question(
                 self,
                 "Message",

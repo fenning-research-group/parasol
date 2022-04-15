@@ -315,6 +315,7 @@ class FileStructure:
         Returns:
             dict: runinfo ["module_id", "string_id", "name", "date"]
         """
+
         # Get file name, pull out name of file (account for _#)
         file_name = os.path.basename(file_path)
         name_len = (file_name.count("_") + 1) - 5
@@ -365,7 +366,6 @@ class FileStructure:
 
     # Get test folders and subfolders (MPP, Analyzed, JV), Get env monitoring folders
 
-    # this is really get_test_subfolders
     def get_tests(self, rootdir=None) -> list:
         """Returns a list of all test paths in root directory
 
@@ -415,7 +415,7 @@ class FileStructure:
         # Get path to MPP folders
         mpp_folder = [os.path.join(stringpath, "MPP")]
 
-        # Get path to jv folders --> rootfolder:JV_{module}:
+        # Get path to JV folders
         jv_folders = []
         for i in range(1, self.NUM_MODULES + 1):
             jv_folder = os.path.join(stringpath, "JV_" + str(int(i)))

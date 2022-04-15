@@ -13,7 +13,7 @@ from parasol.filestructure import FileStructure
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f)["analysis"]  # , Loader=yaml.FullLoader)["analysis"]
+    constants = yaml.safe_load(f)["analysis"]
 
 
 class Analysis:
@@ -22,10 +22,10 @@ class Analysis:
     def __init__(self) -> None:
         """Initializes Analysis class"""
 
-        # Get file structure
+        # Load packages
         self.filestructure = FileStructure()
 
-        # Get constants
+        # Load constants
         self.derivative_v_step = constants["derivative_v_step"]
 
     # Main analysis --> check_test runs from RUN_UI and analyze_from_savepath on string unload
@@ -44,13 +44,13 @@ class Analysis:
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
 
-        # Calculate pmpps (1 device per module), stick in dataframe and return to plot
+        # Calculate Pmpps, create dataframe and return to plot
         t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps(jv_folders, jv_dict)
         col_names = ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
         plot_df = pd.DataFrame(columns=col_names, data=data)
 
-        # Note that right now we cant run analysis on MPP file incase we are trying to save to it
+        # TODO: Could improve this by plotting the MPP values as well
 
         return plot_df
 
@@ -64,7 +64,7 @@ class Analysis:
             list[str]: path to output file
         """
 
-        # Get folder paths: create self.mpp_folder, self.jv_folders, and self.analyzed_folder (all lists)
+        # Get folder paths: create mpp_folder, jv_folders, and analyzed_folder (all lists)
         (
             mpp_folder,
             jv_folders,
@@ -76,7 +76,7 @@ class Analysis:
         jv_dict = self.filestructure.map_test_files(jv_folders)
         mpp_dict = self.filestructure.map_test_files(mpp_folder)
 
-        # Analyze JV files: For each module export scalars_{module}.csv
+        # Analyze JV files: for each module export scalars_{module}.csv
         analyzed_waves = self.analyze_files(
             jv_folders, jv_dict, mpp_folder, mpp_dict, analyzed_folder[0]
         )
@@ -117,14 +117,13 @@ class Analysis:
                 all_p_rev,
             ) = self.load_jv_files(jv_file_paths)
 
-            # Make time data numpy array, calc time elapsed
+            # Make time data numpy array, calculate time elapsed
             all_t = np.array(all_t)
             all_t_elapsed = all_t - all_t[0]
 
-            # Calc pmp
+            # Calculate Pmps for forward and reverse scans
             pmp_fwd = []
             pmp_rev = []
-
             for index in range(len(all_p_fwd)):
                 pmp_fwd.append(np.max(all_p_fwd[index]))
                 pmp_rev.append(np.max(all_p_rev[index]))
@@ -163,10 +162,10 @@ class Analysis:
         # Make blank array to keep save locations
         save_locations = []
 
-        # Cycle through every module/folder in jv dict
+        # Cycle through every module/folder in JV dict
         for idx, jv_folder in enumerate(jv_folders):
 
-            # Get data from JV files
+            # Load data from JV files
             jv_file_paths = jv_dict[jv_folder]
             (
                 all_t,
@@ -201,13 +200,14 @@ class Analysis:
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
 
-            # Interpolate env data reforms the large matrix every time right now.
+            # Interpolate environmental data.
+            # TODO: This reforms the large matrix every time right now, which could be prohibitive for large data sets.
             t = np.asarray([t_epoch for t_epoch in all_t])
             env_headers, env_data = self.interp_env_data(t)
             for idx in range(1, len(env_headers)):
                 scalardict[env_headers[idx]] = env_data[idx]
 
-            # Create scalar dataframe
+            # Create dataframe from dictionary
             scalar_df = pd.DataFrame(scalardict)
 
             # Filter dataframe
@@ -335,7 +335,7 @@ class Analysis:
                 ff_vals.append(ff)
                 pce_vals.append(pce)
 
-        # Create dict to hold data
+        # Create dictionary to hold data
         returndict = {
             direction + " PCE (%)": pce_vals,
             direction + " Jsc (mA/cm2)": jsc_vals,
@@ -364,10 +364,8 @@ class Analysis:
 
         """
 
-        # Get file paths seperated by environmental date folder
+        # Get file paths seperated by date (list of lists), make 1D
         filepaths = self.filestructure.get_env_files(startdate, enddate)
-
-        # Make 1D list of filepahts for loading
         one_d = []
         for subfolder in filepaths:
             for path in subfolder:
@@ -393,21 +391,23 @@ class Analysis:
             list(float): data for interpolated dataframe
         """
 
-        # Grab first and last timestamp
+        # Get first and last timestamps
         first_t = datetime.fromtimestamp(float(epochstamps[0])).strftime("x%Y%m%d")
         last_t = datetime.fromtimestamp(float(epochstamps[-1])).strftime("x%Y%m%d")
 
-        # Create dataframe from first and last timestamps, first column is t
+        # Get enviornmental monitoring header and data from first time to last time
+        # ["Time (Epoch)", "Temperature (C)", "RH (%)", "Intensity (mW/m2)"]
         df_headers, df_data = self.get_env_data(first_t, last_t)
 
-        # Start data with start time
-        df2_data = [df_data[0]]
+        # Create seccond list to start interpolating data. Start data with start time
+        # x220415 -> fill this will time data from epoch stamps instad of df_data[0] # TODO: Check this is correct
+        df2_data = [epochstamps]
 
-        # Grab time, interp epoch stamps to datatime
-        x = df_data[0]
+        # Grab monitoring_time, interpolate monitoring data to epochstamps
+        monitoring_times = df_data[0]
         for idx in range(1, len(df_data)):
 
-            interp_data = np.interp(epochstamps, x, df_data[idx])
+            interp_data = np.interp(epochstamps, monitoring_times, df_data[idx])
             df2_data.append(interp_data)
 
         return df_headers, df2_data
@@ -439,7 +439,8 @@ class Analysis:
 
         return df_filtered_2
 
-    # Loads various files into program
+    # Load various files into program
+
     def load_jv_files(self, jv_file_paths: list) -> list:
         """Loads JV files contained in jv_file_paths, returns data
 
@@ -595,7 +596,7 @@ class Analysis:
                 j.append(float(line[3]))
                 p.append(float(line[4]))
 
-        # convert to lists --> ensures we dont have a float and converts np arrays
+        # Convert to lists if not already a list (floats throw errors in sequential code)
         if type(t) is not list:
             t2 = [t]
         else:
@@ -666,13 +667,13 @@ class Analysis:
             list[float]: intensity
         """
 
-        # Create blank lists
+        # Create blank lists to fill with float variables
         t = []
         temp = []
         rh = []
         intensity = []
 
-        # append to the lists
+        # Append to the lists
         with open(env_file_path) as f:
             csvreader = reader(f, delimiter=",")
             next(csvreader)  # skip header

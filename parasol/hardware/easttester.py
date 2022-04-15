@@ -56,7 +56,7 @@ class EastTester:
         self.connect(et_num=et_num)
 
         # Set both channels to source voltage and measure current when initialized (1st is dummy index)
-        # Added some time.sleep because sometimes Ch2 of ET5420 was not ready to receive commands
+        # Added some time.sleep because sometimes Ch2 of ET5420 was not ready to receive commands. This should be done with internal commands.
         # TODO: Check if this is still necessary
         self._sourcing_current = [False, False, False]
         self.srcV_measI(1)
@@ -251,7 +251,7 @@ class EastTester:
             self.srcI_measV(channel)
             self._sourcing_current[channel] = True
 
-        # set current (TODO: units) and wait
+        # set current (A) and wait
         self.et.write(("CURR" + str(channel) + ":CC %.4f\n" % (current)).encode())
         time.sleep(self.source_delay)
 
@@ -268,7 +268,7 @@ class EastTester:
             self.srcI_measV(channel)
             self._sourcing_current[channel] = True
 
-        # set current (TODO: units) and wait
+        # set current (A) and wait
         self.et.write(("CURR" + str(channel) + ":CC %.4f\n" % (current)).encode())
         time.sleep(self.source_delay)
 
@@ -290,8 +290,6 @@ class EastTester:
         # Average over avg_num
         while i < self.et_avg_num:
 
-            # TODO: NOTIFY USER WITH EMAIL
-
             # Measure current
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             time.sleep(self.sense_delay)
@@ -299,6 +297,7 @@ class EastTester:
 
             # If we havnt got 5 replies break loop by returning 0.
             if noreply == 5:
+                # TODO: NOTIFY USER SOMEHOW
                 return 0.000
 
             # If we dont get a reply, try again, iterate no reply counter

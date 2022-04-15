@@ -15,7 +15,7 @@ class Grapher:
     def __init__(self) -> None:
         """Initializes Grapher class"""
 
-        # Load filstructure and analysis package to manage files
+        # Load packages
         self.filestructure = FileStructure()
         self.analysis = Analysis()
 
@@ -62,10 +62,10 @@ class Grapher:
             10: "X",
         }
 
-    # Plot Statistics for a single dataframe --> used in check test
+    # Plot Statistics for a single dataframe with x and y labels --> used in check test
 
     def plot_x_v_ys(self, df: pd.DataFrame, x: str, ys: list, **plt_kwargs) -> None:
-        """Plots x vs. y for a set of ys (1 graph)
+        """Plots x vs. ys in a singular dataframe on one graph
 
         Args:
             df (pd.DataFrame): dataframe containing x and y values to plot
@@ -76,17 +76,17 @@ class Grapher:
         # Get x values
         x_vals = df[x]
 
-        # Get y labels
+        # Create blank string to append y labels
         y_label = ""
 
         # Cycle through y labels
         for y_param in ys:
 
-            # For each parameter, plot all data
+            # For each parameter, plot x versus y
             y_vals = df[y_param]
             for i in range(len(y_vals)):
 
-                # Plot using fwd/rev arrows
+                # If FWD/REV data plot using fwd/rev arrows, otherwise plot using dots
                 if "FWD" in y_param:
                     plt.scatter(
                         x_vals[i],
@@ -104,10 +104,13 @@ class Grapher:
                 else:
                     plt.scatter(x_vals[i], y_vals[i], **plt_kwargs)
 
+                # Append y label to string
                 y_label += str(y_param) + " / "
 
-        # Label axes, show plot
+        # Remove ending of y label
         y_label = y_label[:-3]
+
+        # Set labels
         plt.ylabel(y_label, weight="black")
         plt.xlabel(x, weight="black")
         plt.show()
@@ -121,7 +124,7 @@ class Grapher:
             jvfolder (str): path to JV folder
         """
 
-        # Create dictionary where dict[testfolder] = list of jv files
+        # Create dictionary where dict[testfolder] = list of JV files
         jv_dict = self.filestructure.map_test_files([jvfolder])
 
         # Feed file into the dictionary to get a list of JV files
@@ -145,8 +148,6 @@ class Grapher:
 
         # Plot MPPs for each module
         self.plot_mpps(self, mpp_file_paths, None, **plt_kwargs)
-
-    # These functions take axes and plot on them
 
     def plot_jvs(self, jvfiles: list, **plt_kwargs) -> None:
         """Plot JVs for input JV files
@@ -212,6 +213,8 @@ class Grapher:
         plt.xlabel("V (V)", weight="black")
         plt.title(titlestr)
         plt.show()
+
+    # These functions take axes and plot on them
 
     def plot_mpps(self, mppfiles: list, ax: plt.axes = None, **plt_kwargs) -> plt.axes:
         """Plots MPPs for input MPP files
@@ -290,7 +293,6 @@ class Grapher:
         ax.set_ylabel(y, weight="black")
         ax.set_xlabel(x, weight="black")
 
-        # Return axes
         return ax
 
     def plot_xy2_scalars(
@@ -401,11 +403,11 @@ class Grapher:
         ax.set_ylabel(y, weight="black")
         ax.set_xlabel(x, weight="black")
 
-        # Return axes
         return ax
 
 
 # TODO: plot_mpps take plot axes, plot_jvs should as well.
+# TODO: make things function better on either axes or figure
 
 
 # Remove for now:

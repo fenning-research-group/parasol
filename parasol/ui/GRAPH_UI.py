@@ -14,7 +14,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import yaml
-
 from PyQt5 import QtCore
 from PyQt5 import uic
 import sys
@@ -192,11 +191,8 @@ def GRAPHER():
 
             # Create dictionary [foldername] = folderpath -> map names to paths
             # Create dictionary [foldername] = True/False -> map names to if they have been selected
-            # Create dictionary [foldername] = color -> map names to colors
-
             testname_to_testpath = {}
             test_selection_dict = {}
-
             for idx in range(len(test_foldername_list)):
                 testname_to_testpath[test_foldername_list[idx]] = test_folderpath_list[
                     idx
@@ -225,7 +221,7 @@ def GRAPHER():
 
         def testfolder_clicked(self, item: QListWidgetItem) -> None:
             """Does Nothing"""
-            # Option to overlay single click plot on double when clicked
+            # Do nothing on single click
 
         def testfolder_doubleclicked(self, item: QListWidgetItem) -> None:
             """Permanantley displays the test folder when double clicked
@@ -256,7 +252,7 @@ def GRAPHER():
         def setrootdir_clicked(self) -> None:
             """Manages setting root directory on button click"""
 
-            # Propts dialoge to let user select root directory
+            # Prompts dialoge to let user select root directory
             file = QFileDialog.getExistingDirectory(
                 self, "Select Directory", self.rootdir.text()
             )
@@ -291,28 +287,21 @@ def GRAPHER():
 
             """
 
-            # TODO: delete numtests
-            # Append selected tests to list
-            # numtests = 0
+            # Create list of selected tests
             selected_tests = []
             for i, key in enumerate(self.test_selection_dict):
                 if self.test_selection_dict[key] == True:
-                    # numtests += 1
                     selected_tests.append(key)
-                # elif self.test_selection_dict[key] == False:
-                #     numtests += 0
 
             # Create color map dict to hold color for each test
-            colors = plt.cm.viridis(
-                np.linspace(0, 1, len(selected_tests))
-            )  # numtests))
+            colors = plt.cm.viridis(np.linspace(0, 1, len(selected_tests)))
             test_color_dict = {}
             for idx, selected_test in enumerate(selected_tests):
                 test_color_dict[self.testname_to_testpath[selected_test]] = str(
                     mpl.colors.to_hex(colors[idx])
                 )
 
-            # Colorize the list
+            # Colorize the list in the file browser. This will behave as a key
             for i, key in enumerate(self.test_selection_dict):
 
                 # If dev is selected, get colors and set item to same color as graph
@@ -320,7 +309,7 @@ def GRAPHER():
                     rgbh = test_color_dict[self.testname_to_testpath[key]]
                     self.alltestfolders.item(i).setBackground(PyQt5.QtGui.QColor(rgbh))
 
-                # otherwise set white
+                # Otherwise set it to white
                 elif self.test_selection_dict[key] == False:
                     self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
 

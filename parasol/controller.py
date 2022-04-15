@@ -19,7 +19,7 @@ from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
 
-# # Set module directory, import constants from yaml file
+# Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
     constants = yaml.safe_load(f)["controller"]
@@ -55,6 +55,9 @@ class Controller:
 
         # Initialize running
         self.running = False
+
+        # Create blank message that can be checked from other programs (mainly GUI)
+        self.message = None
 
         # Create characterization/monitor/logging directory
         self.characterizationdir = self.filestructure.get_characterization_dir()
@@ -596,6 +599,7 @@ class Controller:
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
+        # TODO: Reset hardware on stop
         # force wait until all active strings have been terminated
         # while any(self.active_strings):
         #     time.sleep(1)
@@ -852,12 +856,32 @@ class Controller:
             self.logger.debug(f"Turned off all relays")
 
         # Return true if orientation is correct, False otherwise
+        check_module_string = ""
         for module in modules:
             self.logger.info(
                 f"Module {module} orientation correct: {correct_orientation[idx]}"
             )
+            check_module_string += (
+                f"Module {module} orientation correct: {correct_orientation[idx]},"
+            )
 
         self.logger.info(f"Checked orientation of modules {modules}")
+        self.message = check_module_string
+
+    def pass_message(self) -> str:
+        """
+        Passes message from controller using self.message, set to None after
+
+        Args:
+            message (str): message to pass
+        """
+
+        self.logger.debug(f"Passing message to controller")
+
+        # Pass message to controller
+        message = self.message
+        self.message = None
+        return message
 
     def __del__(self) -> None:
         """Stops que and program on exit"""

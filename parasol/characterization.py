@@ -15,6 +15,7 @@ class Characterization:
     def __init__(self) -> None:
         """Initializes the Characterization class"""
 
+        # Get constants
         self.et_voltage_step = constants["mppt_voltage_step"]
 
         # Set up JV mode: # should match the if statment below and "" should be the desired name
@@ -104,6 +105,7 @@ class Characterization:
             np.ndarray: current (A) values
         """
 
+        # Get MPP mode
         mpp_mode = d["mpp"]["mode"]
 
         # # Perturb and observe, standard
@@ -273,7 +275,6 @@ class Characterization:
         # # http://lib.tkk.fi/Dipl/2010/urn100399.pdf
         # elif mpp_mode == 3:
 
-        # Note that right now currents, vmin, and vmax are floats, others are np.floats
         if mpp_mode == 0:
             # If we have not tracked yet, step in standard direction from MPP calc from JV, else run algorithm
             if (d["mpp"]["last_powers"][0] is None) or (
@@ -284,14 +285,13 @@ class Characterization:
                 i = easttester.set_V_measure_I(ch, v)
 
             else:
-                # calcualte changes in I, P, V
+                # Calcualte changes in I, P, V
                 delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
                 delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
                 delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
 
                 # Modified perturb and observe logic
-                # Not working great
-                # If we get stuck at 0 then dv = 0 and we get v_inc = 0 unless we decrease in energy.
+                # TODO: Not working great. If we get stuck at 0 then dv = 0 and we get v_inc = 0 unless we decrease in energy.
                 if delta_p == 0:
                     v_increase = 0
                 elif delta_i < 0:
@@ -309,22 +309,22 @@ class Characterization:
                     else:
                         v_increase = -1
 
-                # set direction of v
+                # Set voltage using constant step + direction determined above
                 v = vmpp_last + v_increase * self.et_voltage_step
 
-                # ensure we are within bounds and in correct quadrant
+                # Ensure we are within bounds and in correct quadrant
                 if v <= max(d["mpp"]["vmin"], 0.0):
                     v = vmpp_last + 2 * self.et_voltage_step
                 elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0.0):
                     v = vmpp_last - 2 * self.et_voltage_step
 
-                # ensure we arent sitting in the noise --> may not need anymore
+                # ensure we arent sitting in the noise. If we are, turn voltage to low.
                 if 0 <= d["mpp"]["last_currents"][1] <= 1:
                     v = max(
                         self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
                     )
 
-                # bias at calc point and last point, determine greater value
+                # bias at calc point
                 t = time.time()
                 i = easttester.set_V_measure_I(ch, v)
 
@@ -382,12 +382,12 @@ class Characterization:
 
             num_modules = len(d["module_channels"])
 
-            # set voltage to voltage wave, make empty currents
+            # Set voltage to voltage wave, make empty currents
             v_vals = d["jv"]["v"][0]
             j_fwd = 0
             j_rev = 0
 
-            # add up currents (parallel) in fwd/rev
+            # Add up currents  from devices in parallel in fwd/rev
             for value in d["jv"]["j_fwd"]:
                 j_fwd += value
             j_fwd /= num_modules
@@ -395,16 +395,15 @@ class Characterization:
                 j_rev += value
             j_rev /= num_modules
 
-            # average forward and reverse current, calc p and vmpp
+            # Average forward and reverse current
             j = (j_fwd + j_rev) / 2
 
-            voc = v_vals[np.argmin(np.abs(v_vals))]
-
+            # Calc voc, set voltage to fraction of voc
+            voc = v_vals[np.argmin(np.abs(j))]
             v = voc * 0.75
             t = time.time()
             i = easttester.set_V_measure_I(ch, v)
 
-        # send back vmpp
         return t, v, i
 
     def calc_last_vmp(self, d: dict) -> float:
@@ -417,22 +416,21 @@ class Characterization:
             float: last maximum power point tracking voltage (V)
         """
 
-        vmpp = 0
         num_modules = len(d["module_channels"])
 
-        # take vmp from mpp tracking if it has value
+        # Take vmp from mpp tracking if it has value
         if d["mpp"]["vmpp"] is not None:
             vmpp = d["mpp"]["vmpp"]
 
-        # if we have run all modules on the string use JV curves
+        # If we have run all modules on the string, use JV curves to calcualte
         elif d["jv"]["j_fwd"][num_modules - 1] is not None:
 
-            # set voltage to voltage wave, make empty currents
+            # Set voltage to voltage wave, make empty currents
             v = d["jv"]["v"][0]
             j_fwd = 0
             j_rev = 0
 
-            # add up currents (parallel) in fwd/rev
+            # Add up currents (parallel) in fwd/rev
             for value in d["jv"]["j_fwd"]:
                 j_fwd += value
             j_fwd /= num_modules
@@ -440,12 +438,12 @@ class Characterization:
                 j_rev += value
             j_rev /= num_modules
 
-            # average forward and reverse current, calc p and vmpp
+            # Average forward and reverse current, calc p and vmpp
             j = (j_fwd + j_rev) / 2
             p = np.array(v * j)
             vmpp = v[np.argmax(p)]
 
-        # else flag with None
+        # Else, flag with None
         else:
             vmpp = None
 
@@ -456,7 +454,7 @@ class Characterization:
         orientation_correct = None
 
         isc = scanner.isc()
-        minisc = -0.0005
+        minisc = 0  # TODO: confirm this doesnt have to be -0.0005
         if isc < minisc:
             orientation_correct = True
         elif isc > minisc:
@@ -478,6 +476,7 @@ class Characterization:
         """
 
         t = time.time()
+        # TODO: Add read monitoring
         # temp, rh, intensity = labjack.monitor_env()
 
         # return t, temp, rh, intensity

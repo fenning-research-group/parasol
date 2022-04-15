@@ -28,7 +28,7 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>0</y>
+         <y>-349</y>
          <width>1138</width>
          <height>1098</height>
         </rect>
@@ -451,7 +451,7 @@
                   <x>845</x>
                   <y>10</y>
                   <width>225</width>
-                  <height>131</height>
+                  <height>165</height>
                  </rect>
                 </property>
                 <property name="title">
@@ -500,6 +500,19 @@
                  </property>
                  <property name="text">
                   <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
                  </property>
                 </widget>
                </widget>
@@ -1062,7 +1075,7 @@
                   <x>845</x>
                   <y>10</y>
                   <width>225</width>
-                  <height>131</height>
+                  <height>165</height>
                  </rect>
                 </property>
                 <property name="title">
@@ -1111,6 +1124,19 @@
                  </property>
                  <property name="text">
                   <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
                  </property>
                 </widget>
                </widget>
@@ -1673,7 +1699,7 @@
                   <x>845</x>
                   <y>10</y>
                   <width>225</width>
-                  <height>131</height>
+                  <height>165</height>
                  </rect>
                 </property>
                 <property name="title">
@@ -1722,6 +1748,19 @@
                  </property>
                  <property name="text">
                   <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
                  </property>
                 </widget>
                </widget>
@@ -2287,7 +2326,7 @@
                   <x>845</x>
                   <y>10</y>
                   <width>225</width>
-                  <height>131</height>
+                  <height>165</height>
                  </rect>
                 </property>
                 <property name="title">
@@ -2336,6 +2375,19 @@
                  </property>
                  <property name="text">
                   <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
                  </property>
                 </widget>
                </widget>
@@ -2901,7 +2953,7 @@
                   <x>845</x>
                   <y>10</y>
                   <width>225</width>
-                  <height>131</height>
+                  <height>165</height>
                  </rect>
                 </property>
                 <property name="title">
@@ -2950,6 +3002,19 @@
                  </property>
                  <property name="text">
                   <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
                  </property>
                 </widget>
                </widget>
@@ -3515,7 +3580,7 @@
                   <x>845</x>
                   <y>10</y>
                   <width>225</width>
-                  <height>131</height>
+                  <height>165</height>
                  </rect>
                 </property>
                 <property name="title">
@@ -3564,6 +3629,19 @@
                  </property>
                  <property name="text">
                   <string>Check On Test</string>
+                 </property>
+                </widget>
+                <widget class="QPushButton" name="CheckOrientationButton_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>126</y>
+                   <width>205</width>
+                   <height>30</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Check Module Orientation</string>
                  </property>
                 </widget>
                </widget>
