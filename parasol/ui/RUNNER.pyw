@@ -1,4 +1,4 @@
-from .RUN_UI import RUN_UI
+from RUN_UI import RUNNER 
 
 # Launch the GUI without terminal
-RUN_UI()
+RUNNER() 
