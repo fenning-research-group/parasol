@@ -6,20 +6,18 @@ import os
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f)[
-        "characterization"
-    ]  # , Loader=yaml.FullLoader)["characterization"]
+    constants = yaml.safe_load(f)["characterization"]
 
 
 class Characterization:
     """Characterization package for PARASOL"""
 
     def __init__(self) -> None:
-        """Initliazes the Characterization class"""
+        """Initializes the Characterization class"""
 
         self.et_voltage_step = constants["mppt_voltage_step"]
 
-        # set up jv mode where # shoud match the if statment below and "" should match name of that test
+        # Set up JV mode: # should match the if statment below and "" should be the desired name
         self.jv_options = {
             0: "REV then FWD",
             1: "FWD then REV",
@@ -27,7 +25,7 @@ class Characterization:
             3: "FWD then REV, Jsc to Voc",
         }
 
-        # set up mpp mode where # shoud match the if statment below and "" should match name of that test
+        # Set up MPP mode: # shoud match the if statment below and "" should be the desired name
         self.mpp_options = {
             0: "Perturb and Observe (constant V step)",
             1: "75% of Voc --> Untested",

@@ -28,7 +28,7 @@ with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
 class Controller:
     """Controller package for PARASOL"""
 
-    # Initialize kit, Start/stop workers, File management
+    # Initialize kit, start/stop workers, file management
 
     def __init__(self, logging_on=True) -> None:
         """Initializes the Controller class
@@ -50,11 +50,13 @@ class Controller:
         self.filestructure = FileStructure()
         self.monitor = LabJack()
 
-        # Get monitoring delay
+        # Get constants
         self.monitor_delay = constants["monitor_delay"]
 
-        # Initialize running variable, create characterization/monitor/logging directory
+        # Initialize running
         self.running = False
+
+        # Create characterization/monitor/logging directory
         self.characterizationdir = self.filestructure.get_characterization_dir()
         if not os.path.exists(self.characterizationdir):
             os.mkdir(self.characterizationdir)
@@ -65,7 +67,7 @@ class Controller:
         if not os.path.exists(self.logdir):
             os.mkdir(self.logdir)
 
-        # Maps string ID to ET port (which of the 3 ET) and channel
+        # Map string ID to ET port and channel
         self.et_channels = {
             1: ("12", 1),
             2: ("12", 2),
@@ -74,6 +76,7 @@ class Controller:
             5: ("56", 1),
             6: ("56", 2),
         }
+
         # Maps string ID to module channels
         self.module_channels = {
             1: [1, 2, 3, 4],
@@ -83,15 +86,14 @@ class Controller:
             5: [17, 18, 19, 20],
             6: [21, 22, 23, 24],
         }
+
+        # Create blank dictionary to hold all info about strings
         self.strings = {}
 
-        # Create list of threads
-        self.active_threads = []
-
-        # Create a list of active strings
+        # Create list of active strings
         self.active_strings = [False] * (6 + 1)
 
-        # Create Logger
+        # Create logger with options to log or not
         date = datetime.now().strftime("%Y%m%d")
         self.logger = logging.getLogger("PARASOL")
         self.logger.setLevel(logging.DEBUG)
@@ -108,17 +110,16 @@ class Controller:
         )
         fh.setFormatter(fh_formatter)
         sh.setFormatter(sh_formatter)
-
-        # Options to not log
         if logging_on:
             self.logger.addHandler(fh)
             self.logger.addHandler(sh)
 
         # Decide how many workers we will allow and start the queue
-        # 1 for scanner, 6 for load, 1 for random tasks
-        self.threadpool = ThreadPoolExecutor(max_workers=8)
+        # 1 for scanner, 6 for load, 1 for random tasks, 1 for environment
+        self.threadpool = ThreadPoolExecutor(max_workers=9)
         self.start()
 
+    # TODO: check name _idx added
     def load_string(
         self,
         id: int,
@@ -140,7 +141,7 @@ class Controller:
             id (int): string number
             startdate (string): start date for test (xYYYYMMDD)
             name (string): test name (basename, no _idx added)
-            area (float): area of each module on string
+            area (float): area of each module on string (cm^2)
             jv_mode (int): JV mode (#'s correspond to option # in UI)
             mpp_mode (int): MPP mode (#'s correspond to option # in UI)
             module_channels (list[int]): modules connected
@@ -151,8 +152,8 @@ class Controller:
             jv_steps (int): number of voltage steps
 
         Raises:
-            ValueError: String is already loaded
-            ValueError: String ID does not exist
+            ValueError: String ID already loaded
+            ValueError: ID not valid string ID
 
         Returns:
             string: path to save directory
@@ -170,7 +171,7 @@ class Controller:
         mpp_future = asyncio.run_coroutine_threadsafe(self.mpp_timer(id=id), self.loop)
         mpp_future.add_done_callback(future_callback)
 
-        # If we are not monitoring the environment, start the monitor, let user know
+        # If we are not monitoring the environment, start the monitor
         if not any(self.active_strings):
             self.logger.debug(f"Starting environmental monitoring")
             self.monitor_future = asyncio.run_coroutine_threadsafe(
@@ -218,8 +219,6 @@ class Controller:
             self.strings[id]["_savedir"],
             self.strings[id]["name"],
         ) = self.filestructure.make_module_subdir(name, module_channels, startdate)
-
-        # Let user know
         self.logger.info(f"String {id} loaded")
 
         return self.strings[id]["name"]
@@ -254,6 +253,7 @@ class Controller:
         if id not in self.strings:
             raise ValueError(f"String {id} not loaded!")
 
+        # Lock all actions on string
         with d["lock"]:
 
             saveloc = d["_savedir"]
@@ -266,9 +266,8 @@ class Controller:
             self.strings[id]["mpp"]["_future"].cancel()
             self.logger.debug(f"Canceled tasks for {id}")
 
-            # Delete the stringid from the dict, remove from queue
+            # Remove all tasks in que not already started (can start 1 from each worker)
             self.logger.debug(f"Removing tasks from que for {id}")
-            # # del self.strings[id]
             while id in self.jv_queue._queue:
                 self.jv_queue._queue.remove(id)
             while id in self.mpp_queue._queue:
@@ -283,9 +282,6 @@ class Controller:
                 self.logger.debug(f"Canceling environmental monitoring")
                 time.sleep(self.monitor_delay)
                 self.monitor_future.cancel()
-                # NEW commented this out. i think it may throw errors occasionally.
-                # while 1 in self.monitor_queue._queue:
-                #     self.monitor_queue._queue.remove(1)
                 self.logger.info(f"Environmental monitoring canceled")
 
             # Turn load output off
@@ -296,14 +292,14 @@ class Controller:
             load.output_off(ch)
             self.logger.debug(f"Load reset for {id}")
 
-            # Analyze the saveloc in a new thread, append to list of active threads
+            # Analyze the saveloc in a new thread
             self.logger.debug(f"Saving analysis at : {saveloc}")
             analyze_thread = Thread(
                 target=self.analysis.analyze_from_savepath, args=(saveloc,)
             )
             analyze_thread.start()
-            self.active_threads.append(analyze_thread)
 
+        # Delete the string
         del self.strings[id]
 
         self.logger.info(f"Analysis saved at : {saveloc}")
@@ -323,7 +319,7 @@ class Controller:
         time_str = datetime.now().strftime("%H:%M:%S")
         epoch_str = time.time()
 
-        # Save in base filepath: stringname: MPP: stringname_stringid_mpp_1 (we only have 1 mpp file)
+        # Save in base filepath: stringname: MPP: stringname_stringid_mpp_# (matches JV #)
         mppfolder = self.filestructure.get_mpp_folder(d["start_date"], d["name"])
         mppfile = self.filestructure.get_mpp_file_name(
             d["start_date"], d["name"], id, d["jv"]["scan_count"]
@@ -363,7 +359,7 @@ class Controller:
         currenttime = datetime.now()
         cdate = currenttime.strftime("x%Y%m%d")
 
-        # Get environment folder, file
+        # Get environment folder and file
         envfolder = self.filestructure.get_environment_folder(cdate)
         if not os.path.exists(envfolder):
             os.mkdir(envfolder)
@@ -400,7 +396,8 @@ class Controller:
 
         # We need a sleep here or it never gets added to the queue
         time.sleep(0.5)
-        # While the loop is running, add jv scans to queue
+
+        # While the loop is running, add JV scans to queue
         while self.running:
             id = await self.jv_queue.get()
 
@@ -413,7 +410,7 @@ class Controller:
             )
             scan_future.add_done_callback(future_callback)
 
-            # Scan the module and let user know
+            # Scan the module
             await scan_future
             self.jv_queue.task_done()
 
@@ -426,6 +423,7 @@ class Controller:
 
         # We need a sleep here or it never gets added to the queue
         time.sleep(0.5)
+
         # While the loop is running, add mpp scans to queue
         while self.running:
             id = await self.mpp_queue.get()
@@ -438,7 +436,7 @@ class Controller:
             )
             scan_future.add_done_callback(future_callback)
 
-            # Scan the string and let the user know
+            # Track the string
             await scan_future
             self.mpp_queue.task_done()
 
@@ -450,7 +448,9 @@ class Controller:
             loop (asyncio.AbstractEventLoop): timer loop to insert MPP worker into
         """
 
+        # We need a sleep here or it never gets added to the queue
         time.sleep(0.5)
+
         # While the loop is running, add mpp scans to queue
         while self.running:
             modules = await self.random_queue.get()
@@ -463,7 +463,7 @@ class Controller:
             )
             scan_future.add_done_callback(future_callback)
 
-            # Scan the string and let the user know
+            # Check orientation of modules
             await scan_future
             self.random_queue.task_done()
 
@@ -476,6 +476,7 @@ class Controller:
 
         # We need a sleep here or it never gets added to the queue
         time.sleep(0.5)
+
         # While the loop is running, add monitor scans to queue
         while self.running:
             dummyid = await self.monitor_queue.get()
@@ -484,6 +485,7 @@ class Controller:
             )
             scan_future.add_done_callback(future_callback)
 
+            # Track the environemnt
             await scan_future
             self.monitor_queue.task_done()
 
@@ -542,7 +544,7 @@ class Controller:
         def exception_handler(loop, context):
             self.logger.info(f"Exception raised in Controller loop")
 
-        # Start event loop, add jv workers and mpp workers
+        # Start event loop, add workers
         self.loop = asyncio.new_event_loop()
         self.loop.set_exception_handler(exception_handler)
         asyncio.set_event_loop(self.loop)
@@ -573,11 +575,13 @@ class Controller:
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+
+        # Create check orientation workers
         asyncio.run_coroutine_threadsafe(
             self.check_orientation_worker(self.loop), self.loop
         )
 
-        # Set to running
+        # Turn on running
         self.running = True
 
     def stop(self) -> None:
@@ -588,7 +592,7 @@ class Controller:
         for id in ids:
             self.unload_string(id)
 
-        # cancel loops, join threads
+        # Cancel loops, join threads
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
@@ -624,13 +628,15 @@ class Controller:
         # Get dictionary information
         d = self.strings.get(id, None)
 
+        # If dictionary is not found, return
         if d is None:
             self.logger.info(f"Empty dictionary passed to MPPT")
             return
 
-        # Ensure MPP isn't running.
+        # Lock the string
         with d["lock"]:
 
+            # If string is nto active return
             if self.active_strings[id] == False:
                 self.logger.info(f"Last JV scan of string {id} aborted")
                 return
@@ -708,11 +714,10 @@ class Controller:
                 d["jv"]["j_fwd"][index] = fwd_j
                 d["jv"]["j_rev"][index] = rev_j
 
-            # Increase jv scan count
+            # Increase JV scan count
             d["jv"]["scan_count"] += 1
 
             # Turn on load output at old vmpp if we have one
-            # (outputon and setvoltage is locked)
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 self.logger.debug(f"Turning on load output for string {id}")
@@ -737,9 +742,10 @@ class Controller:
             self.logger.info(f"Empty dictionary passed to JV")
             return
 
-        # Ensure that JV isn't running
+        # Lock string
         with d["lock"]:
 
+            # If string is not active return
             if self.active_strings[id] == False:
                 self.logger.info(f"Last MPP scan of string {id} aborted")
                 return
@@ -747,7 +753,7 @@ class Controller:
             # Get last MPP, will be none if JV not filled
             last_vmpp = self.characterization.calc_last_vmp(d)
 
-            # If we dont have a Vmpp, skip
+            # If we dont have a Vmpp return
             if last_vmpp is None:
                 return
 
@@ -799,9 +805,13 @@ class Controller:
 
         self.logger.debug(f"Monitoring environment")
 
+        # Get Temperature, Humidity, Relative Humidity, and Temperature
         t, temp, rh, intensity = self.characterization.monitor_environment(self.monitor)
 
+        # Make Env file if needed (daily)
         fpath = self.make_env_file()
+
+        # Append to file
         with open(fpath, "a", newline="") as f:
             writer = csv.writer(f, delimiter=",")
             writer.writerow([t, temp, rh, intensity])
@@ -818,7 +828,10 @@ class Controller:
 
         self.logger.debug(f"Checking orientation")
 
+        # Make string to hold # of correct orientations
         correct_orientation = [None] * len(modules)
+
+        # Cycle through each module
         for idx, module in enumerate(modules):
 
             # Turn on relay
@@ -826,7 +839,7 @@ class Controller:
             self.relay.on(module)
             self.logger.debug(f"Turned on relay for module {module}")
 
-            # Pass scanner to characterization module, returns True if Isc < 0, False otherwise
+            # Pass scanner to characterization module, returns true if Isc < 0, false otherwise
             self.logger.debug(f"Checking orientation for module {module}")
             correct_orientation[idx] = self.characterization.check_orientation(
                 self.scanner
@@ -838,7 +851,7 @@ class Controller:
             self.relay.all_off()
             self.logger.debug(f"Turned off all relays")
 
-        # Return True if orientation is correct, False otherwise
+        # Return true if orientation is correct, False otherwise
         for module in modules:
             self.logger.info(
                 f"Module {module} orientation correct: {correct_orientation[idx]}"

@@ -44,7 +44,7 @@ class Analysis:
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
 
-        # Calculate pmpps (1 array per module), stick in dataframe and return to plot
+        # Calculate pmpps (1 device per module), stick in dataframe and return to plot
         t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps(jv_folders, jv_dict)
         col_names = ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
@@ -107,7 +107,7 @@ class Analysis:
         for jv_folder in jv_folders:
             jv_file_paths = jv_dict[jv_folder]
 
-            # Load jv files
+            # Load JV files
             (
                 all_t,
                 all_v,
@@ -146,6 +146,7 @@ class Analysis:
         mpp_dict: dict,
         analyzed_folder: str,
     ) -> list:
+
         """Cycle through JV files, analyze, and make output file for parameters
 
         Args:
@@ -200,8 +201,7 @@ class Analysis:
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
 
-            # Can break this function here to seperate into multiple parts. Analyze JV, analyze ENV, Analyze MPP. tack on mpp and env to scalardict. Final function to write csv.
-            # interpolate env data reforms the large matrix every time right now.
+            # Interpolate env data reforms the large matrix every time right now.
             t = np.asarray([t_epoch for t_epoch in all_t])
             env_headers, env_data = self.interp_env_data(t)
             for idx in range(1, len(env_headers)):
@@ -272,7 +272,7 @@ class Analysis:
                     rsh = np.inf
                     jsc = float(b)
 
-                # Calculate voc and rs from J(J=0) to derivative_v_step V before
+                # Calculate Voc and Rs from J(J=0) to derivative_v_step V before
                 v_iter = max(math.ceil(self.derivative_v_step / (v[2] - v[1])), 1)
                 wherejis0 = np.nanargmin(np.abs(j))
                 wherejis0_1 = wherejis0 - int(v_iter)
@@ -291,7 +291,7 @@ class Analysis:
                 vmp = v[pmaxloc]
                 jmp = j[pmaxloc]
 
-                # Calculate Rch using vmpp-(derivative_v_step/2) V to vmpp+(derivative_v_step/2) V
+                # Calculate Rch using Vmpp-(derivative_v_step/2) V to vmpp+(derivative_v_step/2) V
                 j1 = j[pmaxloc - math.floor(v_iter / 2)]
                 j2 = j[pmaxloc + math.floor(v_iter / 2)]
                 v1 = v[pmaxloc - math.floor(v_iter / 2)]
@@ -376,7 +376,7 @@ class Analysis:
         # Pass list, get numpy arrays of all the data
         t, temp, rh, intensity = self.load_env_files(one_d)
 
-        # zip and make dataframe
+        # Zip and make dataframe
         df_data = [t, temp, rh, intensity]
         df_headers = ["Time (Epoch)", "Temperature (C)", "RH (%)", "Intensity (mW/m2)"]
 
@@ -393,17 +393,17 @@ class Analysis:
             list(float): data for interpolated dataframe
         """
 
-        # grab first and last timestamp
+        # Grab first and last timestamp
         first_t = datetime.fromtimestamp(float(epochstamps[0])).strftime("x%Y%m%d")
         last_t = datetime.fromtimestamp(float(epochstamps[-1])).strftime("x%Y%m%d")
 
-        # create dataframe from first and last timestamps, first column is t
+        # Create dataframe from first and last timestamps, first column is t
         df_headers, df_data = self.get_env_data(first_t, last_t)
 
-        # start data with time
+        # Start data with start time
         df2_data = [df_data[0]]
 
-        # grab time, interp epoch stamps to datatime
+        # Grab time, interp epoch stamps to datatime
         x = df_data[0]
         for idx in range(1, len(df_data)):
 
@@ -463,6 +463,7 @@ class Analysis:
         all_j_rev = []
         all_p_rev = []
 
+        # Cycle through all files, append values
         for jv_file_path in jv_file_paths:
 
             t, v, j_fwd, p_fwd, j_rev, p_rev = self.load_jv_file(jv_file_path)
@@ -664,11 +665,14 @@ class Analysis:
             list[float]: relative humidity
             list[float]: intensity
         """
+
+        # Create blank lists
         t = []
         temp = []
         rh = []
         intensity = []
 
+        # append to the lists
         with open(env_file_path) as f:
             csvreader = reader(f, delimiter=",")
             next(csvreader)  # skip header

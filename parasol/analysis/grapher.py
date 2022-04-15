@@ -72,8 +72,6 @@ class Grapher:
             x (str): x header name
             ys (list[str]): y header names
         """
-        # Create figure
-        # fig = plt.figure()
 
         # Get x values
         x_vals = df[x]
@@ -84,11 +82,11 @@ class Grapher:
         # Cycle through y labels
         for y_param in ys:
 
-            # for each parameter, plot all data
+            # For each parameter, plot all data
             y_vals = df[y_param]
             for i in range(len(y_vals)):
 
-                # plot using fwd/rev arrows
+                # Plot using fwd/rev arrows
                 if "FWD" in y_param:
                     plt.scatter(
                         x_vals[i],
@@ -108,13 +106,11 @@ class Grapher:
 
                 y_label += str(y_param) + " / "
 
-        # label axes, show plot
+        # Label axes, show plot
         y_label = y_label[:-3]
         plt.ylabel(y_label, weight="black")
         plt.xlabel(x, weight="black")
         plt.show()
-
-        # return fig
 
     # Plot JV/MPPT scans for a single module folder
 
@@ -124,6 +120,7 @@ class Grapher:
         Args:
             jvfolder (str): path to JV folder
         """
+
         # Create dictionary where dict[testfolder] = list of jv files
         jv_dict = self.filestructure.map_test_files([jvfolder])
 
@@ -146,6 +143,7 @@ class Grapher:
         # Feed file into the dictionary to get a list of MPP files
         mpp_file_paths = mpp_dict[mppfolder]
 
+        # Plot MPPs for each module
         self.plot_mpps(self, mpp_file_paths, None, **plt_kwargs)
 
     # These functions take axes and plot on them
@@ -231,7 +229,7 @@ class Grapher:
         if ax is None:
             ax = plt.gca()
 
-        # load mpp
+        # Load MPP files
         (
             all_t,
             all_v,
@@ -240,9 +238,11 @@ class Grapher:
             all_p,
         ) = self.analysis.load_mpp_files(mppfiles)
 
+        # Calculate time elapsed
         t1 = all_t
         t_elapsed = t1 - t1[0]
 
+        # Plot
         ax.plot(
             t_elapsed,
             all_p,
@@ -270,6 +270,7 @@ class Grapher:
         Returns:
             plt.ax: plotted axes
         """
+
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
@@ -307,6 +308,7 @@ class Grapher:
         Returns:
             plt.ax: plotted axes
         """
+
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
@@ -335,7 +337,6 @@ class Grapher:
         ax.set_ylabel(ylab, weight="black")
         ax.set_xlabel(x, weight="black")
 
-        # Return axes
         return ax
 
     def plot_xyz_scalar(
@@ -354,6 +355,7 @@ class Grapher:
         Returns:
             plt.ax: plotted axes
         """
+
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
@@ -361,7 +363,7 @@ class Grapher:
         # Load datafolder path
         df = pd.read_csv(paramfile)
 
-        # cycle through # of points in each array
+        # Cycle through # of points in each array
         for n in range(df.shape[0]):
 
             # Get values for x and y
@@ -380,7 +382,6 @@ class Grapher:
 
         # Manage colorbar
         norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
-
         objs = plt.colorbar(
             mpl.cm.ScalarMappable(norm=norm, cmap=plt.get_cmap("viridis")),
             ax=ax,

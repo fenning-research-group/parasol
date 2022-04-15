@@ -6,18 +6,14 @@ import sys
 import os
 from datetime import datetime
 import yaml
+from multiprocessing import Process
 
-# Import Controller (call load, unload), characterization (know test types), and analysis (check on tests)
 from parasol.controller import Controller
 from parasol.characterization import Characterization
 from parasol.analysis.analysis import Analysis
 from parasol.analysis.grapher import Grapher
 from parasol.filestructure import FileStructure
 
-from multiprocessing import Process
-from threading import Thread
-import threading
-import time
 
 # Set module directory, load yaml preferences
 MODULE_DIR = os.path.dirname(__file__)
@@ -27,7 +23,6 @@ with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
-
 if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
     PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
@@ -42,13 +37,11 @@ def run_async_thread(func):
         function: created thread object
     """
 
-    # import modules needed
+    # Import statements
     from threading import Thread
-
-    # from threading import enumerate
     from functools import wraps
 
-    # wrapper function
+    # Wrapper
     @wraps(func)
     def async_func(*args, **kwargs):
         func_hl = Thread(target=func, args=args, kwargs=kwargs)
@@ -80,9 +73,9 @@ def _check_test(jv_paths: list, mpp_paths: list) -> None:
     )
 
 
-
 def RUNNER():
-    
+    """Create RUN UI window"""
+
     # Main function
     class RUN_UI(QMainWindow):
         """Run UI package for PARASOL"""
@@ -169,7 +162,7 @@ def RUNNER():
             self.area5.setText(str(defaults["area"]))
             self.area6.setText(str(defaults["area"]))
 
-            # get JV frequency and MPP frequency
+            # Get JV frequency and MPP frequency
             self.jvfrequency1 = self.findChild(QLineEdit, "JVFrequencyInput_1")
             self.jvfrequency2 = self.findChild(QLineEdit, "JVFrequencyInput_2")
             self.jvfrequency3 = self.findChild(QLineEdit, "JVFrequencyInput_3")
@@ -198,7 +191,7 @@ def RUNNER():
             self.mppfrequency5.setText(str(defaults["mpp_frequency"]))
             self.mppfrequency6.setText(str(defaults["mpp_frequency"]))
 
-            # Get JV min voltage, max voltage, and voltage step size
+            # Get JV min voltage, max voltage, and voltage step size (V)
             self.vmin1 = self.findChild(QLineEdit, "VminInput_1")
             self.vmin2 = self.findChild(QLineEdit, "VminInput_2")
             self.vmin3 = self.findChild(QLineEdit, "VminInput_3")
@@ -401,13 +394,10 @@ def RUNNER():
             self.checkorientationbutton5.setEnabled(True)
             self.checkorientationbutton6.setEnabled(True)
 
-            # Create GUI
-            # self.launch_gui()
-
         def update_loaded_modules(self) -> None:
             """Uses checkboxes in UI to get list of active modules"""
 
-            # Set all variables to None
+            # Set all modules loaded variables to None
             modules1 = [None] * 4
             modules2 = [None] * 4
             modules3 = [None] * 4
@@ -415,7 +405,7 @@ def RUNNER():
             modules5 = [None] * 4
             modules6 = [None] * 4
 
-            # Cycle through and check if we have module, if so add number to module#
+            # Cycle through and check if we have module box checked, if so add number to module#
             if self.checkbox1.isChecked():
                 modules1[0] = 1
             if self.checkbox2.isChecked():
@@ -646,10 +636,10 @@ def RUNNER():
                 stringid (int): string id
             """
 
-            # Notify User
+            # Notify user
             print("Loading string: " + str(stringid))
 
-            # Update Values
+            # Update values
             self.update_loaded_modules()
             self.update_dictionaries()
 
@@ -689,7 +679,7 @@ def RUNNER():
                     jv_steps,
                 )
 
-                # reconstruct savedir from name and date
+                # Reconstruct savedir from name and date
                 updated_savedir = self.filestructure.get_test_folder(
                     start_date, updated_name
                 )
@@ -714,13 +704,14 @@ def RUNNER():
                     self.name6.setText(updated_name)
                     self.savedir6 = updated_savedir
 
-                # alter dictionary
+                # Update dictionary
                 d["_savedir"] = updated_savedir
                 d["name"] = updated_name
 
-                # lock values
+                # Lock user inputs
                 self.lock_values(id)
 
+            # TODO:REMMOVE PRINTS
             else:
                 print("Please check the boxes for the devices you would like to load.")
 
@@ -733,22 +724,21 @@ def RUNNER():
                 stringid (int): string id
             """
 
-            # Notify User
             print("Unloading string: " + str(stringid))
 
-            # Get ID
+            # Get id
             id = int(stringid)
 
             # Unlock user inputs
             self.unlock_values(id)
 
-            # Call Unload String from controller
+            # Unload string
             self.controller.unload_string(id)
 
-            # get dictionary
+            # Get dictionary
             d = self.strings[id]
 
-            # Manage save dir
+            # Set save directory to None
             saveloc = None
             if id == 1:
                 self.savedir1 = saveloc
@@ -769,7 +759,6 @@ def RUNNER():
                 self.savedir6 = saveloc
                 d["_savedir"] = saveloc
 
-            # Let user know its complete
             print("String " + str(stringid) + " unload successful")
 
         def checktest(self, stringid: int) -> None:
@@ -816,6 +805,8 @@ def RUNNER():
             d = self.strings[stringid]
             module_channels = d["module_channels"]
 
+            # Check orientation of modules
+            # TODO: THIS NO LONGER WORKS AS NO PRINT STATEMENT IS THERE
             self.controller.load_check_orientation(module_channels)
 
         ################################################################################
@@ -824,26 +815,32 @@ def RUNNER():
 
         def checktest1(self) -> None:
             """Checks test 1"""
+
             self.checktest(1)
 
         def checktest2(self) -> None:
             """Checks test 2"""
+
             self.checktest(2)
 
         def checktest3(self) -> None:
             """Checks test 3"""
+
             self.checktest(3)
 
         def checktest4(self) -> None:
             """Checks test 4"""
+
             self.checktest(4)
 
         def checktest5(self) -> None:
             """Checs test 5"""
+
             self.checktest(5)
 
         def checktest6(self) -> None:
             """Checks test 6"""
+
             self.checktest(6)
 
         # Lock Values for Editing
@@ -1224,40 +1221,38 @@ def RUNNER():
             """Checks orientation of test 6"""
             self.checkorientation(6)
 
-        # Launches & closes GUI
-
-        def launch_gui(self) -> None:
-            """Launches GUI"""
-
-            # executes the GUI
-            self.app = QApplication(sys.argv)
-            self.app.exec_()
-
+        # TODO: might delete this, its never run
         def __del__(self) -> None:
             print("Shutting Down")
 
         def closeEvent(self, event):
-            """Confirms & closes the GUI"""
+            """Confirms & closes the GUI upon X being clicked"""
 
+            # Generate box asking for close confirmation (doesnt hold up program)
             reply = QMessageBox.question(
-                self, "Message",
+                self,
+                "Message",
                 "Are you sure you want to quit? Closing will unload all devices and render the UI unresponsive until all data analysis is complete.",
-                QMessageBox.Close | QMessageBox.Cancel, QMessageBox.Cancel)
+                QMessageBox.Close | QMessageBox.Cancel,
+                QMessageBox.Cancel,
+            )
 
+            # If reply is to close, close the GUI
             if reply == QMessageBox.Close:
 
-                # Stop controller (unload everything, reset hardware)
                 self.controller.stop()
-
-                # Quit the application
                 self.app.quit()
-
-                # Close
                 event.accept()
 
+            # Else ignore the close event
             else:
                 event.ignore()
 
+    # Create application (required for widget)
     app = QApplication(sys.argv)
+
+    # Create UI, which is a widget
     window = RUN_UI()
+
+    # Start the application
     app.exec_()

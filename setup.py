@@ -7,7 +7,7 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(this_dir, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
-# set of commands for github
+# Set of commands for github
 setup(
     name="parasol",
     version="0.2.dev",

@@ -11,9 +11,9 @@ from parasol.hardware.port_finder import get_port
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f)["easttester"]  # , Loader=yaml.FullLoader)["relay"]
+    constants = yaml.safe_load(f)["easttester"]
 
-# We have several workers managing east tester so we need to make sure two dont try to work at the same time
+
 def et_lock(f):
     """Locks easttester
 
@@ -57,6 +57,7 @@ class EastTester:
 
         # Set both channels to source voltage and measure current when initialized (1st is dummy index)
         # Added some time.sleep because sometimes Ch2 of ET5420 was not ready to receive commands
+        # TODO: Check if this is still necessary
         self._sourcing_current = [False, False, False]
         self.srcV_measI(1)
         time.sleep(1)
@@ -72,21 +73,14 @@ class EastTester:
 
         # Get port information
         if et_num == 1:
-            # port = constants['ET_1_PORT']
             port = get_port(constants["device_identifiers"]["ET_1"])
-
         elif et_num == 2:
-            # port = constants['ET_2_PORT']
             port = get_port(constants["device_identifiers"]["ET_2"])
-
         elif et_num == 3:
-            # port = constants['ET_3_PORT']
             port = get_port(constants["device_identifiers"]["ET_3"])
 
         # Connect using serial, use highest transferrate and shortest timeout
-        self.et = serial.Serial(
-            port, baudrate=self.baud_rate, timeout=self.time_out
-        )  # 115200, 0.005
+        self.et = serial.Serial(port, baudrate=self.baud_rate, timeout=self.time_out)
 
     # untested
     def srcI_measV(self, channel: int) -> None:
@@ -196,9 +190,7 @@ class EastTester:
         """
 
         self.et.write(("CH" + str(channel) + ":SW ON\n").encode())
-        time.sleep(
-            self.source_delay
-        )  # if this delay reduced we get issues in measuring current (first point low)
+        time.sleep(self.source_delay)
 
     @et_lock
     def output_off(self, channel: int) -> None:
@@ -209,9 +201,7 @@ class EastTester:
         """
 
         self.et.write(("CH" + str(channel) + ":SW OFF\n").encode())
-        time.sleep(
-            self.source_delay
-        )  # if this delay reduced we get issues in measuring current (first point low)
+        time.sleep(self.source_delay)
 
     @et_lock
     def set_voltage(self, channel: int, voltage: float) -> None:
@@ -221,12 +211,13 @@ class EastTester:
             channel (int or string): eastester channel to alter
             voltage (float): desired voltage (V)
         """
+
         # If we are in wrong mode, switch
         if self._sourcing_current[channel] == True:
             self.srcV_measI(channel)
             self._sourcing_current[channel] = False
 
-        # Set voltage and wait
+        # Set voltage (V) and wait
         self.et.write(("VOLT" + str(channel) + ":CV %.4f\n" % (voltage)).encode())
         time.sleep(self.source_delay)
 
@@ -242,7 +233,7 @@ class EastTester:
             self.srcV_measI(channel)
             self._sourcing_current[channel] = False
 
-        # Set voltage and wait
+        # Set voltage (V) and wait
         self.et.write(("VOLT" + str(channel) + ":CV %.4f\n" % (voltage)).encode())
         time.sleep(self.source_delay)
 
@@ -260,7 +251,7 @@ class EastTester:
             self.srcI_measV(channel)
             self._sourcing_current[channel] = True
 
-        # set current and wait
+        # set current (TODO: units) and wait
         self.et.write(("CURR" + str(channel) + ":CC %.4f\n" % (current)).encode())
         time.sleep(self.source_delay)
 
@@ -277,7 +268,7 @@ class EastTester:
             self.srcI_measV(channel)
             self._sourcing_current[channel] = True
 
-        # set current and wait
+        # set current (TODO: units) and wait
         self.et.write(("CURR" + str(channel) + ":CC %.4f\n" % (current)).encode())
         time.sleep(self.source_delay)
 
@@ -290,30 +281,25 @@ class EastTester:
         Returns:
             float: current (A) reading
         """
-        # If timing is off here we get Exemption in Future: List Index Out of Range
 
+        # Initialize variables
         i = 0
         noreply = 0
         curr_tot = 0
 
-        # Average over avg_num (set in hardwareconstants.yaml) times for stats
+        # Average over avg_num
         while i < self.et_avg_num:
-            # adding outputon here may help --> confused on which ch?>
+
+            # TODO: NOTIFY USER WITH EMAIL
+
+            # Measure current
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             time.sleep(self.sense_delay)
             curr = self.et.readlines()
 
-            # If we havnt got 10 replies break loop by returning 0.
-            if noreply == 10:
+            # If we havnt got 5 replies break loop by returning 0.
+            if noreply == 5:
                 return 0.000
-
-            # If we havnt got 5 replies, try to fix ET by resetting settings and restarting
-            elif noreply == 5:
-                print("Warning, no reply from ET")
-                return 0.000
-                # I have tried output_off, output_on, self.et.write("LOAD:ABNO?".encode()),
-                # self.et.reset_output_buffer(), self.et.reset_input_buffer(),
-                # self.srcV_measI(), self.srcI_measV(), self.et.close()
 
             # If we dont get a reply, try again, iterate no reply counter
             if (len(curr) == 0) or (curr[-1] is None):
@@ -349,9 +335,12 @@ class EastTester:
         Returns:
             float: voltage (V) reading
         """
+
+        # Intialize variables
         i = 0
         volt_tot = 0
-        # Average over avg_num (set in hardwareconstants.yaml) times for stats
+
+        # Average voltage (V) over avg_num
         while i < self.et_avg_num:
 
             self.et.write(("MEAS" + str(channel) + ":VOLT?\n").encode())

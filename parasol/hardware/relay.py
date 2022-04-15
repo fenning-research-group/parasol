@@ -37,7 +37,7 @@ class Relay:
         self.lock = Lock()
         self.RESPONSE_TIME = constants["response_time"]
 
-        # Relay commands: [string id] = command to open relay
+        # Relay commands: [device id] = command to open relay
         self.relay_commands = {
             1: (65, 1),
             2: (65, 2),
@@ -72,7 +72,6 @@ class Relay:
         """Connect to the relay"""
 
         # Get port information
-        # port = constants["address"]
         port = get_port(constants["device_identifiers"])
 
         # Connect to relay using serial

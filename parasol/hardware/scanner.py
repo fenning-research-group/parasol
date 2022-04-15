@@ -22,44 +22,46 @@ class Scanner:
     def __init__(self) -> None:
         """Initliazes the Scanner class for Yokogawa GS610"""
 
-        # Load constants, connect, and lock
-        self.lock = Lock()
+        # Connect
         self.connect()
+
+        # Create lock
+        self.lock = Lock()
+
+        # Load constants
         self.sourcedelay = constants["source_delay"]
         self.sensedelay = constants["sense_delay"]
-        self.command_delay = constants["command_delay"]  # None, built in on yoko
+        self.command_delay = constants["command_delay"]
         self.inttime = constants["integration_time"]
         self.max_voltage = constants["max_voltage"]
         self.max_current = constants["max_current"]
+        self.yoko_address = constants["address"]
 
-        # Set to source voltage measure current and set sourcing current to false
+        # Set up to source V and measure I
         self._sourcing_current = False
         self.srcV_measI()
 
     def connect(self) -> None:
         """Connects to the yokogawa"""
 
-        # get address
-        yoko_address = constants["address"]
-
-        # connect to the yokogawa using pyvisa (GPIB)
+        # Connect to the yokogawa using pyvisa (GPIB)
         rm = pyvisa.ResourceManager()
-        self.yoko = rm.open_resource(yoko_address)
+        self.yoko = rm.open_resource(self.yoko_address)
         self.yoko.timeout = constants["timeout"]
 
     def srcV_measI(self) -> None:
         """Setup source voltage and measure current"""
 
-        # Basic commands
-        self.yoko.write("*RST")  # Reset Factory
-        self.yoko.write(":SOUR:FUNC VOLT")  # Source function Voltage
-        self.yoko.write(":SOUR:CURR:PROT:LINK ON")  # Limiter tracking ON
-        self.yoko.write(":SOUR:CURR:PROT:STAT ON")  # Limiter ON
-        self.yoko.write(":SOUR:VOLT:LEV 0V")  # Source level 0 VOLT
-        self.yoko.write(":SENS:STAT ON")  # Measurement ON
-        self.yoko.write(":SENS:FUNC CURR")  # Measurement function Current
-        self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero OFF
-        self.yoko.write(":TRIG:SOUR EXT")  # Trigger source External trigger
+        # ssssssssssssssssssssssBasic commands
+        self.yoko.write("*RST")  # Reset factory
+        self.yoko.write(":SOUR:FUNC VOLT")  # Source function voltage
+        self.yoko.write(":SOUR:CURR:PROT:LINK ON")  # Limiter tracking on
+        self.yoko.write(":SOUR:CURR:PROT:STAT ON")  # Limiter on
+        self.yoko.write(":SOUR:VOLT:LEV 0V")  # Source level 0 V
+        self.yoko.write(":SENS:STAT ON")  # Measurement on
+        self.yoko.write(":SENS:FUNC CURR")  # Measurement function current
+        self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero off
+        self.yoko.write(":TRIG:SOUR EXT")  # Trigger source external trigger
 
         # These settings depend on what we are running
         tempmaxvolt = ":SOUR:VOLT:RANG " + str(self.max_voltage) + "V"
@@ -69,11 +71,11 @@ class Scanner:
 
         # These commands optimize the speed of our measurement
         tempinttime = ":SENS:ITIM " + str(self.inttime) + "ms"
-        self.yoko.write(tempinttime)  # Integration time (20 us to 500 ms)
+        self.yoko.write(tempinttime)  # Integration time minmum
         tempsourcedelay = ":SOUR:DEL " + str(self.sourcedelay) + "ms"
-        self.yoko.write(tempsourcedelay)  # Source delay (15 us to 3600 s)
+        self.yoko.write(tempsourcedelay)  # Source delay minmum
         tempsensedelay = ":SENS:DEL " + str(self.sensedelay) + "ms"
-        self.yoko.write(tempsensedelay)  # Sense Delay --> (0 to 3600 s)
+        self.yoko.write(tempsensedelay)  # Sense delay minmum
         self._sourcing_current = False
 
         # Turn output off
@@ -83,27 +85,27 @@ class Scanner:
         """Setup source current and measure voltage"""
 
         # Basic commands
-        self.yoko.write("*RST")  # Reset Factory
-        self.yoko.write(":SOUR:FUNC CURR")  # Source function Current
-        self.yoko.write(":SOUR:VOLT:PROT:LINK ON")  # Limiter tracking ON
-        self.yoko.write(":SOUR:VOLT:PROT:STAT ON")  # Limiter ON
-        self.yoko.write(":SOUR:CURR:LEV 0A")  # Source level –1.5 VOLT
-        self.yoko.write(":SENS:STAT ON")  # Measurement ON
-        self.yoko.write(":SENS:FUNC VOLT")  # Measurement function Current
-        self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero OFF
-        self.yoko.write(":TRIG:SOUR EXT")  # Trigger source External trigger
+        self.yoko.write("*RST")  # Reset factory
+        self.yoko.write(":SOUR:FUNC CURR")  # Source function current
+        self.yoko.write(":SOUR:VOLT:PROT:LINK ON")  # Limiter tracking on
+        self.yoko.write(":SOUR:VOLT:PROT:STAT ON")  # Limiter on
+        self.yoko.write(":SOUR:CURR:LEV 0A")  # Source level –1.5 V
+        self.yoko.write(":SENS:STAT ON")  # Measurement on
+        self.yoko.write(":SENS:FUNC VOLT")  # Measurement function current
+        self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero off
+        self.yoko.write(":TRIG:SOUR EXT")  # Trigger source external trigger
 
         # These settings depend on what we are running
         tempmaxcurr = ":SOUR:CURR:RANG " + str(self.max_current) + "A"
-        self.yoko.write(tempmaxcurr)  # Source range setting 0 A
+        self.yoko.write(tempmaxcurr)  # Source range setting (A)
         tempmaxvolt = ":SOUR:VOLT:PROT:ULIM " + str(self.max_voltage) + "V"
-        self.yoko.write(tempmaxvolt)  # Limiter 2 V
+        self.yoko.write(tempmaxvolt)  # Limiter (V)
 
         # These commands optimize the speed of our measurement
         tempinttime = ":SENS:ITIM " + str(self.inttime)
-        self.yoko.write(tempinttime)  # Integration time Minimum
+        self.yoko.write(tempinttime)  # Integration time minimum
         tempsourcedelay = ":SOUR:DEL " + str(self.sourcedelay)
-        self.yoko.write(tempsourcedelay)  # Source delay Minimum
+        self.yoko.write(tempsourcedelay)  # Source delay minimum
         tempsensedelay = ":SENS:DEL " + str(self.sensedelay) + " ms"
         self.yoko.write(tempsensedelay)  # Measure delay as set above
         self._sourcing_current = True
@@ -130,7 +132,6 @@ class Scanner:
             str : last output value
         """
 
-        # Read last measurement from  machine
         return self.yoko.query(":INIT;*TRG;:FETC?")
 
     def set_voltage(self, v: float) -> None:
@@ -144,7 +145,7 @@ class Scanner:
         if self._sourcing_current:
             self.srcV_measI()
 
-        # Set voltage
+        # Set voltage (V)
         tempstr = ":SOUR:VOLT:LEV " + str(v) + "V"
         self.yoko.write(tempstr)
 
@@ -159,7 +160,7 @@ class Scanner:
         if not self._sourcing_current:
             self.srcI_measV()
 
-        # Set current
+        # Set current (A)
         tempstr = ":SOUR:CURR:LEV " + str(i) + "A"
         self.yoko.write(tempstr)
 
@@ -170,7 +171,7 @@ class Scanner:
             float: open circut voltage (V)
         """
 
-        # Set current to 0, measure voltage
+        # Set current to 0, measure voltage (V)
         self.set_current(0)
         self.output_on()
         vocval = float(self._trig_read())
@@ -185,7 +186,7 @@ class Scanner:
             float: short circuit current (A)
         """
 
-        # Set voltage to 0, measure current
+        # Set voltage to 0, measure current (A)
         self.set_voltage(0)
         self.output_on()
         iscval = float(self._trig_read())
@@ -314,7 +315,7 @@ class Scanner:
         if (v[end_index] - voc) < 0:
             end_index += 1
 
-        # find point before jsc
+        # Find point before jsc
         index = 0
         for v_point in v:
             if v_point >= 0:
@@ -344,12 +345,3 @@ class Scanner:
         self.output_off()
 
         return v, i_fwd, i_rev
-
-    # def scan_jv(self, vmin, vmax, steps):
-    #     """Scans forward and reverse waves, returning voltage and fwd/reverse current"""
-    #     # Run reverse scan
-    #     _, rev_i = self.iv_sweep(vstart=vmax, vend=vmin, steps=steps)
-    #     # Run forward scan
-    #     v, fwd_i = self.iv_sweep(vstart=vmin, vend=vmax, steps=steps)
-
-    #     return v, fwd_i, rev_i
