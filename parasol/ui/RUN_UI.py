@@ -804,7 +804,7 @@ def RUNNER():
             message = None
             while message is None:
                 time.sleep(1)
-                message = self.controller.pass_message(self)
+                message = self.controller.pass_message()
 
             QMessageBox.about(self, "Module Orientation", f"{message}")
 

@@ -452,12 +452,12 @@ class Characterization:
     def check_orientation(self, scanner: object) -> bool:
 
         orientation_correct = None
-
         isc = scanner.isc()
-        minisc = 0  # TODO: confirm this doesnt have to be -0.0005
-        if isc < minisc:
+
+        minisc = 0.0005
+        if isc > minisc:
             orientation_correct = True
-        elif isc > minisc:
+        elif isc < minisc:
             orientation_correct = False
 
         return orientation_correct

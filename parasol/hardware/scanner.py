@@ -22,9 +22,6 @@ class Scanner:
     def __init__(self) -> None:
         """Initliazes the Scanner class for Yokogawa GS610"""
 
-        # Connect
-        self.connect()
-
         # Create lock
         self.lock = Lock()
 
@@ -36,6 +33,9 @@ class Scanner:
         self.max_voltage = constants["max_voltage"]
         self.max_current = constants["max_current"]
         self.yoko_address = constants["address"]
+
+        # Connect
+        self.connect()
 
         # Set up to source V and measure I
         self._sourcing_current = False

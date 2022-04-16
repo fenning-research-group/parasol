@@ -862,11 +862,11 @@ class Controller:
                 f"Module {module} orientation correct: {correct_orientation[idx]}"
             )
             check_module_string += (
-                f"Module {module} orientation correct: {correct_orientation[idx]},"
+                f"Module {module} orientation correct: {correct_orientation[idx]},\n"
             )
 
         self.logger.info(f"Checked orientation of modules {modules}")
-        self.message = check_module_string
+        self.message = check_module_string[0:-2] + "."
 
     def pass_message(self) -> str:
         """
