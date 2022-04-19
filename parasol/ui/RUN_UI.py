@@ -709,8 +709,8 @@ def RUNNER():
                 # Lock user inputs
                 self.lock_values(id)
 
-            # else:
-            # TODO: notify user
+            else:
+                QMessageBox.about(self, "Error", f"No module channels selected")
 
         # Run unload in a new thread to not interfere with other measurments active
         @run_async_thread
@@ -797,8 +797,6 @@ def RUNNER():
             module_channels = d["module_channels"]
 
             # Check orientation of modules
-            # TODO: THIS NO LONGER WORKS AS NO PRINT STATEMENT IS THERE
-            # AS THIS STARTS A WORKER/LIST ITS HARD TO GET A RETURN HERE
             self.controller.load_check_orientation(module_channels)
 
             message = None

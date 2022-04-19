@@ -181,6 +181,7 @@ class Scanner:
 
         return vocval
 
+    # TODO: Isc called from check orientation can overlap with scanner recieving other commands and crash it. Need to fix this.
     def isc(self) -> float:
         """Measures the short circuit current
 
