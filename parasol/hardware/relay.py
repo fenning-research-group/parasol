@@ -36,6 +36,7 @@ class Relay:
         # Get lock and constants
         self.lock = Lock()
         self.RESPONSE_TIME = constants["response_time"]
+        self.SETTLE_TIME = constants["settle_time"]
 
         # Relay commands: [device id] = command to open relay
         self.relay_commands = {
@@ -98,6 +99,7 @@ class Relay:
         time.sleep(self.RESPONSE_TIME)
         self.inst.write((cmd1).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
+        time.sleep(self.SETTLE_TIME)
 
     @relay_lock
     def all_off(self) -> None:
@@ -106,3 +108,4 @@ class Relay:
         # Close all relay IDs
         self.inst.write((71).to_bytes(1, "big"))
         time.sleep(self.RESPONSE_TIME)
+        time.sleep(self.SETTLE_TIME)

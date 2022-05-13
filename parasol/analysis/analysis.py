@@ -70,6 +70,7 @@ class Analysis:
             jv_folders,
             analyzed_folder,
         ) = self.filestructure.get_test_subfolders(stringpath)
+
         os.mkdir(analyzed_folder[0])
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths

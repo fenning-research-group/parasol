@@ -243,6 +243,7 @@ def GRAPHER():
             test_folders = self.get_selected_folders()
 
             # Get selected test files seperated by test (list of lists)
+
             analyzed_files = self.filestructure.get_files(test_folders, "Analyzed")
             mpp_files = self.filestructure.get_files(test_folders, "MPP")
 

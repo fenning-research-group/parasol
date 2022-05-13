@@ -119,6 +119,8 @@ class Controller:
 
         # Create lock to prevent the relay from switching when MPPT is on
         self.relay_lock = Lock()
+        self.mpp_tracking = False
+        self.relay_open = False
 
         # Decide how many workers we will allow and start the queue
         # 1 for scanner, 6 for load, 1 for random tasks, 1 for environment
@@ -226,6 +228,13 @@ class Controller:
             self.strings[id]["name"],
         ) = self.filestructure.make_module_subdir(name, module_channels, startdate)
         self.logger.info(f"String {id} loaded")
+
+        # Turn on the load here, stays on always
+        self.logger.debug(f"Turning on load output for string {id}")
+        load_key, ch = self.et_channels[id]
+        load = self.load[load_key]
+        load.output_on(ch)
+        self.logger.debug(f"Turned off load output for string {id}")
 
         return self.strings[id]["name"]
 
@@ -604,21 +613,21 @@ class Controller:
 
         # TODO: Reset hardware on stop
         # force wait until all active strings have been terminated
-        while any(self.active_strings):
-            time.sleep(1)
+        # while any(self.active_strings):
+        #     time.sleep(1)
 
-        # Close all channels on the relay
-        self.logger.debug(f"Turning off relays")
-        self.relay.all_off()
-        self.logger.debug(f"Turned off relays")
+        # # Close all channels on the relay
+        # self.logger.debug(f"Turning off relays")
+        # self.relay.all_off()
+        # self.logger.debug(f"Turned off relays")
 
-        # Reset scanner
-        self.logger.debug(f"Resetting scanner")
-        self.scanner.output_off()
-        self.logger.debug(f"Scanner reset")
+        # # Reset scanner
+        # self.logger.debug(f"Resetting scanner")
+        # self.scanner.output_off()
+        # self.logger.debug(f"Scanner reset")
 
-        # Turn off running
-        self.running = False
+        # # Turn off running
+        # self.running = False
 
     # Worker Functions
 
@@ -642,7 +651,7 @@ class Controller:
         # Lock the string
         with d["lock"]:
 
-            # If string is nto active return
+            # If string is not active return
             if self.active_strings[id] == False:
                 self.logger.info(f"Last JV scan of string {id} aborted")
                 return
@@ -669,24 +678,25 @@ class Controller:
                 jvfile = self.filestructure.get_jv_file_name(
                     d["start_date"], d["name"], id, module, d["jv"]["scan_count"]
                 )
-                fpath = os.path.join(jvfolder, jvfile)
-
-                # New relay lock
-                with self.relay_lock:
-                    # Open relay, scan device foward + reverse, turn off relay
-                    self.logger.debug(f"Opening relay for string {id}")
-                    self.relay.on(module)
-                    self.logger.debug(f"Opened relay for string {id}")
-                    self.logger.debug(f"Scanning string {id}")
-                    v, fwd_i, rev_i = self.characterization.scan_jv(d, self.scanner)
-                    self.logger.debug(f"Scanned string {id}")
-                    self.logger.debug(f"Closing relay for string {id}")
-                    # This line of code is creating issues ->
-                    # may need to stick a global lock arround this... i cant find a way to just shut one.
-                    # could make a with switchinglock to lock MPP to JV
-                    self.relay.all_off()
-                    # note that this could at least be moved outside of this loop so that it was only called 1x when we have many strings
-                    self.logger.debug(f"Closed relay for string {id}")
+                fpath = os.path.join(jvfolder, jvfile) 
+                
+                # Open relay, scan device foward + reverse, turn off relay
+                # with self.relay_lock:
+                self.logger.debug(f"Opening relay for string {id}")
+                self.relay.on(module)
+                self.logger.debug(f"Opened relay for string {id}")
+                self.logger.debug(f"Scanning string {id}")
+                
+                v, fwd_i, rev_i = self.characterization.scan_jv(d, self.scanner)
+                self.logger.debug(f"Scanned string {id}")
+                self.logger.debug(f"Closing relay for string {id}")
+                
+                # while self.mpp_tracking is True:
+                #     time.sleep(0.5)
+                # self.relay_open = True
+                self.relay.all_off()
+                # self.relay_open = False
+                self.logger.debug(f"Closed relay for string {id}")
 
                 # Flip the current density, convert to mA, calculate parameters
                 fwd_i *= -1 * 1000
@@ -729,7 +739,7 @@ class Controller:
             # Increase JV scan count
             d["jv"]["scan_count"] += 1
 
-            # Turn on load output at old vmpp if we have one
+            # Turn on load output at old vmpp if we have one ---> is this causing problems? x22020418
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 self.logger.debug(f"Turning on load output for string {id}")
@@ -773,12 +783,17 @@ class Controller:
             load_key, ch = self.et_channels[id]
             load = self.load[load_key]
 
-            # new
-            with self.relay_lock:
-                # Scan mpp (pass last MPP to it)
-                self.logger.debug(f"Tracking MPP for {id}")
-                t, v, i = self.characterization.track_mpp(d, load, ch, last_vmpp)
-                self.logger.debug(f"Tracked MPP for {id}")
+            # new --> This stops from paralell tracking happening, which is bad..
+            # with self.relay_lock:
+            # while self.relay_open is True:
+            #     time.sleep(0.5)
+            # self.mpp_tracking = True
+            
+            # # Scan mpp (pass last MPP to it)
+            self.logger.debug(f"Tracking MPP for {id}")
+            t, v, i = self.characterization.track_mpp(d, load, ch, last_vmpp)
+            self.logger.debug(f"Tracked MPP for {id}")
+            # self.mpp_tracking = False
 
             # Convert current to mA and calc j and p
             i *= 1000

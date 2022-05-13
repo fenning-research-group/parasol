@@ -227,10 +227,13 @@ class Grapher:
         Returns:
             plt.ax: plotted axes
         """
-
+            
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
+        
+        if len(mppfiles) == 0:
+            return ax
 
         # Load MPP files
         (
@@ -277,6 +280,9 @@ class Grapher:
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
+        
+        if len(paramfiles) == 0:
+            return ax
 
         # Cycle through paramfiles
         for paramfile in paramfiles:
@@ -314,6 +320,9 @@ class Grapher:
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
+        
+        if len(paramfiles) == 0:
+            return ax
 
         # Cycle through paramfiles
         for paramfile in paramfiles:

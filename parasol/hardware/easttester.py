@@ -285,7 +285,9 @@ class EastTester:
         # Initialize variables
         i = 0
         noreply = 0
+        nocurrent = 0
         curr_tot = 0
+        curr_list = []
 
         # Average over avg_num
         while i < self.et_avg_num:
@@ -295,9 +297,11 @@ class EastTester:
             time.sleep(self.sense_delay)
             curr = self.et.readlines()
 
-            # If we havnt got 5 replies break loop by returning 0.
-            if noreply == 5:
-                # TODO: NOTIFY USER SOMEHOW
+            # If we havnt got 5 non zero replies break loop by returning 0.
+            if noreply == self.et_avg_num*2:
+                print("EASTTESTERFAILEDTOREAD", curr_list)
+                return -1
+            elif nocurrent == self.et_avg_num*2:
                 return 0.000
 
             # If we dont get a reply, try again, iterate no reply counter
@@ -309,19 +313,30 @@ class EastTester:
             else:
                 curr = curr[-1].decode("utf-8")
                 curr = re.findall("\d*\.?\d+", curr)
-
-                # If we dont have one, retry
-                if len(curr) == 0:
+                
+                # If we dont have one or its 0, retry
+                if (len(curr) == 0):
                     i -= 1
                     noreply += 1
-
+                elif(float(curr[0]) == 0):
+                    i -= 1
+                    nocurrent  += 1
                 # Else, get it and add it to the total
                 else:
                     curr = float(curr[0])
                     curr_tot += curr
+                    curr_list.append(curr)
             i += 1
 
         curr_tot = curr_tot / self.et_avg_num
+        
+        # curr_list.remove(max(curr_list))
+        # curr_list.remove(min(curr_list))
+        # or curr_list.sort()
+
+        print(curr_list)
+
+
 
         return curr_tot
 
