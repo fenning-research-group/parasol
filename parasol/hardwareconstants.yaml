@@ -20,7 +20,7 @@ yokogawa:
   source_delay: 0.05 # Time source to settle (ms)
   sense_delay: 0.05 # Time for sense to settle (ms)
   command_delay: 0 # Time between commands (built in on yoko)
-  integration_time: 10 # Time for integration (ms)
+  integration_time: 25 # was 10 # Time for integration (ms)
   max_voltage: 5 # Max volts (V)
   max_current: 1 # Max amps (A) 
   timeout : 10 # Time before timeout error (s)
@@ -40,11 +40,11 @@ easttester:
       vid: 6790
       location: "1-4.4"
   baud_rate: 115200 # Baud rate for ET
-  time_out: 0.05 #changed from 0.005 # Timeout for ET (s)
+  time_out: 5 #changed from 0.05 #changed from 0.005 # Timeout for ET (s)
   source_delay: 1 # 0.5 # Time for source to settle (s) 
   sense_delay: 0.5 # 0.25 #1 # 0.25 # Time for sense to return value (s)
   command_delay: 0.25 #1 #0.25 # 0.05 # Time between commands (s)
-  avg_num: 5 #2 # Number of currents to avg for reading 
+  avg_num: 3 #2 # Number of currents to avg for reading 
   max_voltage: 5 # Max voltage (V) of 'low' range, 155 V for high range 
   max_current: 3.3 # Max current (A) of 'low' range, 22 A for high range
   v_min: 0.1 # Min voltage registered by ET (V)
