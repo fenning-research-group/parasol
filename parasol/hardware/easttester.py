@@ -296,6 +296,7 @@ class EastTester:
             self.et.write(("MEAS" + str(channel) + ":CURR?\n").encode())
             time.sleep(self.sense_delay)
             curr = self.et.readlines()
+            time.sleep(self.sense_delay)
 
             # If we havnt got 5 non zero replies break loop by returning 0.
             if noreply == self.et_avg_num*2:
@@ -419,6 +420,10 @@ class EastTester:
         """
 
         # Set voltage, wait, measure current
+        # NEW NEW
+        if(voltage <= 0):
+            print("VOLTAGE ERROR!!!!")
+
         self._set_voltage(channel, voltage)
         curr = self.measure_current(channel)
         return curr
