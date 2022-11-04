@@ -15,7 +15,7 @@ relay:
   settle_time: 1 # Time to wait after relay shuts
 
 yokogawa:
-  # No device identifiers as connected through GBIP protocol
+  # No device identifiers as connected through GPIB protocol
   address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
   source_delay: 0.05 # Time source to settle (ms)
   sense_delay: 0.05 # Time for sense to settle (ms)
@@ -24,6 +24,20 @@ yokogawa:
   max_voltage: 5 # Max volts (V)
   max_current: 1 # Max amps (A) 
   timeout : 10 # Time before timeout error (s)
+
+chroma:
+  # might be able to use GPIB protocol?
+  address: 'GPIB1::15::INSTR'
+  baud_rate: 9600 # Baud rate for Chroma
+  time_out: 2000 # from ET settings # Timeout for Chroma (ms)
+  source_delay: 0.05 # from yoko settings # Time for source to settle (s)
+  sense_delay: 0.05 # from yoko settings # Time for sense to return value (s)
+  command_delay: 0 # from yoko settings # Time between commands (s)
+  avg_num: 2 # from ET settings # Number of currents to avg for reading
+  max_voltage: 80 # Max voltage (V) of 'high' range, 16 V for low range
+  max_current: 2 # Max current (A) of 'low' range, 20 A for high range
+  current_mode: "CCH" # "CCH" for high range CC, "CCL" for low range CC
+  v_min: 0.4 # Min voltage registered at 10 A (V), 0.8 at 20 A
 
 easttester:
   device_identifiers:
@@ -44,7 +58,7 @@ easttester:
   source_delay: 0.5 # changed from 1 # 0.5 # Time for source to settle (s) 
   sense_delay: 0.5 # 0.25 #1 # 0.25 # Time for sense to return value (s)
   command_delay: 0.25 #1 #0.25 # 0.05 # Time between commands (s)
-  avg_num: 2 #2 # Number of currents to avg for reading 
+  avg_num: 2 # Number of currents to avg for reading 
   max_voltage: 5 # Max voltage (V) of 'low' range, 155 V for high range 
   max_current: 3.3 # Max current (A) of 'low' range, 22 A for high range
   v_min: 0.1 # Min voltage registered by ET (V)
