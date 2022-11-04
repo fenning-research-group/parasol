@@ -243,9 +243,8 @@ class Controller:
 
         # Turn on the load here, stays on always
         self.logger.debug(f"Turning on load output for string {id}")
-        load_key, ch = self.et_channels[id]
-        load = self.load[load_key]
-        load.output_on(ch)
+        ch = self.et_channels[id]
+        self.load.output_on(ch)
         self.logger.debug(f"Turned off load output for string {id}")
 
         return self.strings[id]["name"]
@@ -313,10 +312,9 @@ class Controller:
 
             # Turn load output off
             self.logger.debug(f"Resetting load for {id}")
-            load_key, ch = self.et_channels[id]
-            load = self.load[load_key]
-            load.srcV_measI(ch)
-            load.output_off(ch)
+            ch = self.et_channels[id]
+            self.load.srcV_measI(ch)
+            self.load.output_off(ch)
             self.logger.debug(f"Load reset for {id}")
 
             # Analyze the saveloc in a new thread
@@ -670,9 +668,8 @@ class Controller:
 
             # Turn off load output (outputoff is locked)
             self.logger.debug(f"Turning off load output for string {id}")
-            load_key, ch = self.et_channels[id]
-            load = self.load[load_key]
-            load.output_off(ch)
+            ch = self.et_channels[id]
+            self.load.output_off(ch)
             self.logger.debug(f"Turned off load output for string {id}")
 
             # Cycle through each device on the string
@@ -755,8 +752,8 @@ class Controller:
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 self.logger.debug(f"Turning on load output for string {id}")
-                load.output_on(ch)
-                load.set_voltage(ch, vmp)
+                self.load.output_on(ch)
+                self.load.set_voltage(ch, vmp)
                 self.logger.debug(f"Turned on load output for string {id}")
 
             self.logger.info(f"Scanned {id}")
@@ -792,8 +789,7 @@ class Controller:
                 return
 
             # Turn on load output, set voltage, measure current
-            load_key, ch = self.et_channels[id]
-            load = self.load[load_key]
+            ch = self.et_channels[id]
 
             # new --> This stops from paralell tracking happening, which is bad..
             # with self.relay_lock:
@@ -803,7 +799,7 @@ class Controller:
             
             # # Scan mpp (pass last MPP to it)
             self.logger.debug(f"Tracking MPP for {id}")
-            t, v, i = self.characterization.track_mpp(d, load, ch, last_vmpp)
+            t, v, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
             # self.mpp_tracking = False
 
