@@ -13,11 +13,12 @@ import sys
 
 from parasol.hardware.relay import Relay
 from parasol.hardware.scanner import Scanner
-from parasol.hardware.easttester import EastTester
 from parasol.hardware.labjack import LabJack
 from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
+# from parasol.hardware.easttester import EastTester
+from parasol.hardware.chroma import Chroma
 
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
@@ -40,15 +41,18 @@ class Controller:
         # Connect to other modules
         self.relay = Relay()
         self.scanner = Scanner()
-        self.load = {
-            "12": EastTester(et_num=1),
-            "34": EastTester(et_num=2),
-            "56": EastTester(et_num=3),
-        }
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
         self.monitor = LabJack()
+        
+        # LOADS
+        self.load = Chroma()
+        # self.load = {
+        #     "12": EastTester(et_num=1),
+        #     "34": EastTester(et_num=2),
+        #     "56": EastTester(et_num=3),
+        # }
 
         # Get constants
         self.monitor_delay = constants["monitor_delay"]
@@ -71,13 +75,21 @@ class Controller:
             os.mkdir(self.logdir)
 
         # Map string ID to ET port and channel
+        # self.et_channels = {
+        #     1: ("12", 1),
+        #     2: ("12", 2),
+        #     3: ("34", 1),
+        #     4: ("34", 2),
+        #     5: ("56", 1),
+        #     6: ("56", 2),
+        # }
         self.et_channels = {
-            1: ("12", 1),
-            2: ("12", 2),
-            3: ("34", 1),
-            4: ("34", 2),
-            5: ("56", 1),
-            6: ("56", 2),
+            1: 1,
+            2: 2,
+            3: 3,
+            4: 4,
+            5: 7,
+            6: 8,
         }
 
         # Maps string ID to module channels

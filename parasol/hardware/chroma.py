@@ -31,7 +31,7 @@ def ca_lock(f):
 class Chroma:
     """Chroma package for PARASOL"""
 
-    def __init__(self, ca_num: int) -> None:
+    def __init__(self) -> None:
         """Initliazes the Chroma class for Chroma 63102A
 
         Args:
@@ -40,7 +40,6 @@ class Chroma:
 
         # Get constants from hardwareconstants
         self.time_out = constants["time_out"]
-        self.baud_rate = constants["baud_rate"]
         self.source_delay = constants["source_delay"]
         self.sense_delay = constants["sense_delay"]
         self.ca_delay = constants["command_delay"]
@@ -50,24 +49,25 @@ class Chroma:
         self.ca_v_min = constants["v_min"]
         self.ca_address = constants["address"]
         self.ca_cc_mode = constants["current_mode"]
-        self.ca_cv_mode = "CV" # 
-        # self.voltage_range = constants["voltage_range"]
-        # self.current_range = constants["current_range"]
+        self.ca_cv_mode = "CV"
         
         # Connect and setup lock
         self.lock = Lock()
-        self.connect(ca_num=ca_num)
+        self.connect()
 
         # Set both channels to source voltage and measure current when initialized (1st is dummy index)
         # Added some time.sleep because sometimes Ch2 of ET5420 was not ready to receive commands. This should be done with internal commands.
         # TODO: Check if this is still necessary
-        self._sourcing_current = [False, False, False]
+        self._sourcing_current = [False, False, False, False, False, False, False, False, False]
         self.srcV_measI(1)
-        time.sleep(1)
         self.srcV_measI(2)
-        time.sleep(1)
+        self.srcV_measI(3)
+        self.srcV_measI(4)
+        self.srcV_measI(7)
+        self.srcV_measI(8)
+        
 
-    def connect(self, ca_num: int) -> None:
+    def connect(self) -> None:
         """Connects to the chroma at the given port
 
         Args:
@@ -77,16 +77,7 @@ class Chroma:
         rm = pyvisa.ResourceManager()
         self.ca = rm.open_resource(self.ca_address)
         self.ca.timeout = constants["time_out"]
-        # Get port information
-        # if ca_num == 1:
-        #     port = get_port(constants["device_identifiers"]["ET_1"])
-        # elif ca_num == 2:
-        #     port = get_port(constants["device_identifiers"]["ET_2"])
-        # elif ca_num == 3:
-        #     port = get_port(constants["device_identifiers"]["ET_3"])
-
-        # Connect using serial, use highest transferrate and shortest timeout
-        # self.ca = serial.Serial(port, baudrate=self.baud_rate, timeout=self.time_out)
+        
 
     # untested
     def srcI_measV(self, channel: int) -> None:
@@ -96,37 +87,10 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        # Set to input channel
         self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
-
-        # Set to constant current
         self.ca.write(":MODE " + self.ca_cc_mode)
-        time.sleep(self.ca_delay)
-
-        # Set ranges for voltage, as well as max and min
-        # "NAME" : RANGE (MAX/SHUTOFF)
-        # "LOW": 0.4 -> 16.000 (20.000)
-        # "HIGH": 0.8 -> 80.000 (80.000)
         self.ca.write(":CONF:VOLT:RANG " + str(self.ca_v_max))
-        time.sleep(self.ca_delay)
-
-        # Set range for current, as well as max current (no min feature)
-        # "NAME" : RANGE (MAX/SHUTOFF)
-        # "LOW": 0 -> 2.000 (2.0)
-        # "HIGH": 0 -> 20.000 (20.0)
-        
-        # no command for setting current range in CC?
-
-        # Set max power output
-        # "NAME" : RANGE (MAX/SHUTOFF)
-        # ALL: 0 --> 100 (100?)
-
-        # no command for setting max power output in CC?
-
-        # Close channel
         self.ca.write(":CHAN:ACT OFF")
-        time.sleep(self.ca_delay)
 
     def srcV_measI(self, channel: int) -> None:
         """Setup source voltage and measure current
@@ -135,37 +99,10 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        # sets to input channel
         self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
-        
-        # Set to constant voltage
         self.ca.write(":MODE " + self.ca_cv_mode)
-        time.sleep(self.ca_delay)
-
-        # Set ranges for voltage, as well as max and min
-        # "NAME" : RANGE (MAX/SHUTOFF)
-        # "LOW": 0.4 -> 16.000 (20.000)
-        # "HIGH": 0.8 -> 80.000 (155.000)
-        
-        # no command for setting voltage range in CV
-
-        # Set range for current, as well as max current (no min feature)
-        # "NAME" : RANGE (MAX/SHUTOFF)
-        # "LOW": 0 -> 3.000 (3.3)
-        # "HIGH": 0 -> 20.000 (22.0)
         self.ca.write(":VOLT:CURR " + str(self.ca_i_max))
-        time.sleep(self.ca_delay)
-
-        # Set max power output
-        # "NAME" : RANGE (MAX/SHUTOFF)
-        # ALL: 0 --> 200 (220)
-        
-        # no command for setting max power limit in CV
-
-        # Close channel
         self.ca.write(":CHAN:ACT OFF")
-        time.sleep(self.ca_delay)
 
     @ca_lock
     def output_on(self, channel: int) -> None:
@@ -175,13 +112,8 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        # sets to input channel
         self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
-
-        # enables the selected load module (panel displays measurements)
         self.ca.write(":CHAN:ACT ON")
-        time.sleep(self.source_delay)
 
     @ca_lock
     def output_off(self, channel: int) -> None:
@@ -191,13 +123,17 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        # sets to input channel
         self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
-
-        # disables the selected load module (LCD turns off?)
         self.ca.write(":CHAN:ACT OFF")
-        time.sleep(self.source_delay)
+    
+    def _trig_read(self) -> str:
+        """Reads the last output
+
+        Returns:
+            str : last output value
+        """
+        # LOOK INTO THIS!
+        return self.ca.query(":INIT;*TRG;:FETC?")
 
     @ca_lock
     def set_voltage(self, channel: int, voltage: float) -> None:
@@ -208,20 +144,14 @@ class Chroma:
             voltage (float): desired voltage (V)
         """
         
-        # sets to input channel
-        self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
 
         # If we are in wrong mode, switch
         if self._sourcing_current[channel] == True:
             self.srcV_measI(channel)
             self._sourcing_current[channel] = False
-
-        # Set voltage (V) and wait
-        self.ca.write(":VOLT:L1 " + str(voltage))
-        time.sleep(self.ca_delay)
         
-        # starts sinking current to match voltage
+        self.ca.write(":CHAN " + str(channel))
+        self.ca.write(":VOLT:L1 " + str(voltage))
         self.ca.write(":LOAD ON")
         time.sleep(self.source_delay)
 
@@ -233,20 +163,13 @@ class Chroma:
             voltage (float): desired voltage (V)
         """
          
-        # sets to input channel
-        self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
-
         # If we are in wrong mode, switch
         if self._sourcing_current[channel] == True:
             self.srcV_measI(channel)
             self._sourcing_current[channel] = False
-
-        # Set voltage (V) and wait
-        self.ca.write(":VOLT:L1 " + str(voltage))
-        time.sleep(self.ca_delay)
         
-        # starts sinking current to match voltage
+        self.ca.write(":CHAN " + str(channel))
+        self.ca.write(":VOLT:L1 " + str(voltage))
         self.ca.write(":LOAD ON")
         time.sleep(self.source_delay)
 
@@ -258,21 +181,15 @@ class Chroma:
             channel (int or string): chroma channel to alter
             current (float): desired current (A)
         """
-        
-        # set to input channel
-        self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
 
         # If we are in wrong mode, switch
         if self._sourcing_current[channel] == False:
             self.srcI_measV(channel)
             self._sourcing_current[channel] = True
 
-        # set current (A) and wait
+        # set to input channel
+        self.ca.write(":CHAN " + str(channel))
         self.ca.write(":CURR:STATIC:L1 " + str(current))
-        time.sleep(self.ca_delay)
-        
-        # starts sinking current
         self.ca.write(":LOAD ON")
         time.sleep(self.source_delay)
 
@@ -284,20 +201,14 @@ class Chroma:
             current (float): desired current (A)
         """
         
-        # set to input channel
-        self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
 
         # If we are in wrong mode, switch
         if self._sourcing_current[channel] == False:
             self.srcI_measV(channel)
             self._sourcing_current[channel] = True
 
-        # set current (A) and wait
+        self.ca.write(":CHAN " + str(channel))
         self.ca.write(":CURR:STATIC:L1 " + str(current))
-        time.sleep(self.ca_delay)
-        
-        # starts sinking current
         self.ca.write(":LOAD ON")
         time.sleep(self.source_delay)
 
@@ -313,16 +224,10 @@ class Chroma:
 
         # sets to input channel
         self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
-
-        # sets avg num of measurements taken
         self.ca.write(":CONF:MEAS:AVE " + str(self.ca_avg_num))
-        time.sleep(self.ca_delay)
-
-        # measure current
         self.ca.write(":MEAS:CURR?")
         time.sleep(self.sense_delay)
-        curr = self.ca.readlines()
+        curr = float(self._trig_read())
         time.sleep(self.sense_delay)
 
         return curr
@@ -339,16 +244,10 @@ class Chroma:
 
         # sets to input channel
         self.ca.write(":CHAN " + str(channel))
-        time.sleep(self.ca_delay)
-
-        # sets avg num of measurements taken
         self.ca.write(":CONF:MEAS:AVE " + str(self.ca_avg_num))
-        time.sleep(self.ca_delay)
-
-        # measure voltage
         self.ca.write(":MEAS:VOLT?")
         time.sleep(self.sense_delay)
-        volt = self.ca.readlines()
+        volt = float(self._trig_read())
         time.sleep(self.sense_delay)
 
         return volt
@@ -405,6 +304,7 @@ class Chroma:
         # NEW NEW
         if(voltage <= 0):
             print("VOLTAGE ERROR!!!!")
+            voltage = abs(voltage + 0.05)
 
         self._set_voltage(channel, voltage)
         curr = self.measure_current(channel)
