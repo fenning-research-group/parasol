@@ -141,7 +141,8 @@ class Chroma:
             self._sourcing_current[channel] = False
         
         self.ca.write("CHAN " + str(channel))
-        self.ca.write("VOLT:L1 " + str(voltage) + "V")
+        # self.ca.write("VOLT:L1 " + str(voltage) + "V")
+        self.ca.write("VOLT:L1 " + str(0) + "V")
         # self.ca.write("CONF:VOLT:ON 1V")
         self.ca.write("LOAD ON")
         time.sleep(self.source_delay)
@@ -161,7 +162,8 @@ class Chroma:
             self._sourcing_current[channel] = False
         
         self.ca.write("CHAN " + str(channel))
-        self.ca.write("VOLT:L1 " + str(voltage) + "V")
+        self.ca.write("VOLT:L1 " + str(0) + "V")
+        # self.ca.write("VOLT:L1 " + str(voltage) + "V")
         self.ca.write("LOAD ON")
         time.sleep(self.source_delay)
 
