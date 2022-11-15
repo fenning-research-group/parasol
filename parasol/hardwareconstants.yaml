@@ -30,10 +30,10 @@ chroma:
   address: 'GPIB1::15::INSTR'
   baud_rate: 9600 # Baud rate for Chroma
   time_out: 2000 # from ET settings # Timeout for Chroma (ms)
-  source_delay: 0.05 # from yoko settings # Time for source to settle (s)
-  sense_delay: 0.05 # from yoko settings # Time for sense to return value (s)
+  source_delay: 0.25 #0.05 # from yoko settings # Time for source to settle (s)
+  sense_delay: 0.25 #0.05 # from yoko settings # Time for sense to return value (s)
   command_delay: 0 # from yoko settings # Time between commands (s)
-  avg_num: 2 # from ET settings # Number of currents to avg for reading
+  avg_num: 10 # from ET settings # Number of currents to avg for reading
   max_voltage: 80 # Max voltage (V) of 'high' range, 16 V for low range
   max_current: 2 # Max current (A) of 'low' range, 20 A for high range
   current_mode: "CCH" # "CCH" for high range CC, "CCL" for low range CC

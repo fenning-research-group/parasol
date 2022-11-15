@@ -104,7 +104,7 @@ class Chroma:
         self.ca.write("VOLT:CURR " + str(self.ca_i_max) +"A")
         self.ca.write("CHAN:ACT OFF")
 
-    @ca_lock
+    # @ca_lock
     def output_on(self, channel: int) -> None:
         """Turns output on
 
@@ -115,7 +115,7 @@ class Chroma:
         self.ca.write("CHAN " + str(channel))
         self.ca.write("CHAN:ACT ON")
 
-    @ca_lock
+    # @ca_lock
     def output_off(self, channel: int) -> None:
         """Turns output off
 
@@ -126,7 +126,7 @@ class Chroma:
         self.ca.write("CHAN " + str(channel))
         self.ca.write("CHAN:ACT OFF")
 
-    @ca_lock
+    # @ca_lock
     def set_voltage(self, channel: int, voltage: float) -> None:
         """Sets voltage
 
@@ -167,7 +167,7 @@ class Chroma:
         self.ca.write("LOAD ON")
         time.sleep(self.source_delay)
 
-    @ca_lock
+    # @ca_lock
     def set_current(self, channel: int, current: float) -> None:
         """Sets current
 
@@ -244,7 +244,7 @@ class Chroma:
         return volt
 
     # untested
-    @ca_lock
+    # @ca_lock
     def voc(self, channel: int) -> float:
         """Gets open circut voltage: V where I = 0
 
@@ -262,7 +262,7 @@ class Chroma:
         return voc
 
     # untested
-    @ca_lock
+    # @ca_lock
     def isc(self, channel: int) -> float:
         """Gets short circut current: I where V = 0
 
@@ -279,7 +279,7 @@ class Chroma:
 
         return isc
 
-    @ca_lock
+    # @ca_lock
     def set_V_measure_I(self, channel: int, voltage: float) -> float:
         """Sets voltage and measures current
 
@@ -302,7 +302,7 @@ class Chroma:
         return curr
 
     # untested
-    @ca_lock
+    # @ca_lock
     def set_I_measure_V(self, channel: int, voltage: float) -> float:
         """Sets current and measures voltage
 

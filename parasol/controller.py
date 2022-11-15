@@ -135,8 +135,8 @@ class Controller:
         self.relay_open = False
 
         # Decide how many workers we will allow and start the queue
-        # 1 for scanner, 6 for load, 1 for random tasks, 1 for environment
-        self.threadpool = ThreadPoolExecutor(max_workers=9)
+        # 1 for scanner, n for loads, 1 for random tasks, 1 for environment
+        self.threadpool = ThreadPoolExecutor(max_workers=4)
         self.start()
 
     # TODO: check name _idx added
@@ -593,13 +593,16 @@ class Controller:
         # Create JV worker for scanner
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
 
-        # Create MPP workers for load
+        # Create MPP workers for each load
+        # 1 controller for loads
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        # 3 dual ch
+        # asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        # asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        # 6 single ch
+        # asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        # asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        # asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
 
         # Create check orientation workers
         asyncio.run_coroutine_threadsafe(

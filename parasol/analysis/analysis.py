@@ -309,6 +309,7 @@ class Analysis:
                     pce = ff * jsc * voc / 100
                 else:
                     ff = np.nan
+                    pce = np.nan
 
             # If we run into any issues, just make values for time NaN
             except:
