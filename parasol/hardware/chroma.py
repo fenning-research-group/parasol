@@ -87,10 +87,10 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        self.ca.write("CHAN " + str(channel))
-        self.ca.write("MODE " + self.ca_cc_mode)
-        self.ca.write("CONF:VOLT:RANG " + str(self.ca_v_max)+"V") # note this could be H or L for high or low
-        self.ca.write("CHAN:ACT OFF")
+        self.ca.write("CHAN " + str(channel)) # set channel
+        self.ca.write("MODE " + self.ca_cc_mode) # set mode to CC
+        #self.ca.write("CONF:VOLT:RANG " + str(self.ca_v_max)+"V") # note this could be H or L for high or low
+        self.ca.write("CHAN:ACT OFF") # turn off measurement
 
     def srcV_measI(self, channel: int) -> None:
         """Setup source voltage and measure current
@@ -99,12 +99,13 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        self.ca.write("CHAN " + str(channel))
-        self.ca.write("MODE " + self.ca_cv_mode)
-        self.ca.write("VOLT:CURR " + str(self.ca_i_max) +"A")
-        self.ca.write("CHAN:ACT OFF")
+        self.ca.write("CHAN " + str(channel)) # set channel
+        self.ca.write("MODE " + self.ca_cv_mode) # set mode to CV
+        self.ca.write("VOLT:CURR L")# set current mode low + str(self.ca_i_max) +"A")
+        # self.ca.write("VOLT:MODE FAST") #NEW
+        self.ca.write("CHAN:ACT OFF") # turn off measurement
 
-    # @ca_lock
+
     def output_on(self, channel: int) -> None:
         """Turns output on
 
@@ -115,7 +116,7 @@ class Chroma:
         self.ca.write("CHAN " + str(channel))
         self.ca.write("CHAN:ACT ON")
 
-    # @ca_lock
+
     def output_off(self, channel: int) -> None:
         """Turns output off
 
@@ -126,7 +127,6 @@ class Chroma:
         self.ca.write("CHAN " + str(channel))
         self.ca.write("CHAN:ACT OFF")
 
-    # @ca_lock
     def set_voltage(self, channel: int, voltage: float) -> None:
         """Sets voltage
 
@@ -141,33 +141,11 @@ class Chroma:
             self._sourcing_current[channel] = False
         
         self.ca.write("CHAN " + str(channel))
-        # self.ca.write("VOLT:L1 " + str(voltage) + "V")
-        self.ca.write("VOLT:L1 " + str(0) + "V")
-        # self.ca.write("CONF:VOLT:ON 1V")
+        self.ca.write("VOLT:L1 " + str(voltage))
         self.ca.write("LOAD ON")
         time.sleep(self.source_delay)
 
 
-    def _set_voltage(self, channel: int, voltage: float) -> None:
-        """Sets voltage without locking
-
-        Args:
-            channel (int or string): chroma channel to alter
-            voltage (float): desired voltage (V)
-        """
-         
-        # If we are in wrong mode, switch
-        if self._sourcing_current[channel] == True:
-            self.srcV_measI(channel)
-            self._sourcing_current[channel] = False
-        
-        self.ca.write("CHAN " + str(channel))
-        self.ca.write("VOLT:L1 " + str(0) + "V")
-        # self.ca.write("VOLT:L1 " + str(voltage) + "V")
-        self.ca.write("LOAD ON")
-        time.sleep(self.source_delay)
-
-    # @ca_lock
     def set_current(self, channel: int, current: float) -> None:
         """Sets current
 
@@ -187,24 +165,6 @@ class Chroma:
         self.ca.write("LOAD ON")
         time.sleep(self.source_delay)
 
-    def _set_current(self, channel: int, current: float) -> None:
-        """Sets current without locking
-
-        Args:
-            channel (int or string): chroma channel to alter
-            current (float): desired current (A)
-        """
-        
-
-        # If we are in wrong mode, switch
-        if self._sourcing_current[channel] == False:
-            self.srcI_measV(channel)
-            self._sourcing_current[channel] = True
-
-        self.ca.write("CHAN " + str(channel))
-        self.ca.write("CURR:STATIC:L1 " + str(current) + "A")
-        self.ca.write("LOAD ON")
-        time.sleep(self.source_delay)
 
     def measure_current(self, channel: int) -> float:
         """Measures current several times and then averages (number defined in hardwareconstants.yaml)
@@ -215,15 +175,14 @@ class Chroma:
         Returns:
             float: current (A) reading
         """
-        # mIGHT NEED
-        # self.ca.wite(":MEAS:INP")
-        # sets to input channel
+
         self.ca.write("CHAN " + str(channel))
-        self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
-        time.sleep(self.sense_delay)
+        # self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
+        # time.sleep(self.sense_delay)
         curr = float(self.ca.query("MEAS:CURR?"))
 
         return curr
+
 
     def measure_voltage(self, channel: int) -> float:
         """Measures voltage several times and then averages (number defined in hardwareconstants.yaml)
@@ -237,14 +196,12 @@ class Chroma:
 
         # sets to input channel
         self.ca.write("CHAN " + str(channel))
-        self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
-        time.sleep(self.sense_delay)
+        # time.sleep(self.sense_delay)
         volt = float(self.ca.query("MEAS:VOLT?"))
 
         return volt
 
-    # untested
-    # @ca_lock
+
     def voc(self, channel: int) -> float:
         """Gets open circut voltage: V where I = 0
 
@@ -256,13 +213,12 @@ class Chroma:
         """
 
         # Set current to 0, measure voltage
-        self._set_current(channel, 0)
+        self.set_current(channel, 0)
         voc = self.measure_voltage(channel)
 
         return voc
 
-    # untested
-    # @ca_lock
+
     def isc(self, channel: int) -> float:
         """Gets short circut current: I where V = 0
 
@@ -274,12 +230,12 @@ class Chroma:
         """
 
         # Set voltage to 0, measure current
-        self._set_voltage(channel, 0)
+        self.set_voltage(channel, 0)
         isc = self.measure_current(channel)
 
         return isc
 
-    # @ca_lock
+
     def set_V_measure_I(self, channel: int, voltage: float) -> float:
         """Sets voltage and measures current
 
@@ -292,17 +248,18 @@ class Chroma:
         """
 
         # Set voltage, wait, measure current
-        # NEW NEW
-        if(voltage <= 0):
+        if(voltage < 0):
             print("VOLTAGE ERROR!!!!")
             voltage = abs(voltage + 0.05)
 
-        self._set_voltage(channel, voltage)
+        self.set_voltage(channel, voltage)
         curr = self.measure_current(channel)
+        volt = self.measure_voltage(channel)
+        print(voltage,volt,curr)
         return curr
 
+
     # untested
-    # @ca_lock
     def set_I_measure_V(self, channel: int, voltage: float) -> float:
         """Sets current and measures voltage
 
