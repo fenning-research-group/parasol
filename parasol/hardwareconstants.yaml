@@ -33,7 +33,7 @@ chroma:
   source_delay: 0.25 #0.05 # from yoko settings # Time for source to settle (s)
   sense_delay: 0.25 #0.05 # from yoko settings # Time for sense to return value (s)
   command_delay: 0 # from yoko settings # Time between commands (s)
-  avg_num: 10 # from ET settings # Number of currents to avg for reading
+  avg_num: 25 # from ET settings # Number of currents to avg for reading
   max_voltage: 80 # Max voltage (V) of 'high' range, 16 V for low range
   max_current: 2 # Max current (A) of 'low' range, 20 A for high range
   current_mode: "CCH" # "CCH" for high range CC, "CCL" for low range CC
@@ -74,7 +74,7 @@ labjack:
   # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py
 
 characterization:
-  mppt_voltage_step: 0.01 # MPPT voltage iteration (V)
+  mppt_voltage_step: 0.02 # MPPT voltage iteration (V) // floor resolution of Chroma
 
 analysis:
   derivative_v_step : 0.05 # Voltage step for derivative (Rs, Rsh, Rch) in JV post-analysis (V)

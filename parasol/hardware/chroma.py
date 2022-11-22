@@ -39,6 +39,9 @@ class Chroma:
         # Connect and setup lock
         self.connect()
 
+        # indicator of channel so we dont keep spamming
+        self.channel = None
+
         # Set both channels to source voltage and measure current when initialized (1st is dummy index)
         self._sourcing_current = [False, False, False, False, False, False, False, False, False]
         self.srcV_measI(1)
@@ -47,9 +50,6 @@ class Chroma:
         self.srcV_measI(4)
         self.srcV_measI(7)
         self.srcV_measI(8)
-        
-        # indicator of channel so we dont keep spamming
-        self.channel = None
         
 
     def connect(self) -> None:
@@ -78,7 +78,7 @@ class Chroma:
             self.ca.write("CHAN " + str(channel)) # set channel
             self.channel = channel
         self.ca.write("MODE " + self.ca_cc_mode) # set mode to CC
-        # self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
+        self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
         # self.ca.write("CONF:VOLT:RANG L")# + str(self.ca_v_max)+"V") 
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.set_current(channel,0.0) # set power to 0
@@ -95,9 +95,9 @@ class Chroma:
             self.ca.write("CHAN " + str(channel)) # set channel
             self.channel = channel
         self.ca.write("MODE " + self.ca_cv_mode) # set mode to CV
-        # self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
-        # self.ca.write("VOLT:CURR L")# set current mode low + str(self.ca_i_max) +"A")
-        # self.ca.write("VOLT:MODE FAST") 
+        self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
+        self.ca.write("VOLT:CURR L")# set current mode low + str(self.ca_i_max) +"A")
+        self.ca.write("VOLT:MODE SLOW") 
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.set_voltage(channel,0.0) # set power to 0
 
@@ -148,7 +148,7 @@ class Chroma:
             self.ca.write("CHAN " + str(channel)) # set channel
             self.channel = channel
         self.ca.write("VOLT:L1 " + str(voltage)) # set load voltage
-        time.sleep(self.source_delay) # delay for system to settle
+        time.sleep(self.source_delay*5) # delay for system to settle
 
 
     def set_current(self, channel: int, current: float) -> None:
@@ -282,7 +282,7 @@ class Chroma:
         # Ensure we are in correct quadrant
         if(current < 0):
             print("CURRENT ERROR!!!!")
-            voltage = abs(voltage + 0.05)
+            voltage = abs(current + 0.05)
         
         # set current, measure current and voltage
         self.set_current(channel, current)
