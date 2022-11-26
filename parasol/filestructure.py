@@ -338,31 +338,45 @@ class FileStructure:
 
         return run_info
 
-    # Get Folders in any file and files in any file #TODO: add filestring for getting names with specific match
+    # Get Folders in any file and files in any file 
 
-    def get_subfolders(self, folder: str) -> list:
+    def get_subfolders(self, folder: str, partial = None) -> list:
         """Returns list of subfolders in folder
 
         Args:
             folder (str): path to folder
+            partial (str = None): parial name requirement
 
         Returns:
             list[str]: paths to subfolders
         """
+        list1 = [f.path for f in os.scandir(folder) if f.is_dir()]
 
-        return [f.path for f in os.scandir(folder) if f.is_dir()]
+        if partial is None:
+            return_list = list1
+        else:
+            return_list = [folder for folder in list1 if partial in folder]
 
-    def get_subfiles(self, folder: str) -> list:
+        return return_list
+
+    def get_subfiles(self, folder: str, partial = None) -> list:
         """Returns list of subfiles in folder
 
         Args:
             folder (str): path to folder
+            partial (str = None): parial name requirement
 
         Returns:
             list[str]: paths to subfiles
         """
+        list1 = [f.path for f in os.scandir(folder) if f.is_file()]
+        
+        if partial is None:
+            return_list = list1
+        else:
+            return_list = [file for file in list1 if partial in file]
 
-        return [f.path for f in os.scandir(folder) if f.is_file()]
+        return return_list
 
     # Get test folders and subfolders (MPP, Analyzed, JV), Get env monitoring folders
 

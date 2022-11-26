@@ -88,6 +88,7 @@ class Characterization:
 
         return v, fwd_i, rev_i
 
+
     def track_mpp(
         self, d: dict, easttester: object, ch: int, vmpp_last: float
     ) -> np.ndarray:
@@ -322,10 +323,10 @@ class Characterization:
         #         t = time.time()
         #         i = easttester.set_V_measure_I(ch, v)
 
-        # # Old MPP mode 0 is constant perturb and observe
+        # Constant perturb and observe (1 = newest, 0 = oldest)
         if mpp_mode == 0:
 
-            # If we just have one scan, use native voltage step
+            # If we just have one scan, use native voltage step (+)
             if (d["mpp"]["last_powers"][0] is None) or (
                 d["mpp"]["last_powers"][1] is None
             ):
@@ -341,16 +342,8 @@ class Characterization:
                     voltage_step = -self.et_voltage_step
 
                 # if power isnt increasing, invert voltage step to move in the other direction
-                if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
+                if d["mpp"]["last_powers"][1] < d["mpp"]["last_powers"][0]:
                     voltage_step *= -1
-
-                # voltage_step = self.et_voltage_step*(+ or -)
-                # moving in the (0) direction, increasing on power: (+)
-                # moving in the (0) direction, decreasing in power (-)
-                # moving in the (+) direction, increasing on power (+)
-                # moving in the (+) direction, decreasing on power (+)
-                # moving in the (-) direction, decreasing in power: (+)
-                # moving in the (-) direction, increasing in power: (-)
 
             # set the voltage equal to last voltage + voltage step (determined above)
             v = vmpp_last + voltage_step
@@ -359,7 +352,7 @@ class Characterization:
             if (v <= max(d["mpp"]["vmin"], 0)) or (v >= d["mpp"]["vmax"]):
                 v = vmpp_last - 2 * voltage_step
 
-            # If we read 0 to 1 current (floor), set v to maximum of (voltage step, vmin + voltagestep)
+            # If we read 0 current (floor), set v to maximum of (voltage step, vmin + voltagestep)
             # Removing this section of code causes the ET to read 1/0 and ramp in voltage to max voltage
             if d["mpp"]["last_currents"][1] is not None:
                 if d["mpp"]["last_currents"][1] == 0.0:
@@ -369,7 +362,7 @@ class Characterization:
 
             # get time, set voltage measure current
             t = time.time()
-            i = easttester.set_V_measure_I(ch, v)
+            vm, i = easttester.set_V_measure_I(ch, v)
 
         # Mode = 1, bias at 75% of Voc
         elif mpp_mode == 1:
@@ -396,7 +389,7 @@ class Characterization:
             voc = v_vals[np.argmin(np.abs(j))]
             v = voc * 0.75
             t = time.time()
-            i = easttester.set_V_measure_I(ch, v)
+            vm, i = easttester.set_V_measure_I(ch, v)
 
         return t, v, i
 

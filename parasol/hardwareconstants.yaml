@@ -10,60 +10,26 @@ relay:
     pid: 24577
     vid: 1027
     serial_number : 'AQ01FVSHA'
-    # location: None
   response_time: 0.25 # TODO: changed from 0.1 4/13/2022 # Seconds for relay switch to settle
   settle_time: 1 # Time to wait after relay shuts
 
 yokogawa:
-  # No device identifiers as connected through GPIB protocol
   address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
+  timeout : 10 # Time before timeout error (s)
   source_delay: 0.05 # Time source to settle (ms)
   sense_delay: 0.05 # Time for sense to settle (ms)
-  command_delay: 0 # Time between commands (built in on yoko)
-  integration_time: 25 # was 10 # Time for integration (ms)
-  max_voltage: 5 # Max volts (V)
-  max_current: 1 # Max amps (A) 
-  timeout : 10 # Time before timeout error (s)
+  integration_time: 10 # Time for integration (ms)
+  max_voltage: 2 # 30 # Max volts (V) (200 mV, 2 V, 12 V, 20 V, 30 V, 60 V, or 110 V
+  max_current: 0.5 # 2 # Max amps (A) g (2 µA, 200 µA, 2 mA, 20 mA, 200 mA, 0.5 A, 1 A, 2 A, or 3 A)
 
 chroma:
-  # might be able to use GPIB protocol?
-  address: 'GPIB1::15::INSTR'
-  baud_rate: 9600 # Baud rate for Chroma
-  time_out: 2000 # from ET settings # Timeout for Chroma (ms)
-  source_delay: 0.25 #0.05 # from yoko settings # Time for source to settle (s)
-  sense_delay: 0.25 #0.05 # from yoko settings # Time for sense to return value (s)
-  command_delay: 0 # from yoko settings # Time between commands (s)
-  avg_num: 25 # from ET settings # Number of currents to avg for reading
+  address: 'GPIB1::15::INSTR' # GPIB adress
+  time_out: 1000 # Timeout for Chroma (ms)
+  source_delay: 0.5 # Time for source to settle (s)
+  sense_delay: 'SLOW' # Time for sense to return value (SLOW/FAST)
+  avg_num: 10 # Number of currents to avg for reading
   max_voltage: 80 # Max voltage (V) of 'high' range, 16 V for low range
   max_current: 2 # Max current (A) of 'low' range, 20 A for high range
-  current_mode: "CCH" # "CCH" for high range CC, "CCL" for low range CC
-  v_min: 0.4 # Min voltage registered at 10 A (V), 0.8 at 20 A
-
-easttester:
-  device_identifiers:
-    ET_1: # Generally COM10
-      pid: 29987
-      vid: 6790
-      location: "1-4.2"
-    ET_2: # Generally COM11
-      pid: 29987
-      vid: 6790
-      location: "1-4.3"
-    ET_3: # Generally COM9
-      pid: 29987
-      vid: 6790
-      location: "1-4.4"
-  baud_rate: 115200 # Baud rate for ET
-  time_out: 2 #changed from 0.05 #changed from 0.005 # Timeout for ET (s)
-  source_delay: 0.5 # changed from 1 # 0.5 # Time for source to settle (s) 
-  sense_delay: 0.5 # 0.25 #1 # 0.25 # Time for sense to return value (s)
-  command_delay: 0.25 #1 #0.25 # 0.05 # Time between commands (s)
-  avg_num: 2 # Number of currents to avg for reading 
-  max_voltage: 5 # Max voltage (V) of 'low' range, 155 V for high range 
-  max_current: 3.3 # Max current (A) of 'low' range, 22 A for high range
-  v_min: 0.1 # Min voltage registered by ET (V)
-  voltage_range: "LOW" # "LOW" or "HIGH"
-  current_range: "LOW" # "LOW" or "HIGH"
 
 labjack:
   thermocouple_port: 0 # AIN Port for thermocouple
@@ -121,3 +87,30 @@ GRAPH_UI:
   y10: ["FWD Rsh (Ohm/cm2)", "REV Rsh (Ohm/cm2)"] # Graph10 y data
   y11: ["FWD Rch (Ohm/cm2)", "REV Rch (Ohm/cm2)"] # Graph11 y data
   y12: "MPPT MPP (mW/cm2)" # Graph12 y data
+
+# old and outdated
+easttester:
+  device_identifiers:
+    ET_1: # Generally COM10
+      pid: 29987
+      vid: 6790
+      location: "1-4.2"
+    ET_2: # Generally COM11
+      pid: 29987
+      vid: 6790
+      location: "1-4.3"
+    ET_3: # Generally COM9
+      pid: 29987
+      vid: 6790
+      location: "1-4.4"
+  baud_rate: 115200 # Baud rate for ET
+  time_out: 2 #changed from 0.05 #changed from 0.005 # Timeout for ET (s)
+  source_delay: 0.5 # changed from 1 # 0.5 # Time for source to settle (s) 
+  sense_delay: 0.5 # 0.25 #1 # 0.25 # Time for sense to return value (s)
+  command_delay: 0.25 #1 #0.25 # 0.05 # Time between commands (s)
+  avg_num: 2 # Number of currents to avg for reading 
+  max_voltage: 5 # Max voltage (V) of 'low' range, 155 V for high range 
+  max_current: 3.3 # Max current (A) of 'low' range, 22 A for high range
+  v_min: 0.1 # Min voltage registered by ET (V)
+  voltage_range: "LOW" # "LOW" or "HIGH"
+  current_range: "LOW" # "LOW" or "HIGH"
