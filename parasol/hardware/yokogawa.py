@@ -184,7 +184,7 @@ class Yokogawa:
         self.yoko.write(":SENS:FUNC CURR")
         return (float(self._trig_read()))
 
- 
+
     def set_V_measure_I(self, voltage: float, lock = True) -> float:
         """Sets voltage and measures current
 
@@ -290,7 +290,7 @@ class Yokogawa:
             if abs(vstart) > abs(vend):
                 i = i[::-1]
 
-        return vm, i
+        return v, vm, i
 
 
     def iv_sweep_quadrant_fwd_rev(
@@ -316,8 +316,9 @@ class Yokogawa:
         with self.lock:
             # Make empty numpy arrays for data
             v = np.linspace(vstart, vend, steps)
-            vm = np.zeros(v.shape)
+            vm_fwd = np.zeros(v.shape)
             i_fwd = np.zeros(v.shape)
+            vm_rev = np.zeros(v.shape)
             i_rev = np.zeros(v.shape)
             i_fwd[:] = np.nan
             i_rev[:] = np.nan
@@ -336,20 +337,20 @@ class Yokogawa:
 
             # Cycle from there until we get out of the quadrant
             while index <= len(v):
-                vm[index], i_fwd[index] = self.set_V_measure_I(v[index], lock = False)
+                vm_fwd[index], i_fwd[index] = self.set_V_measure_I(v[index], lock = False)
                 if i_fwd[index] > 0:
                     break
                 index += 1
 
             # Scan backwards until we get back to starting point
             while index >= start_index:
-                _, i_rev[index] = self.set_V_measure_I(v[index], lock = False)
+                vm_rev[index], i_rev[index] = self.set_V_measure_I(v[index], lock = False)
                 index -= 1
 
             # Turn output off
             self.output_off()
 
-        return vm, i_fwd, i_rev
+        return v, vm_fwd, i_fwd, vm_rev, i_rev
 
     def iv_sweep_quadrant_rev_fwd(
         self, vstart: float, vend: float, steps: int
@@ -375,8 +376,9 @@ class Yokogawa:
         
             # Make empty numpy arrays for data
             v = np.linspace(vstart, vend, steps)
-            vm = np.zeros(v.shape)
+            vm_fwd = np.zeros(v.shape)
             i_fwd = np.zeros(v.shape)
+            vm_rev = np.zeros(v.shape)
             i_rev = np.zeros(v.shape)
             i_fwd[:] = np.nan
             i_rev[:] = np.nan
@@ -402,16 +404,16 @@ class Yokogawa:
             # Scan rev until we get back to starting point
             index = end_index
             while index >= start_index:
-                _, i_rev[index] = self.set_V_measure_I(v[index], lock = False)
+                vm_rev[index], i_rev[index] = self.set_V_measure_I(v[index], lock = False)
                 index -= 1
 
             # Cycle from there until we get out of the quadrant
             index = start_index
             while index <= end_index:
-                vm[index], i_fwd[index] = self.set_V_measure_I(v[index], lock = False)
+                vm_fwd[index], i_fwd[index] = self.set_V_measure_I(v[index], lock = False)
                 index += 1
 
             # Turn output off
             self.output_off()
 
-        return vm, i_fwd, i_rev
+        return v, vm_fwd, i_fwd, vm_rev, i_rev

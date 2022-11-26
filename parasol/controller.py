@@ -345,7 +345,8 @@ class Controller:
 
         # If it doesnt exist, make it:
         if os.path.exists(fpath) != True:
-
+            
+            # HEREHERE
             # Open file, write header/column names then fill
             with open(fpath, "w", newline="") as f:
                 writer = csv.writer(f, delimiter=",")
@@ -681,13 +682,14 @@ class Controller:
                 )
                 fpath = os.path.join(jvfolder, jvfile) 
                 
+                # HEREHERE
                 # Open relay, scan device foward + reverse, turn off relay
                 self.logger.debug(f"Opening relay for string {id}")
                 self.relay.on(module)
                 self.logger.debug(f"Opened relay for string {id}")
                 self.logger.debug(f"Scanning string {id}")
                 self.scanner.output_on()
-                v, fwd_i, rev_i = self.characterization.scan_jv(d, self.scanner)
+                v, fwd_vm, fwd_i, rev_vm, rev_i = self.characterization.scan_jv(d, self.scanner)
                 self.scanner.output_off()
                 self.logger.debug(f"Scanned string {id}")
                 self.logger.debug(f"Closing relay for string {id}")
@@ -779,9 +781,10 @@ class Controller:
             # Turn on load output
             ch = self.load_channels[id]
             
+            # HEREHERE
             # Scan mpp (pass last MPP to it)
             self.logger.debug(f"Tracking MPP for {id}")
-            t, v, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
+            t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
 
             # Convert current to mA and calc j and p

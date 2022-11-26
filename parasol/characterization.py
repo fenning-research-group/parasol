@@ -52,11 +52,11 @@ class Characterization:
         if jv_mode == 0:
 
             # Run reverse scan
-            _, rev_i = scanner.iv_sweep(
+            _, rev_vm, rev_i = scanner.iv_sweep(
                 vstart=d["jv"]["vmax"], vend=d["jv"]["vmin"], steps=d["jv"]["steps"]
             )
             # Run forward scan
-            v, fwd_i = scanner.iv_sweep(
+            v, fwd_vm, fwd_i = scanner.iv_sweep(
                 vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )
 
@@ -64,29 +64,29 @@ class Characterization:
         elif jv_mode == 1:
 
             # Run forward scan
-            v, fwd_i = scanner.iv_sweep(
+            v, fwd_vm, fwd_i = scanner.iv_sweep(
                 vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )
             # Run reverse scan
-            _, rev_i = scanner.iv_sweep(
+            _, rev_vm, rev_i = scanner.iv_sweep(
                 vstart=d["jv"]["vmax"], vend=d["jv"]["vmin"], steps=d["jv"]["steps"]
             )
 
         # Mode = 2 scan rev then fwd (quadrant 4 only)
         elif jv_mode == 2:
 
-            v, fwd_i, rev_i = scanner.iv_sweep_quadrant_rev_fwd(
+            v, fwd_vm, fwd_i, rev_vm, rev_i = scanner.iv_sweep_quadrant_rev_fwd(
                 vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )
 
         # Mode = 3, scan fwd then rev (quadrant 4 only)
         elif jv_mode == 3:
 
-            v, fwd_i, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
+            v, fwd_vm, fwd_i, rev_vm, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
                 vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )
 
-        return v, fwd_i, rev_i
+        return v, fwd_vm, fwd_i, rev_vm, rev_i
 
 
     def track_mpp(
@@ -391,7 +391,8 @@ class Characterization:
             t = time.time()
             vm, i = easttester.set_V_measure_I(ch, v)
 
-        return t, v, i
+        return t, v, vm, i
+
 
     def calc_last_vmp(self, d: dict) -> float:
         """Gets last vmpp from tracking if it exists. If not, calculates from JV curves
