@@ -324,6 +324,7 @@ class Chroma:
             # Flip reverse scan order so that it aligns with voltage
             if abs(vstart) > abs(vend):
                 i = i[::-1]
+                vm = vm[::-1]
 
         return v, vm, i
     
