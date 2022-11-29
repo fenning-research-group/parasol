@@ -346,7 +346,6 @@ class Controller:
         # If it doesnt exist, make it:
         if os.path.exists(fpath) != True:
             
-            # HEREHERE
             # Open file, write header/column names then fill
             with open(fpath, "w", newline="") as f:
                 writer = csv.writer(f, delimiter=",")
@@ -359,6 +358,7 @@ class Controller:
                 writer.writerow(
                     [
                         "Time (epoch)",
+                        "Applied Voltage (V)",
                         "Voltage (V)",
                         "Current (mA)",
                         "Current Density (mA/cm2)",
@@ -684,7 +684,6 @@ class Controller:
                 )
                 fpath = os.path.join(jvfolder, jvfile) 
                 
-                # HEREHERE
                 # Open relay, scan device foward + reverse, turn off relay
                 self.logger.debug(f"Opening relay for string {id}")
                 self.relay.on(module)
@@ -718,16 +717,18 @@ class Controller:
                     writer.writerow(["Area (cm2):", d["area"]])
                     writer.writerow(
                         [
-                            "Voltage (V)",
+                            "Applied Voltage (V)",
+                            "FWD Voltage (V)",
                             "FWD Current (mA)",
                             "FWD Current Density (mA/cm2)",
                             "FWD Power Density (mW/cm2)",
+                            "REV Voltage (V)",
                             "REV Current (mA)",
                             "REV Current Density (mA/cm2)",
                             "REV Power Density (mW/cm2)",
                         ]
                     )
-                    for line in zip(fwd_vm, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
+                    for line in zip(v, fwd_vm, fwd_i, fwd_j, fwd_p, rev_vm, rev_i, rev_j, rev_p):
                         writer.writerow(line)
 
                 self.logger.debug(f"Writing JV file for {id} at {fpath}")
@@ -783,7 +784,6 @@ class Controller:
             # Turn on load output
             ch = self.load_channels[id]
             
-            # HEREHERE
             # Scan mpp (pass last MPP to it)
             self.logger.debug(f"Tracking MPP for {id}")
             t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
@@ -793,13 +793,14 @@ class Controller:
             i *= 1000
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
+            pm = vm*j
 
             # Update dictionary by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
-            d["mpp"]["last_powers"][1] = p
+            d["mpp"]["last_powers"][1] = (p+pm)/2 # incase resolution doesnt change V value
 
             d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
-            d["mpp"]["last_voltages"][1] = v
+            d["mpp"]["last_voltages"][1] = (v+vm)/2 # incase resolution doesnt change V value
 
             d["mpp"]["last_currents"][0] = d["mpp"]["last_currents"][1]
             d["mpp"]["last_currents"][1] = i
@@ -812,7 +813,7 @@ class Controller:
             # Open file, append values to columns
             with open(fpath, "a", newline="") as f:
                 writer = csv.writer(f, delimiter=",")
-                writer.writerow([t, v, i, j, p])
+                writer.writerow([t, v, vm, i, j, pm])
 
             self.logger.debug(f"Writing MPP file for {id} at {fpath}")
 

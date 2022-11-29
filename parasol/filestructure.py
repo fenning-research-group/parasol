@@ -19,6 +19,9 @@ class FileStructure:
         self.analysis_folder = constants["analysis_dir"]
         self.NUM_MODULES = constants["num_modules"]
 
+        if not os.path.exists(self.root_folder):
+            os.mkdir(self.root_folder)
+
         # Create paths to cell characterization, environment monitoring, and logging folders
         self.characterization_folder = os.path.join(
             self.root_folder, "Characterization"
