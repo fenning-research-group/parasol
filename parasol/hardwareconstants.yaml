@@ -16,11 +16,11 @@ relay:
 yokogawa:
   address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
   timeout : 10 # Time before timeout error (s)
-  source_delay: 0.05 # Time source to settle (ms)
-  sense_delay: 0.05 # Time for sense to settle (ms)
-  integration_time: 10 # Time for integration (ms)
+  source_delay: 0.25 # Time source to settle (ms)
+  sense_delay: 0.25 # Time for sense to settle (ms)
+  integration_time: 0.25 # Time for integration (ms)
   max_voltage: 2 # 30 # Max volts (V) (200 mV, 2 V, 12 V, 20 V, 30 V, 60 V, or 110 V
-  max_current: 0.5 # 2 # Max amps (A) g (2 µA, 200 µA, 2 mA, 20 mA, 200 mA, 0.5 A, 1 A, 2 A, or 3 A)
+  max_current: 1 # 2 # Max amps (A) g (2 µA, 200 µA, 2 mA, 20 mA, 200 mA, 0.5 A, 1 A, 2 A, or 3 A)
 
 chroma:
   address: 'GPIB1::15::INSTR' # GPIB adress

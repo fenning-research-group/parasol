@@ -46,7 +46,9 @@ class Yokogawa:
         self.yoko = rm.open_resource(self.yoko_address)
         self.yoko.timeout = constants["timeout"]
         self.yoko.write("*RST")  # Reset factory
-        self.yoko.write(":SEN:RSEN 1") # Set 4 terminal
+        self.yoko.write(":SENS:RSEN 1") # Set 4 terminal
+        self.yoko.write(":TRIG:SOUR EXT")  # Trigger source external trigger
+
 
     def disconnect(self):
         """Disconnects from the yokogawa"""
@@ -56,60 +58,61 @@ class Yokogawa:
     def srcV_measI(self) -> None:
         """Setup source voltage and measure current"""
 
-        # Basic commands
+        # Source functions
         self.yoko.write(":SOUR:FUNC VOLT")  # Source function voltage
+        self.yoko.write((":SOUR:DEL " + str(self.source_delay) + "ms"))  # Source delay minmum in ms
+
+        # source volt options
         self.yoko.write((":SOUR:VOLT:RANG " + str(self.max_voltage) + "V"))  # Source voltage range setting to user specification
-        self.yoko.write(":SOUR:CURR:PROT:LINK ON")  # Limiter tracking on
-        self.yoko.write(":SOUR:CURR:PROT:ULIM " + str(self.max_current) + "A") # Limit current to user specification
-        self.yoko.write(":SOUR:CURR:PROT:LLIM -" + str(self.max_current) + "A") # NEW Limit current to user specification
-        self.yoko.write(":SENS:RANG:AUTO 1") # NEW
-        self.yoko.write(":SOUR:CURR:PROT:STAT ON")  # Limiter on
         self.yoko.write(":SOUR:VOLT:LEV 0V")  # Source level 0 V
 
+        # source current options
+        self.yoko.write(":SOUR:CURR:PROT:ULIM " + str(self.max_current) + "A") # Limit current to user specification
+        self.yoko.write(":SOUR:CURR:PROT:LLIM -" + str(self.max_current) + "A") # NEW Limit current to user specification
+        self.yoko.write(":SOUR:CURR:PROT:LINK ON")  # Limiter tracking on
+        self.yoko.write(":SOUR:CURR:PROT:STAT ON")  # Limiter on
+
+        # sense options
         self.yoko.write(":SENS:FUNC CURR")  # Measurement function current
-        # self.yoko.write((":SENS:ITIM " + str(self.int_time) + "ms"))  # Integration time in ms
-        # self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero off
-
-        self.yoko.write(":TRIG:SOUR EXT")  # Trigger source external trigger
-        self.yoko.write((":SOUR:DEL " + str(self.source_delay) + "ms"))  # Source delay minmum in ms
+        # self.yoko.write(":SENS:CURR:RANG 1A") # NEW doesnt work
         self.yoko.write((":SENS:DEL " + str(self.sense_delay) + "ms"))  # Sense delay minmum in ms
+        self.yoko.write((":SENS:ITIM " + str(self.int_time) + "ms"))  # Integration time in ms
+        self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero off
 
+        # turn off measurement and load output
         self._sourcing_current = False
-        self.yoko.write(":SENS:STAT OFF")  # Measurement off
         self.yoko.write(":OUTP:STAT OFF") # Output off
+        self.yoko.write(":SENS:STAT OFF")  # Measurement off
 
     def srcI_measV(self) -> None:
         """Setup source current and measure voltage"""
 
-        # Basic commands
+        # Source functions
         self.yoko.write(":SOUR:FUNC CURR")  # Source function current
-        self.yoko.write(":SOUR:VOLT:PROT:LINK ON")  # Limiter tracking on
-        self.yoko.write(":SOUR:VOLT:PROT:STAT ON")  # Limiter on
+        self.yoko.write((":SOUR:DEL " + str(self.source_delay) + "ms"))  # Source delay minmum in ms #
+
+        # source current options
+        self.yoko.write((":SOUR:CURR:RANG " + str(self.max_current) + "A"))
         self.yoko.write(":SOUR:CURR:LEV 0A")  # Source level 0 V
-        self.yoko.write(":SENS:STAT ON")  # Measurement on
+
+        # source volt options
+        self.yoko.write((":SOUR:VOLT:PROT:ULIM " + str(self.max_voltage) + "V")) # Limit current to user specification
+        self.yoko.write((":SOUR:VOLT:PROT:ULIM -" + str(self.max_voltage) + "V")) # NEW Limit current to user specification
+        self.yoko.write(":SOUR:VOLT:PROT:LINK ON")  # Limiter tracking on#
+        self.yoko.write(":SOUR:VOLT:PROT:STAT ON")  # Limiter on#
+
+        # sense functions
         self.yoko.write(":SENS:FUNC VOLT")  # Measurement function voltage
-        self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero off
-        self.yoko.write(":TRIG:SOUR EXT")  # Trigger source external trigger
+        # curr equiv self.yoko.write(":SENS:CURR:RANG 1A") # NEW doesnt work
+        self.yoko.write((":SENS:DEL " + str(self.sense_delay) + "ms"))  # Sense delay minmum in ms #
+        self.yoko.write((":SENS:ITIM " + str(self.int_time) + "ms"))  # Integration time in ms #
+        self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero off #
 
-        # These settings depend on what we are running
-        tempmaxcurr = ":SOUR:CURR:RANG " + str(self.max_current) + "A"
-        self.yoko.write(
-            tempmaxcurr
-        )  # Source current range setting to user specification
-        tempmaxvolt = ":SOUR:VOLT:PROT:ULIM " + str(self.max_voltage) + "V"
-        self.yoko.write(tempmaxvolt)  # Limit voltage to user specification
-
-        # These commands optimize the speed of our measurement
-        tempinttime = ":SENS:ITIM " + str(self.int_time)
-        self.yoko.write(tempinttime)  # Integration time minimum
-        tempsourcedelay = ":SOUR:DEL " + str(self.sourcedelay)
-        self.yoko.write(tempsourcedelay)  # Source delay minimum
-        tempsensedelay = ":SENS:DEL " + str(self.sensedelay) + " ms"
-        self.yoko.write(tempsensedelay)  # Measure delay as set above
+        # turn off measurement and load ouput
         self._sourcing_current = True
+        self.yoko.write(":SENS:STAT OFF")  # Measurement off
+        self.yoko.write(":OUTP:STAT OFF") # Output off
 
-        # Turn output off
-        self.yoko.write(":OUTP:STAT OFF")
 
     def output_on(self) -> None:
         """Turn output on"""
@@ -227,13 +230,14 @@ class Yokogawa:
                 self.set_current(current)
                 volt = self.measure_voltage()
                 curr = self.measure_current()
-                return curr, volt
+
         else:
             # set current, measure current and voltage
             self.set_current(current)
             volt = self.measure_voltage()
             curr = self.measure_current()
-            return curr, volt
+        
+        return curr, volt
 
 
     def voc(self) -> float:
@@ -275,6 +279,7 @@ class Yokogawa:
             np.ndarray: current (A) array
         """
         with self.lock:
+            
             # Make empty numpy arrays for data
             v = np.linspace(vstart, vend, steps)
             i = np.zeros(v.shape)

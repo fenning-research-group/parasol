@@ -453,10 +453,11 @@ class Controller:
                 )
             )
             scan_future.add_done_callback(future_callback)
-
             # Track the string
             await scan_future
             self.mpp_queue.task_done()
+
+
 
     async def check_orientation_worker(self, loop: asyncio.AbstractEventLoop) -> None:
         """
@@ -540,7 +541,8 @@ class Controller:
 
         # Add worker to que and start when possible
         await asyncio.sleep(1)
-        while self.running:
+        while self.running:           
+            # add worker to queue, increase mpp worker count
             self.mpp_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["mpp"]["interval"])
 
@@ -701,9 +703,9 @@ class Controller:
                 fwd_i *= -1000
                 rev_i *= -1000
                 fwd_j = fwd_i / d["area"]
-                fwd_p = v * fwd_j
+                fwd_p = fwd_vm * fwd_j
                 rev_j = rev_i / d["area"]
-                rev_p = v * rev_j
+                rev_p = rev_vm * rev_j
 
                 # Open file, write header/column names then fill
                 with open(fpath, "w", newline="") as f:
@@ -725,7 +727,7 @@ class Controller:
                             "REV Power Density (mW/cm2)",
                         ]
                     )
-                    for line in zip(v, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
+                    for line in zip(fwd_vm, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
                         writer.writerow(line)
 
                 self.logger.debug(f"Writing JV file for {id} at {fpath}")
@@ -815,6 +817,7 @@ class Controller:
             self.logger.debug(f"Writing MPP file for {id} at {fpath}")
 
             self.logger.info(f"Tracked {id}")
+            
 
     def monitor_env(self, dummyid: int) -> None:
         """
