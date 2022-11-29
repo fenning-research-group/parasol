@@ -111,8 +111,12 @@ class Analysis:
             (
                 all_t,
                 all_v,
+                all_vm_fwd,
+                all_i_fwd,
                 all_j_fwd,
                 all_p_fwd,
+                all_vm_rev,
+                all_i_rev,
                 all_j_rev,
                 all_p_rev,
             ) = self.load_jv_files(jv_file_paths)
@@ -170,8 +174,12 @@ class Analysis:
             (
                 all_t,
                 all_v,
+                all_vm_fwd,
+                all_i_fwd,
                 all_j_fwd,
                 all_p_fwd,
+                all_vm_rev,
+                all_i_rev,
                 all_j_rev,
                 all_p_rev,
             ) = self.load_jv_files(jv_file_paths)
@@ -185,10 +193,10 @@ class Analysis:
 
             # Pass all vectors to function to calculate scalars
             scalardict_fwd = self._calculate_jv_parameters(
-                all_v, all_j_fwd, all_p_fwd, "FWD"
+                all_vm_fwd, all_j_fwd, all_p_fwd, "FWD"
             )
             scalardict_rev = self._calculate_jv_parameters(
-                all_v, all_j_rev, all_p_rev, "REV"
+                all_vm_rev, all_j_rev, all_p_rev, "REV"
             )
 
             # Create scalardict, append time values and results from each scalardict
@@ -458,33 +466,45 @@ class Analysis:
 
         Returns:
             list[np.ndarray]: list of time vectors
-            list[np.ndarray]: list of voltage vectors
+            list[np.ndarray]: list of voltage applied vectors
+            list[np.ndarray]: list of FWD voltage measured vectors
             list[np.ndarray]: list of FWD current vectors
+            list[np.ndarray]: list of FWD current density vectors
             list[np.ndarray]: list of FWD power vectors
+            list[np.ndarray]: list of REV voltage measured vectors
             list[np.ndarray]: list of REV current vectors
+            list[np.ndarray]: list of REV current density vectors
             list[np.ndarray]: list of REV power vectors
         """
 
         # Create blank lists to fill with numpy arrays
         all_t = []
         all_v = []
+        all_vm_fwd = []
+        all_i_fwd = []
         all_j_fwd = []
         all_p_fwd = []
+        all_vm_rev = []
+        all_i_rev = []
         all_j_rev = []
         all_p_rev = []
 
         # Cycle through all files, append values
         for jv_file_path in jv_file_paths:
 
-            t, v, j_fwd, p_fwd, j_rev, p_rev = self.load_jv_file(jv_file_path)
+            t, v, vm_fwd, i_fwd, j_fwd, p_fwd, vm_rev, i_rev, j_rev, p_rev = self.load_jv_file(jv_file_path)
             all_t.append(t)
             all_v.append(v)
+            all_vm_fwd.append(vm_fwd)
+            all_i_fwd.append(i_fwd)
             all_j_fwd.append(j_fwd)
             all_p_fwd.append(p_fwd)
+            all_vm_rev.append(vm_rev)
+            all_i_rev.append(i_rev)
             all_j_rev.append(j_rev)
             all_p_rev.append(p_rev)
 
-        return all_t, all_v, all_j_fwd, all_p_fwd, all_j_rev, all_p_rev
+        return all_t, all_v, all_vm_fwd, all_i_fwd, all_j_fwd, all_p_fwd, all_vm_rev, all_i_rev, all_j_rev, all_p_rev
 
     def load_jv_file(self, jv_file_path: str) -> np.ndarray:
         """Loads data for a single JV file given by jv_file_path, returns data
@@ -494,10 +514,14 @@ class Analysis:
 
         Returns:
            np.ndarray: time vector
-           np.ndarray: voltage vector
+           np.ndarray: voltage applied vector
+           np.ndarray: FWD voltage measured vector
            np.ndarray: FWD current vector
-           np.ndarray: FWD power vector
+           np.ndarray: FWD current density vector
+           np.ndarray: FWD power density vector
+           np.ndarray: REV voltage measured vector
            np.ndarray: REV current vector
+           np.mdarray: REV current density vector
            np.ndarray: REV power vector
         """
 
@@ -515,12 +539,16 @@ class Analysis:
         all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
         all_data = np.transpose(all_data)
         v = all_data[0]
-        j_fwd = all_data[2]
-        p_fwd = all_data[3]
-        j_rev = all_data[5]
-        p_rev = all_data[6]
+        vm_fwd = all_data[1]
+        i_fwd = all_data[2]
+        j_fwd = all_data[3]
+        p_fwd = all_data[4]
+        vm_rev = all_data[5]
+        i_rev = all_data[6]
+        j_rev = all_data[7]
+        p_rev = all_data[8]
 
-        return t, v, j_fwd, p_fwd, j_rev, p_rev
+        return t, v, vm_fwd, i_fwd, j_fwd, p_fwd, vm_rev, i_rev, j_rev, p_rev
 
     def load_mpp_files(self, mpp_file_paths: list) -> np.ndarray:
         """Loads JV files contained in jv_file_paths, returns data
@@ -530,15 +558,16 @@ class Analysis:
 
         Returns:
             np.ndarray: list of time vectors
-            np.ndarray: list of voltage vectors
-            np.ndarray: list of FWD current vectors
-            np.ndarray: list of FWD power vectors
-            np.ndarray: list of REV current vectors
-            np.ndarray: list of REV power vectors
+            np.ndarray: list of voltage measured vectors
+            np.ndarray: list of voltage applied vectors
+            np.ndarray: list of current vectors
+            np.ndarray: list of current density vectors
+            np.ndarray: list of power density vectors
         """
 
         # Create blank lists to fill with numpy arrays
         all_t = []
+        all_vm = []
         all_v = []
         all_i = []
         all_j = []
@@ -546,8 +575,9 @@ class Analysis:
 
         # Extend the lists [a1,a2] +[b1,b2] = [a1,a2,b1,b2]
         for mpp_file_path in mpp_file_paths:
-            t, v, i, j, p = self.load_mpp_file(mpp_file_path)
+            t, vm, v, i, j, p = self.load_mpp_file(mpp_file_path)
             all_t.extend(t)
+            all_vm.extend(vm)
             all_v.extend(v)
             all_i.extend(i)
             all_j.extend(j)
@@ -555,12 +585,13 @@ class Analysis:
 
         # Turn into numpy arrays
         t_s = np.asarray(all_t)
+        vm_s = np.asarray(all_vm)
         v_s = np.asarray(all_v)
         i_s = np.asarray(all_i)
         j_s = np.asarray(all_j)
         p_s = np.asarray(all_p)
 
-        return t_s, v_s, i_s, j_s, p_s
+        return t_s, vm_s, v_s, i_s, j_s, p_s
 
     def load_mpp_file(self, mpp_file_path: str) -> list:
         """Loads data for a single MPP file given by mpp_file_path, returns values
@@ -570,7 +601,8 @@ class Analysis:
 
         Returns:
             list[float]: time vector
-            list[float]: voltage vector
+            list[float]: voltage measured vector
+            list[float]: voltage applied vector
             list[float]: current vector
             list[float]: current denisty vector
             list[float]: power denisty vector
@@ -588,6 +620,7 @@ class Analysis:
 
         # Initialie lists
         t = []
+        vm = []
         v = []
         i = []
         j = []
@@ -600,16 +633,21 @@ class Analysis:
                 next(csvreader)
             for line in csvreader:
                 t.append(float(line[0]))
-                v.append(float(line[1]))
-                i.append(float(line[2]))
-                j.append(float(line[3]))
-                p.append(float(line[4]))
+                vm.append(float(line[1]))
+                v.append(float(line[2]))
+                i.append(float(line[3]))
+                j.append(float(line[4]))
+                p.append(float(line[5]))
 
         # Convert to lists if not already a list (floats throw errors in sequential code)
         if type(t) is not list:
             t2 = [t]
         else:
             t2 = t
+        if type(vm) is not list:
+            vm2 = [vm]
+        else:
+            vm2 = vm
         if type(v) is not list:
             v2 = [v]
         else:
@@ -627,7 +665,7 @@ class Analysis:
         else:
             p2 = p
 
-        return t2, v2, i2, j2, p2
+        return t2, vm2, v2, i2, j2, p2
 
     def load_env_files(self, env_file_paths: list) -> np.ndarray:
         """Loads env files contained in env_file_paths, returns data
