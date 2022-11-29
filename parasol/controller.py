@@ -718,11 +718,11 @@ class Controller:
                     writer.writerow(
                         [
                             "Applied Voltage (V)",
-                            "FWD Voltage (V)"
+                            "FWD Voltage (V)",
                             "FWD Current (mA)",
                             "FWD Current Density (mA/cm2)",
                             "FWD Power Density (mW/cm2)",
-                            "REV Voltage (V)"
+                            "REV Voltage (V)",
                             "REV Current (mA)",
                             "REV Current Density (mA/cm2)",
                             "REV Power Density (mW/cm2)",
