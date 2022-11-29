@@ -5,7 +5,6 @@ import csv
 import yaml
 from datetime import datetime
 from csv import reader
-
 import math
 
 from parasol.filestructure import FileStructure
@@ -308,7 +307,16 @@ class Analysis:
                     ff = 100 * pmp / (voc * jsc)
                     pce = ff * jsc * voc / 100
                 else:
+                    jsc = np.nan
+                    rsh = np.nan
+                    voc = np.nan
+                    rs = np.nan
+                    vmp = np.nan
+                    jmp = np.nan
+                    pmp = np.nan
+                    rch = np.nan
                     ff = np.nan
+                    pce = np.nan
 
             # If we run into any issues, just make values for time NaN
             except:
@@ -687,4 +695,3 @@ class Analysis:
 
 
 # TODO: should be able to fit between two points near jsc, mpp, voc to get values
-# TODO: should be able to fit to ideal diode equation to get values

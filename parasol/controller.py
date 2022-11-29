@@ -12,12 +12,13 @@ import logging
 import sys
 
 from parasol.hardware.relay import Relay
-from parasol.hardware.scanner import Scanner
-from parasol.hardware.easttester import EastTester
+from parasol.hardware.yokogawa import Yokogawa
 from parasol.hardware.labjack import LabJack
 from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
+from parasol.hardware.chroma import Chroma
+# from parasol.hardware.easttester import EastTester
 
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
@@ -39,16 +40,17 @@ class Controller:
 
         # Connect to other modules
         self.relay = Relay()
-        self.scanner = Scanner()
-        self.load = {
-            "12": EastTester(et_num=1),
-            "34": EastTester(et_num=2),
-            "56": EastTester(et_num=3),
-        }
+        self.scanner = Yokogawa()
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
         self.monitor = LabJack()
+        self.load = Chroma()
+        # self.load = {
+        #     "12": EastTester(et_num=1),
+        #     "34": EastTester(et_num=2),
+        #     "56": EastTester(et_num=3),
+        # }
 
         # Get constants
         self.monitor_delay = constants["monitor_delay"]
@@ -59,7 +61,7 @@ class Controller:
         # Create blank message that can be checked from other programs (mainly GUI)
         self.message = None
 
-        # Create characterization/monitor/logging directory
+        # Create characterization/monitor/logging directories
         self.characterizationdir = self.filestructure.get_characterization_dir()
         if not os.path.exists(self.characterizationdir):
             os.mkdir(self.characterizationdir)
@@ -70,14 +72,22 @@ class Controller:
         if not os.path.exists(self.logdir):
             os.mkdir(self.logdir)
 
-        # Map string ID to ET port and channel
-        self.et_channels = {
-            1: ("12", 1),
-            2: ("12", 2),
-            3: ("34", 1),
-            4: ("34", 2),
-            5: ("56", 1),
-            6: ("56", 2),
+        # Map string ID to load port and channel
+        # self.load_channels = {
+        #     1: ("12", 1),
+        #     2: ("12", 2),
+        #     3: ("34", 1),
+        #     4: ("34", 2),
+        #     5: ("56", 1),
+        #     6: ("56", 2),
+        # }
+        self.load_channels = {
+            1: 1,
+            2: 2,
+            3: 3,
+            4: 4,
+            5: 7,
+            6: 8,
         }
 
         # Maps string ID to module channels
@@ -94,7 +104,7 @@ class Controller:
         self.strings = {}
 
         # Create list of active strings
-        self.active_strings = [False] * (6 + 1)
+        self.active_strings = [False] * (len(self.load_channels)+1)
 
         # Create logger with options to log or not
         date = datetime.now().strftime("%Y%m%d")
@@ -117,17 +127,10 @@ class Controller:
             self.logger.addHandler(fh)
             self.logger.addHandler(sh)
 
-        # Create lock to prevent the relay from switching when MPPT is on
-        self.relay_lock = Lock()
-        self.mpp_tracking = False
-        self.relay_open = False
-
-        # Decide how many workers we will allow and start the queue
-        # 1 for scanner, 6 for load, 1 for random tasks, 1 for environment
-        self.threadpool = ThreadPoolExecutor(max_workers=9)
+        # Create workers (1 for scanner, n for loads, 1 for random tasks, 1 for environment) & start queue
+        self.threadpool = ThreadPoolExecutor(max_workers=3+(len(self.load_channels)))
         self.start()
 
-    # TODO: check name _idx added
     def load_string(
         self,
         id: int,
@@ -170,7 +173,7 @@ class Controller:
         # Ensure id is not already in use and can be used
         if id in self.strings:
             raise ValueError(f"String {id} already loaded!")
-        if id not in self.et_channels:
+        if id not in self.load_channels:
             raise ValueError(f"{id} not valid string id!")
 
         # Setup JV and MPP timers in main loop
@@ -229,11 +232,10 @@ class Controller:
         ) = self.filestructure.make_module_subdir(name, module_channels, startdate)
         self.logger.info(f"String {id} loaded")
 
-        # Turn on the load here, stays on always
+        # Turn on the load here, stays on when not being scanned
         self.logger.debug(f"Turning on load output for string {id}")
-        load_key, ch = self.et_channels[id]
-        load = self.load[load_key]
-        load.output_on(ch)
+        ch = self.load_channels[id]
+        self.load.output_on(ch)
         self.logger.debug(f"Turned off load output for string {id}")
 
         return self.strings[id]["name"]
@@ -270,7 +272,8 @@ class Controller:
 
         # Lock all actions on string
         with d["lock"]:
-
+            
+            # Get saveloc
             saveloc = d["_savedir"]
 
             # Destroy all future tasks for the string
@@ -301,10 +304,9 @@ class Controller:
 
             # Turn load output off
             self.logger.debug(f"Resetting load for {id}")
-            load_key, ch = self.et_channels[id]
-            load = self.load[load_key]
-            load.srcV_measI(ch)
-            load.output_off(ch)
+            ch = self.load_channels[id]
+            self.load.srcV_measI(ch)
+            self.load.output_off(ch)
             self.logger.debug(f"Load reset for {id}")
 
             # Analyze the saveloc in a new thread
@@ -343,7 +345,8 @@ class Controller:
 
         # If it doesnt exist, make it:
         if os.path.exists(fpath) != True:
-
+            
+            # HEREHERE
             # Open file, write header/column names then fill
             with open(fpath, "w", newline="") as f:
                 writer = csv.writer(f, delimiter=",")
@@ -450,10 +453,11 @@ class Controller:
                 )
             )
             scan_future.add_done_callback(future_callback)
-
             # Track the string
             await scan_future
             self.mpp_queue.task_done()
+
+
 
     async def check_orientation_worker(self, loop: asyncio.AbstractEventLoop) -> None:
         """
@@ -537,7 +541,8 @@ class Controller:
 
         # Add worker to que and start when possible
         await asyncio.sleep(1)
-        while self.running:
+        while self.running:           
+            # add worker to queue, increase mpp worker count
             self.mpp_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["mpp"]["interval"])
 
@@ -555,7 +560,7 @@ class Controller:
     def __make_background_event_loop(self) -> None:
         """Setup background event loop for schedueling tasks"""
 
-        # If we have an issue in the loop, alter the user
+        # If we have an issue in the loop, log it
         def exception_handler(loop, context):
             self.logger.info(f"Exception raised in Controller loop")
 
@@ -583,7 +588,7 @@ class Controller:
         # Create JV worker for scanner
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
 
-        # Create MPP workers for load
+        # Create MPP workers for each load
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
@@ -649,18 +654,17 @@ class Controller:
             return
 
         # Lock the string
-        with d["lock"]:
+        with d['lock']:
 
             # If string is not active return
             if self.active_strings[id] == False:
                 self.logger.info(f"Last JV scan of string {id} aborted")
                 return
 
-            # Turn off load output (outputoff is locked)
+            # Turn off load output
             self.logger.debug(f"Turning off load output for string {id}")
-            load_key, ch = self.et_channels[id]
-            load = self.load[load_key]
-            load.output_off(ch)
+            ch = self.load_channels[id]
+            self.load.output_off(ch)
             self.logger.debug(f"Turned off load output for string {id}")
 
             # Cycle through each device on the string
@@ -680,31 +684,28 @@ class Controller:
                 )
                 fpath = os.path.join(jvfolder, jvfile) 
                 
+                # HEREHERE
                 # Open relay, scan device foward + reverse, turn off relay
-                # with self.relay_lock:
                 self.logger.debug(f"Opening relay for string {id}")
                 self.relay.on(module)
                 self.logger.debug(f"Opened relay for string {id}")
                 self.logger.debug(f"Scanning string {id}")
-                
-                v, fwd_i, rev_i = self.characterization.scan_jv(d, self.scanner)
+                self.scanner.output_on()
+                v, fwd_vm, fwd_i, rev_vm, rev_i = self.characterization.scan_jv(d, self.scanner)
+                self.scanner.output_off()
                 self.logger.debug(f"Scanned string {id}")
                 self.logger.debug(f"Closing relay for string {id}")
-                
-                # while self.mpp_tracking is True:
-                #     time.sleep(0.5)
-                # self.relay_open = True
                 self.relay.all_off()
-                # self.relay_open = False
                 self.logger.debug(f"Closed relay for string {id}")
 
-                # Flip the current density, convert to mA, calculate parameters
-                fwd_i *= -1 * 1000
-                rev_i *= -1 * 1000
+                # Convert to mA, calculate parameters
+                # TODO: GET RID OF (-) SIGN
+                fwd_i *= -1000
+                rev_i *= -1000
                 fwd_j = fwd_i / d["area"]
-                fwd_p = v * fwd_j
+                fwd_p = fwd_vm * fwd_j
                 rev_j = rev_i / d["area"]
-                rev_p = v * rev_j
+                rev_p = rev_vm * rev_j
 
                 # Open file, write header/column names then fill
                 with open(fpath, "w", newline="") as f:
@@ -726,7 +727,7 @@ class Controller:
                             "REV Power Density (mW/cm2)",
                         ]
                     )
-                    for line in zip(v, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
+                    for line in zip(fwd_vm, fwd_i, fwd_j, fwd_p, rev_i, rev_j, rev_p):
                         writer.writerow(line)
 
                 self.logger.debug(f"Writing JV file for {id} at {fpath}")
@@ -739,12 +740,12 @@ class Controller:
             # Increase JV scan count
             d["jv"]["scan_count"] += 1
 
-            # Turn on load output at old vmpp if we have one ---> is this causing problems? x22020418
+            # Turn on load output at old vmpp if we have one
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 self.logger.debug(f"Turning on load output for string {id}")
-                load.output_on(ch)
-                load.set_voltage(ch, vmp)
+                self.load.output_on(ch)
+                self.load.set_voltage(ch, vmp)
                 self.logger.debug(f"Turned on load output for string {id}")
 
             self.logger.info(f"Scanned {id}")
@@ -765,7 +766,7 @@ class Controller:
             return
 
         # Lock string
-        with d["lock"]:
+        with d['lock']:
 
             # If string is not active return
             if self.active_strings[id] == False:
@@ -779,21 +780,14 @@ class Controller:
             if last_vmpp is None:
                 return
 
-            # Turn on load output, set voltage, measure current
-            load_key, ch = self.et_channels[id]
-            load = self.load[load_key]
-
-            # new --> This stops from paralell tracking happening, which is bad..
-            # with self.relay_lock:
-            # while self.relay_open is True:
-            #     time.sleep(0.5)
-            # self.mpp_tracking = True
+            # Turn on load output
+            ch = self.load_channels[id]
             
-            # # Scan mpp (pass last MPP to it)
+            # HEREHERE
+            # Scan mpp (pass last MPP to it)
             self.logger.debug(f"Tracking MPP for {id}")
-            t, v, i = self.characterization.track_mpp(d, load, ch, last_vmpp)
+            t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
-            # self.mpp_tracking = False
 
             # Convert current to mA and calc j and p
             i *= 1000
@@ -823,6 +817,7 @@ class Controller:
             self.logger.debug(f"Writing MPP file for {id} at {fpath}")
 
             self.logger.info(f"Tracked {id}")
+            
 
     def monitor_env(self, dummyid: int) -> None:
         """
@@ -837,7 +832,7 @@ class Controller:
         # Get Temperature, Humidity, Relative Humidity, and Temperature
         t, temp, rh, intensity = self.characterization.monitor_environment(self.monitor)
 
-        # Make Env file if needed (daily)
+        # Make env file if needed (done 1x per experiment)
         fpath = self.make_env_file()
 
         # Append to file
@@ -870,9 +865,11 @@ class Controller:
 
             # Pass scanner to characterization module, returns true if Isc < 0, false otherwise
             self.logger.debug(f"Checking orientation for module {module}")
+            self.scanner.output_on()
             correct_orientation[idx] = self.characterization.check_orientation(
                 self.scanner
             )
+            self.scanner.output_off()
             self.logger.debug(f"Checked orientation for module {module}")
 
             # Turn off relay

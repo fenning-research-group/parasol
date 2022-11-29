@@ -7,6 +7,7 @@ from threading import Lock
 
 from parasol.hardware.port_finder import get_port
 
+# Death to ET5420!
 
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
