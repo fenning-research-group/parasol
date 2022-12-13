@@ -170,7 +170,7 @@ class Yokogawa:
         self.yoko.write(tempstr)
 
     def measure_voltage(self) -> float:
-        """Measures voltage several times and then averages (number defined in hardwareconstants.yaml)
+        """Measures the voltage (V) reading
 
         Returns:
             float: voltage (V) reading
@@ -179,7 +179,7 @@ class Yokogawa:
         return (float(self._trig_read()))
 
     def measure_current(self) -> float:
-        """Measures current several times and then averages (number defined in hardwareconstants.yaml)
+        """Measures the current (A) reading
 
         Returns:
             float: current (A) reading
@@ -222,6 +222,7 @@ class Yokogawa:
             lock (boolean = True): option to lock instrument while command is running
 
         Returns:
+            float: current (A) reading
             float: voltage (V) reading
         """
         if lock:
@@ -241,7 +242,7 @@ class Yokogawa:
 
 
     def voc(self) -> float:
-        """Measures the open circuit voltage
+        """Measures the open circuit voltage (V) at I = 0
 
         Returns:
             float: open circut voltage (V)
@@ -254,7 +255,7 @@ class Yokogawa:
 
 
     def isc(self) -> float:
-        """Measures the short circuit current
+        """Measures the short circuit current (A) at V = 0
 
         Returns:
             float: short circuit current (A)
@@ -275,7 +276,8 @@ class Yokogawa:
             steps (float): number of voltage steps in the sweep
 
         Returns:
-            np.ndarray: voltage (V) array
+            np.ndarray: voltage applied (V) array
+            np.ndarray: voltage measured (V) array
             np.ndarray: current (A) array
         """
         with self.lock:
@@ -299,9 +301,7 @@ class Yokogawa:
         return v, vm, i
 
 
-    def iv_sweep_quadrant_fwd_rev(
-        self, vstart: float, vend: float, steps: int
-    ) -> np.ndarray:
+    def iv_sweep_quadrant_fwd_rev(self, vstart: float, vend: float, steps: int) -> np.ndarray:
         """Runs FWD and then REV IV sweep in the power producing quadrant and returns the data
 
         Args:
@@ -310,13 +310,11 @@ class Yokogawa:
             steps (float): number of voltage steps in the sweep
 
         Returns:
-            vstart (float): sweep start voltage (V)
-            vend (float): sweep end voltage (V)
-            steps (float): number of voltage steps in the sweep
-
-        Returns:
-            np.ndarray: voltage (V) array
-            np.ndarray: current (A) array
+            np.ndarray: voltage applied (V) array
+            np.ndarray: FWD voltage measured (V) array
+            np.ndarray: FWD current measured (A) array
+            np.ndarray: REV voltage measured (V) array
+            np.ndarray: REV current measured (A) array
         """
 
         with self.lock:
@@ -358,9 +356,7 @@ class Yokogawa:
 
         return v, vm_fwd, i_fwd, vm_rev, i_rev
 
-    def iv_sweep_quadrant_rev_fwd(
-        self, vstart: float, vend: float, steps: int
-    ) -> np.ndarray:
+    def iv_sweep_quadrant_rev_fwd(self, vstart: float, vend: float, steps: int) -> np.ndarray:
         """Runs REV and then FWD IV sweep in the power producing quadrant and returns the data
 
         Args:
@@ -369,13 +365,11 @@ class Yokogawa:
             steps (float): number of voltage steps in the sweep
 
         Returns:
-            vstart (float): sweep start voltage (V)
-            vend (float): sweep end voltage (V)
-            steps (float): number of voltage steps in the sweep
-
-        Returns:
-            np.ndarray: voltage (V) array
-            np.ndarray: current (A) array
+            np.ndarray: voltage applied (V) array
+            np.ndarray: FWD voltage measured (V) array
+            np.ndarray: FWD current measured (A) array
+            np.ndarray: REV voltage measured (V) array
+            np.ndarray: REV current measured (A) array
         """
         
         with self.lock:

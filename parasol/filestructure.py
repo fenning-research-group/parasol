@@ -188,9 +188,9 @@ class FileStructure:
         """Makes JV, MPP, and Analyzed subdirectories for a given test
 
         Args:
-            startdate (str): startdate in xYYYYMMDD format
             name (str): name of test
             module_channels (list[int]): module channels
+            startdate (str): startdate in xYYYYMMDD format
 
         Returns:
             list[str]: paths to JV folders
@@ -273,7 +273,8 @@ class FileStructure:
         Args:
             startdate (str): startdate in xYYYYMMDD format
             name (str): name of test
-            id (int): module/channel id
+            id (int): test id
+            module_channel (int): module channel
 
         Returns:
             str: name of Analyed file
@@ -429,7 +430,7 @@ class FileStructure:
             list[str]: path to analyzed folder
         """
 
-        # Get path to MPP folders
+        # Get path to MPP folder
         mpp_folder = [os.path.join(stringpath, "MPP")]
 
         # Get path to JV folders
@@ -439,6 +440,7 @@ class FileStructure:
             if os.path.exists(jv_folder):
                 jv_folders.append(jv_folder)
 
+        # Get path to analyzed folder
         analyzed_folder = [os.path.join(stringpath, "Analyzed")]
 
         return mpp_folder, jv_folders, analyzed_folder
@@ -467,7 +469,7 @@ class FileStructure:
     # Map folders and files in test subdirectory and files in env subdirectory
 
     def map_test_folders(self, test_paths: list) -> dict:
-        """Creates a dictionary maping test folders to their subfolders
+        """Creates a dictionary mapping test folders to their subfolders
 
         Args:
             test_paths (list[str]): paths to test folders
@@ -491,7 +493,7 @@ class FileStructure:
         return test_dict
 
     def map_test_files(self, test_folders: list) -> dict:
-        """Creates a dictionary maping test subfolders to their subfiles
+        """Creates a dictionary mapping test subfolders to their subfiles
 
         Args:
             test_folders (list[str]): path to a given subfolder (e.g. JV)
@@ -532,8 +534,8 @@ class FileStructure:
 
         Args:
             env_folders (list[str]): paths to env folders
-            startdate (str): end date in xYYYYMMDD format
-            enddate (str): start date in xYYYYMMDD format
+            startdate (str): start date in xYYYYMMDD format
+            enddate (str): end date in xYYYYMMDD format
         Returns:
             dict: file_dict[folder] = [file_paths]
         """
@@ -578,7 +580,7 @@ class FileStructure:
 
         Args:
             test_folders (list[str]): list of test folders
-            filetype (string): either "Analyzed" "JV" or "MPP"
+            filetype (string): either "Analyzed", "JV", or "MPP"
 
         Returns:
             list[list[str]]: list of file paths seperated by test
@@ -605,8 +607,8 @@ class FileStructure:
         """Returns a list of all files in test folders
 
         Args:
-            startdate (str): start date of test
-            enddate (str): end date of test
+            startdate (str): start date of test in xYYYYMMDD format
+            enddate (str): end date of test in xYYYYMMDD format
 
         Returns:
             list[list[str]]: list of file paths seperated by env folder

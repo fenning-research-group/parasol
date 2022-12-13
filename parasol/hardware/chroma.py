@@ -23,7 +23,7 @@ class Chroma:
         self.time_out = constants["time_out"]
         self.source_delay = constants["source_delay"]
         self.sense_delay = constants["sense_delay"]
-        self.ca_avg_num = constants["avg_num"]
+        self.ca_avg_num = constants["avg_num"] # unused
         self.ca_v_max = constants["max_voltage"] # unused (use H below)
         self.ca_i_max = constants["max_current"] # will be used (need max current for CV, can be # max or min)
         self.ca_address = constants["address"]
@@ -62,18 +62,28 @@ class Chroma:
         """Disconnects from the chroma"""
         self.inst.close()
         self.rm.close()
+        
+    def channel_check(self, channel: int) -> None:
+        """Checks and switches to new channel ID
 
+        Args:
+            channel (int or string): chroma channel to alter
+        """
+        if channel != self.channel:
+            self.ca.write("CHAN " + str(channel)) # sets new channel
+            self.channel = channel
 
     def srcV_measI(self, channel: int) -> None:
-        """Setup source voltage and measure current
+        """Setup for sourcing voltage and measuring current
 
         Args:
             channel (int or string): chroma channel to alter
         """
         
-        if channel != self.channel:
-            self.ca.write("CHAN " + str(channel)) # set channel
-            self.channel = channel
+        # if channel != self.channel:
+        #     self.ca.write("CHAN " + str(channel)) # set channel
+        #     self.channel = channel
+        self.channel_check(channel) # sets channel
         self.ca.write("MODE " + self.ca_cv_mode) # set mode to CV
         self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
         # self.ca.write("VOLT:CURR " + str(self.ca_i_max))
@@ -84,15 +94,16 @@ class Chroma:
 
 
     def srcI_measV(self, channel: int) -> None:
-        """Setup source current and measure voltage
+        """Setup for sourcing current and measuring voltage
         
         Args:
             channel (int or string): chroma channel to alter
         """
         
-        if channel != self.channel:
-            self.ca.write("CHAN " + str(channel)) # set channel
-            self.channel = channel
+        # if channel != self.channel:
+        #     self.ca.write("CHAN " + str(channel)) # set channel
+        #     self.channel = channel
+        self.channel_check(channel) # sets channel
         self.ca.write("MODE " + self.ca_cc_mode) # set mode to CC
         self.ca.write("CURR:STATIC:L1 0") # set current of load to 0
         self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
@@ -107,9 +118,10 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        if channel != self.channel:
-            self.ca.write("CHAN " + str(channel)) # set channel
-            self.channel = channel
+        # if channel != self.channel:
+        #     self.ca.write("CHAN " + str(channel)) # set channel
+        #     self.channel = channel
+        self.channel_check(channel) # sets channel
         self.ca.write("CHAN:ACT ON") # turn on measurement
         self.ca.write("LOAD ON") # turn on load
 
@@ -121,9 +133,10 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        if channel != self.channel:
-            self.ca.write("CHAN " + str(channel)) # set channel
-            self.channel = channel
+        # if channel != self.channel:
+        #     self.ca.write("CHAN " + str(channel)) # set channel
+        #     self.channel = channel
+        self.channel_check(channel) # sets channel
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.ca.write("LOAD OFF") # turn off load
 
@@ -142,9 +155,10 @@ class Chroma:
             self.output_on(channel)
             self._sourcing_current[channel] = False
         
-        if channel != self.channel:
-            self.ca.write("CHAN " + str(channel)) # set channel
-            self.channel = channel
+        # if channel != self.channel:
+        #     self.ca.write("CHAN " + str(channel)) # set channel
+        #     self.channel = channel
+        self.channel_check(channel) # sets channel
         self.ca.write("VOLT:L1 " + str(voltage)) # set load voltage
         time.sleep(self.source_delay) # delay for system to settle
 
@@ -164,15 +178,16 @@ class Chroma:
             self._sourcing_current[channel] = True
 
         # set to input channel
-        if channel != self.channel:
-            self.ca.write("CHAN " + str(channel)) # set channel
-            self.channel = channel
+        # if channel != self.channel:
+        #     self.ca.write("CHAN " + str(channel)) # set channel
+        #     self.channel = channel
+        self.channel_check(channel)
         self.ca.write("CURR:STATIC:L1 " + str(current)) # set load current
         time.sleep(self.source_delay) # delay for system to settle
 
 
     def measure_voltage(self, channel: int) -> float:
-        """Measures voltage several times and then averages (number defined in hardwareconstants.yaml)
+        """Measures the voltage reading at the given channel
 
         Args:
             channel (int or string): chroma channel to alter
@@ -182,16 +197,17 @@ class Chroma:
         """
 
         # sets to input channel
-        if channel != self.channel:
-            self.ca.write("CHAN " + str(channel)) # set channel
-            self.channel = channel
+        # if channel != self.channel:
+        #     self.ca.write("CHAN " + str(channel)) # set channel
+        #     self.channel = channel
+        self.channel_check(channel)
         volt = float(self.ca.query("MEAS:VOLT?")) # measure voltage
 
         return volt
 
 
     def measure_current(self, channel: int) -> float:
-        """Measures current several times and then averages (number defined in hardwareconstants.yaml)
+        """Measures the current reading at the given channel
 
         Args:
             channel (int or string): chroma channel to alter
@@ -200,9 +216,10 @@ class Chroma:
             float: current (A) reading
         """
 
-        if channel != self.channel:
-            self.ca.write("CHAN " + str(channel)) # set channel
-            self.channel = channel
+        # if channel != self.channel:
+        #     self.ca.write("CHAN " + str(channel)) # set channel
+        #     self.channel = channel
+        self.channel_check(channel) # sets channel
         curr = float(self.ca.query("MEAS:CURR?")) # measure current
 
         return curr
@@ -244,6 +261,7 @@ class Chroma:
             lock (boolean = True): option to lock instrument while command is running
 
         Returns:
+            float: current (A) reading
             float: voltage (V) reading
         """
         
@@ -263,7 +281,7 @@ class Chroma:
 
 
     def voc(self, channel: int) -> float:
-        """Gets open circut voltage: V where I = 0
+        """Gets open circut voltage (V) where I = 0
 
         Args:
             channel (int or string): chroma channel to alter
@@ -279,7 +297,7 @@ class Chroma:
 
 
     def isc(self, channel: int) -> float:
-        """Gets short circut current: I where V = 0
+        """Gets short circut current (A) where V = 0
 
         Args:
             channel (int or string): chroma channel to alter
@@ -339,13 +357,11 @@ class Chroma:
             steps (float): number of voltage steps in the sweep
 
         Returns:
-            vstart (float): sweep start voltage (V)
-            vend (float): sweep end voltage (V)
-            steps (float): number of voltage steps in the sweep
-
-        Returns:
-            np.ndarray: voltage (V) array
-            np.ndarray: current (A) array
+            np.ndarray: voltage applied (V) array
+            np.ndarray: FWD voltage measured (V) array
+            np.ndarray: FWD current measured (A) array
+            np.ndarray: REV voltage measured (V) array
+            np.ndarray: REV current measured (A) array
         """
 
         with self.lock:
@@ -389,9 +405,7 @@ class Chroma:
         return v, vm_fwd, i_fwd, vm_rev, i_rev
 
 
-    def iv_sweep_quadrant_rev_fwd(
-        self, channel: int, vstart: float, vend: float, steps: int
-    ) -> np.ndarray:
+    def iv_sweep_quadrant_rev_fwd(self, channel: int, vstart: float, vend: float, steps: int) -> np.ndarray:
         """Runs REV and then FWD IV sweep in the power producing quadrant and returns the data
 
         Args:
@@ -401,13 +415,11 @@ class Chroma:
             steps (float): number of voltage steps in the sweep
 
         Returns:
-            vstart (float): sweep start voltage (V)
-            vend (float): sweep end voltage (V)
-            steps (float): number of voltage steps in the sweep
-
-        Returns:
-            np.ndarray: voltage (V) array
-            np.ndarray: current (A) array
+            np.ndarray: voltage applied (V) array
+            np.ndarray: FWD voltage measured (V) array
+            np.ndarray: FWD current measured (A) array
+            np.ndarray: REV voltage measured (V) array
+            np.ndarray: REV current measured (A) array
         """
 
         with self.lock:
