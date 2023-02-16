@@ -3,6 +3,7 @@ import time
 import math
 import yaml
 import os
+import numpy as np
 
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
@@ -23,22 +24,23 @@ class LabJack:
         """Initialize the labjack package for monitoring"""
 
         # Setup u6 amd calibration data
-        # self.d = u6.U6()
-        # self.d.getCalibrationData()
+        self.d = u6.U6()
+        self.d.getCalibrationData()
 
         # Ports
         self.tc_port = constants["thermocouple_port"]
         self.pd_port = constants["photodiode_port"]
         self.hg_port = constants["hygrometer_port"]
 
-        # set # to average in measurement, and delay between readings
+        # Set # to average in measurement, and delay between readings
         self.avgnum = constants["average_num"]
         self.delay = constants["delay_time"]
 
-        # setup nested functions for analysis
+        # Setup nested functions for analysis
         self.tc = self.Thermocouple()
         self.pd = self.Photodiode()
         self.hm = self.Hygrometer()
+        self.rtd = self.RTD()
 
     # Base functions
 
@@ -49,6 +51,10 @@ class LabJack:
             idx (int): anolog input channel index
             resolutionindex (int): resolution index for labjack
             gainindex (int): gain index for labjack
+            
+            idx: 14 is the internal temperature sensor and 15 is internal GND.
+            ResolutionIndex: 0=default, 1-8 for high-speed ADC, 9-13 for high-res ADC on U6-Pro. Value in the response is the actual resolution setting used for the reading. 
+            GainIndex: 0=x1, 1=x10, 2=x100, 3=x1000, 15=autorange. Value in the response is the actual gain setting used for the reading
 
         Returns:
             float: value read
@@ -79,19 +85,56 @@ class LabJack:
         DAC_REGISTER = 5000 + idx * 1
         self.d.writeRegister(DAC_REGISTER, v)
 
+
+
+
+
+
     # Monitor Env and supporting Functions
 
     def monitor_env(self) -> float:
         """Monitors the environment and returns the temperature, relative humidity, and intensity"""
 
-        temp = self.get_temp()
+        temp = 25 #self.get_temp_rtd()
         rh = self.get_rh(temp)
         intensity = self.get_intensity(temp)
 
         return temp, intensity, rh
 
-    def get_temp(self) -> float:
-        """Measures the temperature using the labjack and type K thermocouple
+
+    def get_temp_rtd(self)-> float:
+        """Measures the temperature using the labjack and PT1000 RTD
+
+        Returns:
+            float: temperature of thermocouple in degrees C
+        """
+        
+        # Get calibrated current output in amps
+        RTD_A = self.d.calInfo.currentOutput1
+
+        # average over n readings
+        temp = 0
+        for i in range(self.avgnum):
+            
+            # Read voltage before RTD
+            RTD_V = self.read_AIN(idx = self.tc_port)
+            
+            # Caluclate resistance via Ohms law
+            RTD_Ohm = RTD_V/RTD_A
+            
+            # Convert to temp
+            RTD_T = self.rtd.ohmToTempC(RTD_Ohm)
+            
+            # Iterate
+            temp += RTD_T
+            time.sleep(self.delay)
+            
+        temp /= self.avgnum 
+        return temp
+
+
+    def get_temp_tc(self) -> float:
+        """Measures the temperature using the labjack and type K thermocouple.
 
         Returns:
             float: temperature of thermocouple in degrees C
@@ -105,16 +148,16 @@ class LabJack:
             CJTEMPinC = self.read_CJT()
 
             # Read thermocouple's analog voltage (mV)
-            TCmVolts = self.read_AIN(idx=self.tc_port, resolutionindex=8, gainindex=3)
+            TCmVolts = self.read_AIN(idx=self.tc_port, gainindex=3) # gain index 3 = x1000
 
-            # Get total mV, convert to C, add to temp
+            # Get total mV, convert to C
             totalMVolts = TCmVolts + self.tc.tempCToMVolts(CJTEMPinC)
+            
+            # Iterate
             temp += self.tc.mVoltsToTempC(totalMVolts)
             time.sleep(self.delay)
 
-        # divide by number of readings to obtain avg
         temp /= self.avgnum
-
         return temp
 
     def get_intensity(self, temp: float) -> float:
@@ -133,17 +176,17 @@ class LabJack:
         for i in range(self.avgnum):
 
             # Read  analog voltage (mV)
-            PDmVolts = self.read_AIN(idx=self.pd_port, gainindex=2) * 1000
+            PDmVolts = self.read_AIN(idx=self.pd_port, gainindex = 3) # gain index 3 = x1000
             # V drop is across resistor due to current, calc using Ohms Law
             PDmAmps = self.pd.mVoltsTomAmps(PDmVolts)
-            # Compare mA to expected 1 sun illumination (as function of T) to convert to # of suns, add to intensity
+            # Compare mA to expected 1 sun illumination (as function of T) to convert to # of suns
             PDsuns = self.pd.mAmpsToSuns(PDmAmps, temp)
+            
+            # Iterate
             intensity += PDsuns
             time.sleep(self.delay)
 
-        # divide by number of readings to obtain avg
         intensity /= self.avgnum
-
         return intensity
 
     def get_rh(self, temp: float) -> float:
@@ -160,12 +203,12 @@ class LabJack:
         # Get applied voltage
         vapplied = self.hm.get_hg_vapplied()  # 5V
 
+        # iterate over n readinds
         rh = 0
-
         for i in range(self.avgnum):
 
-            # Read hygrometyers analogue voltage (mv)
-            HMmVolts = self.read_AIN(idx=self.hg_port) * 1000
+            # Read hygrometers analogue voltage (mv)
+            HMmVolts = self.read_AIN(idx=self.hg_port, gainindex = 3) # gain index 3 = x1000
 
             # Convert input and output voltages to relative humidity
             HM_RHs = self.hm.mVoltsToRHs(HMmVolts, vapplied)
@@ -173,12 +216,11 @@ class LabJack:
             # Convert sensor RH to real RH
             HM_RHr = self.hm.RHsToRHr(HM_RHs, temp)
 
-            # Add to rh
+            # Iterate
             rh += HM_RHr
+            time.sleep(self.delay)
 
-        # divide by number of readings to obtain avg
         rh /= self.avgnum
-
         return rh
 
     # Nested Functions for each monitoring task
@@ -195,10 +237,10 @@ class LabJack:
             """Initializes the hygrometer class and neccisary constants"""
 
             # grab constants
-            self.vmult = 0.0062  # RH/V
-            self.voffset = 0.16  # V
-            self.rhmult = 0.00216
-            self.rhoffset = 1.0546
+            self.vmult = 0.030 # RH/V, provided for each sensor
+            self.voffset = 0.804 # V, provided for each sensor
+            self.rhmult = 0.00216 # provided for HIH series
+            self.rhoffset = 1.0546 # provided for HIH series
             self.vapplied = 5  # Voltage applied by DAC port
 
         def get_hg_vapplied(self) -> float:
@@ -217,7 +259,8 @@ class LabJack:
                 float: relative humidity in RH
             """
 
-            return ((v_meas / v_app) - self.voffset) / self.vmult
+            # Voltage to RH equation given for each calibrated sensor
+            return (v_meas - self.voffset) / self.vmult
 
         def RHsToRHr(self, RH_meas: float, temp: float) -> float:
             """Concerts RH sensor reading to real RH reading (temp correction)
@@ -230,6 +273,8 @@ class LabJack:
                 float: real relative humidity in %
             """
 
+            # Temp correction given in Installation Instructions manual
+            # https://sps.honeywell.com/us/en/products/advanced-sensing-technologies/healthcare-sensing/humidity-with-temperature-sensors/hih-4000-series
             return (RH_meas) / (self.rhoffset - self.rhmult * temp)
 
     class Photodiode:
@@ -238,7 +283,6 @@ class LabJack:
         Functions by dropping the current of the photodiode across a resistor and measuring voltage loss
         Photodioide should have + to ground, - to resitor to AIN#.
         Resistor = (max V sense / Isc) / gain = (10.1 V)/(5.4E-6 A) / 1 = 1870 kOhm @ gain 1 or  187 kOhm @ gain 10
-        Here we will use 180 kOhm and gain 10
         Specs: https://www.hamamatsu.com/us/en/product/optical-sensors/photodiodes/si-photodiodes/S1133-01.html
         """
 
@@ -246,8 +290,8 @@ class LabJack:
             """Initializes the Photodiode class and neccisary constants"""
 
             # grab constants
-            self.resistor = 180000  # ohms
-            self.onesun_isc = 0.0054  # mA
+            self.resistor = 1666  # ohms, resistor on board
+            self.onesun_isc = 0.0054  # mA, measure under solar simulator
             self.tempmult = 0.1  # %/C off 25 C, +C inc Isc
             self.tempoffset = 25  # C
 
@@ -477,3 +521,34 @@ class LabJack:
             coeffs = self.voltsToTempConstants(mVolts)
             # calculate temp regular
             return self.evaluatePolynomial(coeffs, mVolts)
+        
+    
+    
+    class RTD:
+        """
+        General thermocouple nested class for reading the K-type thermocouple in C
+        Thermocouiple should have - to ground, + to AIN#
+        Tables: https://srdata.nist.gov/its90/type_k/kcoefficients.html
+        """
+
+        def __init__(self) -> None:
+            """Initializes the thermocouple class and neccisary constants"""
+            
+            self.make_coefs()
+        
+        
+        def make_coefs(self):
+            
+            self.temps = np.linspace(-50,110,33)
+            self.ohms = [803.1, 822.9, 842.7, 862.5, 882.2, 901.9, 921.6, 941.2, 960.9, 980.4, 1000, 1019.5, 1039, 1058.5, 
+                1077.9, 1097.3, 1116.7, 1136.1, 1155.4, 1174.7, 1194, 1213.2, 1232.4, 1251.6, 1270.7, 1289.8, 1308.9, 1328,
+                1347, 1366, 1385, 1403.9, 1422.9]
+            
+            print(self.temps)
+        
+        def ohmToTempC(self,ohm) ->float:
+            
+            return np.interp(ohm, self.ohms, self.temps)
+            
+
+
