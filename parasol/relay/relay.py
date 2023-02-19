@@ -15,8 +15,8 @@ class Relay():
         # 1 board runs 2 cells so 12 boards will handle 6 strings of 4 cells
         # general rule: (NUM_STRINGS * NUM_DEVS * NUM_WIRES <= NUM_BOARDS * NUM_RELAYS / 2)
         
-        self.SERIAL_PORT = 'COM5' # com port --> shift to comfinder
-        self.DELAY = 0.00001 # delay between commands 
+        self.SERIAL_PORT = 'COM4' # com port --> shift to comfinder
+        self.DELAY = 0.1 # delay between commands 
         
         self.NUM_DEVS = 4# 4 # number of devices per load string
         self.NUM_WIRES = 4 # number of wires used per device (4 or 2)
@@ -158,8 +158,9 @@ class Relay():
 
     def all_off(self):
         """Close all relays"""
-        for relay in self.relay_open:
-            self._close(relay)
+        for idx, relay in enumerate(self.relay_open):
+            print(idx)
+            self._close(idx)
 
 
     def open_string(self,string_no):

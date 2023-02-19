@@ -11,7 +11,8 @@ import time
 import logging
 import sys
 
-from parasol.hardware.relay import Relay
+#from parasol.hardware.relay import Relay
+from parasol.relay.relay import Relay
 from parasol.hardware.yokogawa import Yokogawa
 from parasol.hardware.labjack import LabJack
 from parasol.analysis.analysis import Analysis
@@ -43,7 +44,7 @@ class Controller:
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
-        self.monitor = LabJack()
+        # self.monitor = LabJack()
         self.load = Chroma()
 
         # Get constants
