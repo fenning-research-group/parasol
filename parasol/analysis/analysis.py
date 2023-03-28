@@ -93,7 +93,7 @@ class Analysis:
             jv_dict (dict): dictionary mapping jv folders to file paths
 
         Returns:
-            numpy: time values for each scan
+            list[np.array]: time values for each scan
             list[np.array]: forward pmp values for each scan
             list[np.array]: reverse pmp values for each scan
         """
@@ -430,13 +430,13 @@ class Analysis:
         return df_headers, df2_data
 
     def filter_parameters(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Lightly filters input Scalars dataframe to ensure values are reslistic
+        """Lightly filters input Scalars dataframe to ensure values are realistic
 
         Args:
             df (pd.DataFrame): dataframe of JV scalars over time
 
         Returns:
-            pd.DataFrame: filtered dataframe with 0<FF<100 and 0<Voc<10
+            pd.DataFrame: filtered dataframe with 0 < FF < 100 and 0 < Voc < 10
         """
 
         # Ensure we dont have crazy numbers
@@ -551,7 +551,7 @@ class Analysis:
         return t, v, vm_fwd, i_fwd, j_fwd, p_fwd, vm_rev, i_rev, j_rev, p_rev
 
     def load_mpp_files(self, mpp_file_paths: list) -> np.ndarray:
-        """Loads JV files contained in jv_file_paths, returns data
+        """Loads MPP files contained in mpp_file_paths, returns data
 
         Args:
             mpp_file_paths (list[str]): list of paths to mpp files
@@ -618,7 +618,7 @@ class Analysis:
         #     _ = next(reader)  # module
         #     _ = next(reader)  # area
 
-        # Initialie lists
+        # Initialize lists
         t = []
         vm = []
         v = []

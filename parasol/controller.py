@@ -11,14 +11,14 @@ import time
 import logging
 import sys
 
-from parasol.hardware.relay import Relay
+#from parasol.hardware.relay import Relay
+from parasol.relay.relay import Relay
 from parasol.hardware.yokogawa import Yokogawa
 from parasol.hardware.labjack import LabJack
 from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
 from parasol.hardware.chroma import Chroma
-# from parasol.hardware.easttester import EastTester
 
 # Set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
@@ -44,13 +44,8 @@ class Controller:
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
-        self.monitor = LabJack()
+        self.monitor = ""#LabJack()
         self.load = Chroma()
-        # self.load = {
-        #     "12": EastTester(et_num=1),
-        #     "34": EastTester(et_num=2),
-        #     "56": EastTester(et_num=3),
-        # }
 
         # Get constants
         self.monitor_delay = constants["monitor_delay"]
@@ -514,7 +509,7 @@ class Controller:
         """Manages inserting random tasks
 
         Args:
-            module (int): module number
+            modules (list[int]): modules to check
         """
 
         # Add worker to que and start when possible
@@ -689,9 +684,7 @@ class Controller:
                 self.relay.on(module)
                 self.logger.debug(f"Opened relay for string {id}")
                 self.logger.debug(f"Scanning string {id}")
-                self.scanner.output_on()
                 v, fwd_vm, fwd_i, rev_vm, rev_i = self.characterization.scan_jv(d, self.scanner)
-                self.scanner.output_off()
                 self.logger.debug(f"Scanned string {id}")
                 self.logger.debug(f"Closing relay for string {id}")
                 self.relay.all_off()
@@ -752,7 +745,7 @@ class Controller:
             self.logger.info(f"Scanned {id}")
 
     def track_mpp(self, id: int) -> None:
-        """Conduct an MPP scan using Easttester class
+        """Conduct an MPP scan using Chroma class
 
         Args:
             id (int): string number
@@ -911,7 +904,7 @@ class Controller:
         return message
 
     def __del__(self) -> None:
-        """Stops que and program on exit"""
+        """Stops queue and program on exit"""
         self.stop()
 
 

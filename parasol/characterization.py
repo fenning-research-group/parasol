@@ -36,12 +36,14 @@ class Characterization:
         """Conducts JV scan
 
         Args:
-            d (dict): dictionary containing all neccsiary information (defined in controller.py)
+            d (dict): dictionary containing all necessary information (defined in controller.py)
             scanner (object): pointer to the controller for the scanner
 
         Returns:
             np.ndarray: voltage (V) values
+            np.ndarray: FWD voltage measured (V) values
             np.ndarray: FWD current (A) values
+            np.ndarray: REV voltage measured (V) values
             np.ndarray: REV current (A) values
         """
 
@@ -90,19 +92,20 @@ class Characterization:
 
 
     def track_mpp(
-        self, d: dict, easttester: object, ch: int, vmpp_last: float
+        self, d: dict, chroma: object, ch: int, vmpp_last: float
     ) -> np.ndarray:
         """Tracks Vmpp for next point
 
         Args:
-            d (dict): dictionary containing all neccsiary information (defined in controller.py)
-            easttester (object): pointer to the contoller for the eastester
-            ch (int): eastester channel
+            d (dict): dictionary containing all necessary information (defined in controller.py)
+            chroma (object): pointer to the contoller for the chroma
+            ch (int): chroma channel
             vmpp_last (float): last maximum power point tracking voltage (V)
 
         Returns:
             np.ndarray: time (epoch) values
-            np.ndarray: voltage (V) values
+            np.ndarray: voltage applied (V) values
+            np.ndarray: voltage measured (V) values
             np.ndarray: current (A) values
         """
 
@@ -118,7 +121,7 @@ class Characterization:
         #         ):
         #             v= vmpp_last + self.et_voltage_step
         #             t = time.time()
-        #             i = easttester.set_V_measure_I(ch, v)
+        #             i = chroma.set_V_measure_I(ch, v)
 
         #     else:
 
@@ -153,7 +156,7 @@ class Characterization:
 
         #         # bias at calc point
         #         t = time.time()
-        #         i = easttester.set_V_measure_I(ch, v)
+        #         i = chroma.set_V_measure_I(ch, v)
 
         # # Perturb and observe, two measurements to eliminate time axes
         # elif mpp_mode == 1:
@@ -164,7 +167,7 @@ class Characterization:
         #         ):
         #             v= vmpp_last + self.et_voltage_step
         #             t = time.time()
-        #             i = easttester.set_V_measure_I(ch, v)
+        #             i = chroma.set_V_measure_I(ch, v)
 
         #     else:
 
@@ -198,8 +201,8 @@ class Characterization:
         #             v = max(self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step)
 
         #         # bias at calc point and last point, determine greater value
-        #         p0 = easttester.set_V_measure_I(ch, vmpp_last)*vmpp_last
-        #         p1 = easttester.set_V_measure_I(ch, v)*v
+        #         p0 = chroma.set_V_measure_I(ch, vmpp_last)*vmpp_last
+        #         p1 = chroma.set_V_measure_I(ch, v)*v
         #         if p1 > p0:
         #             v_set = v
         #         else:
@@ -207,7 +210,7 @@ class Characterization:
 
         #         # set voltage and measure
         #         t = time.time()
-        #         i = easttester.set_V_measure_I(ch, v_set)
+        #         i = chroma.set_V_measure_I(ch, v_set)
 
         # # Perturb and observe, two measurements to eliminate time axes, Hidenori SAITO no check for stabilization
         # # DOI:10.5796/electrochemistry.20-00022
@@ -219,7 +222,7 @@ class Characterization:
         #         ):
         #             v= vmpp_last + self.et_voltage_step
         #             t = time.time()
-        #             i = easttester.set_V_measure_I(ch, v)
+        #             i = chroma.set_V_measure_I(ch, v)
 
         #     else:
 
@@ -258,9 +261,9 @@ class Characterization:
         #         thirdv = max(vmpp_last, v) # smallest point + vstep
 
         #         # set voltage and measure
-        #         _ = easttester.set_V_measure_I(ch, firstv)*firstv
-        #         p0 = easttester.set_V_measure_I(ch, seccondv)*seccondv
-        #         p1 = easttester.set_V_measure_I(ch, thirdv)*thirdv
+        #         _ = chroma.set_V_measure_I(ch, firstv)*firstv
+        #         p0 = chroma.set_V_measure_I(ch, seccondv)*seccondv
+        #         p1 = chroma.set_V_measure_I(ch, thirdv)*thirdv
 
         #         # compare last two measurements
         #         if p1 > p0:
@@ -270,7 +273,7 @@ class Characterization:
 
         #         # set voltage and measure at max power point
         #         t = time.time()
-        #         i = easttester.set_V_measure_I(ch, v_set)
+        #         i = chroma.set_V_measure_I(ch, v_set)
 
         # # Modified perturb and observe: taken from David Sanz Morales Thesis
         # # http://lib.tkk.fi/Dipl/2010/urn100399.pdf
@@ -283,7 +286,7 @@ class Characterization:
         #     ):
         #         v = vmpp_last + self.et_voltage_step
         #         t = time.time()
-        #         i = easttester.set_V_measure_I(ch, v)
+        #         i = chroma.set_V_measure_I(ch, v)
 
         #     else:
         #         # Calcualte changes in I, P, V
@@ -321,7 +324,7 @@ class Characterization:
 
         #         # bias at calc point
         #         t = time.time()
-        #         i = easttester.set_V_measure_I(ch, v)
+        #         i = chroma.set_V_measure_I(ch, v)
 
         # Constant perturb and observe (1 = newest, 0 = oldest)
         if mpp_mode == 0:
@@ -362,7 +365,7 @@ class Characterization:
 
             # get time, set voltage measure current
             t = time.time()
-            vm, i = easttester.set_V_measure_I(ch, v)
+            vm, i = chroma.set_V_measure_I(ch, v)
 
         # Mode = 1, bias at 75% of Voc
         elif mpp_mode == 1:
@@ -389,7 +392,7 @@ class Characterization:
             voc = v_vals[np.argmin(np.abs(j))]
             v = voc * 0.75
             t = time.time()
-            vm, i = easttester.set_V_measure_I(ch, v)
+            vm, i = chroma.set_V_measure_I(ch, v)
 
         return t, v, vm, i
 
@@ -398,7 +401,7 @@ class Characterization:
         """Gets last vmpp from tracking if it exists. If not, calculates from JV curves
 
         Args:
-            d (dict): dictionary containing all neccsiary information (defined in controller.py)
+            d (dict): dictionary containing all necessary information (defined in controller.py)
 
         Returns:
             float: last maximum power point tracking voltage (V)
@@ -438,6 +441,14 @@ class Characterization:
         return vmpp
 
     def check_orientation(self, scanner: object) -> bool:
+        """Checks the orientation of the module by verifying that Jsc > 0
+        
+        Args:
+            scanner (object): pointer to the controller for the scanner
+        
+        Returns:
+            boolean: Check for correct orientation
+        """
 
         orientation_correct = None
         isc = scanner.isc()

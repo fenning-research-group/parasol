@@ -159,8 +159,12 @@ class Grapher:
         (
             all_t,
             all_v,
+            all_vm_fwd,
+            all_i_fwd,
             all_j_fwd,
             all_p_fwd,
+            all_vm_rev,
+            all_i_rev,
             all_j_rev,
             all_p_rev,
         ) = self.analysis.load_jv_files(jvfiles)
@@ -180,10 +184,10 @@ class Grapher:
         # Plot FWD and REV curves, REV with --
         for jvpair in range(len(all_t_elapsed)):
             plt.plot(
-                all_v[jvpair], all_j_fwd[jvpair], color=colors[jvpair], **plt_kwargs
+                all_vm_fwd[jvpair], all_j_fwd[jvpair], color=colors[jvpair], **plt_kwargs
             )
             plt.plot(
-                all_v[jvpair],
+                all_vm_rev[jvpair],
                 all_j_rev[jvpair],
                 "--",
                 color=colors[jvpair],
@@ -237,6 +241,7 @@ class Grapher:
         # Load MPP files
         (
             all_t,
+            all_vm,
             all_v,
             all_i,
             all_j,
