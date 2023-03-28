@@ -24,8 +24,8 @@ class LabJack:
         """Initialize the labjack package for monitoring"""
 
         # Setup u6 amd calibration data
-        self.d = u6.U6()
-        self.d.getCalibrationData()
+        # self.d = u6.U6()
+        # self.d.getCalibrationData()
 
         # Ports
         self.tc_port = constants["thermocouple_port"]

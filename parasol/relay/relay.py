@@ -1,5 +1,6 @@
 from .modbus import Modbus
 from .R421B16 import R421B16
+from threading import Lock
 
 import time
 
@@ -9,12 +10,28 @@ import time
 
 ## DRIVER: https://ftdichip.com/drivers/vcp-drivers/
 
+
+def relay_lock(f):
+    """Locks relay
+
+    Args:
+        f (function): any function that needs to be locked
+    """
+
+    def inner(self, *args, **kwargs):
+        with self.lock:
+            f(self, *args, **kwargs)
+
+    return inner
+
+
 class Relay():
     
     def __init__(self):
         # 1 board runs 2 cells so 12 boards will handle 6 strings of 4 cells
         # general rule: (NUM_STRINGS * NUM_DEVS * NUM_WIRES <= NUM_BOARDS * NUM_RELAYS / 2)
-        
+        self.lock = Lock()
+
         self.SERIAL_PORT = 'COM4' # com port --> shift to comfinder
         self.DELAY = 0.1 # delay between commands 
         
@@ -22,7 +39,7 @@ class Relay():
         self.NUM_WIRES = 4 # number of wires used per device (4 or 2)
         self.NUM_RELAYS = 16 # number of relays per load board
         
-        self.NUM_STRINGS = 1 # 6 number of load strings
+        self.NUM_STRINGS = 2 # 6 number of load strings
         self.NUM_BOARDS = self.NUM_STRINGS*2 #12 # number of installed load boards
 
         self.create_relay_tables() # create useful relay tables  
@@ -79,7 +96,6 @@ class Relay():
             temp2 = self.dev_library[dev_num+1]
             self.relay_library[dev_num+1] = temp1+temp2
         
-        print(self.relay_library)
 
 
     def connect_modbus(self):
@@ -138,49 +154,49 @@ class Relay():
             self.relay_open[relay] = False
             time.sleep(self.DELAY)
 
+    @relay_lock
     def on(self,cell_no):
         """Open the neccisary ports to scan specified cell"""
         for relay in self.relay_library[cell_no]:
             self._open(relay)
 
-
+    @relay_lock
     def off(self,cell_no):
         """Close the neccisary ports to return the specified cell to its load"""
         for relay in self.relay_library[cell_no]:
             self._close(relay)
 
-
+    @relay_lock
     def all_on(self):
         """Open all relays"""
         for relay in self.relay_open:
             self._open(relay)
 
-
+    @relay_lock
     def all_off(self):
         """Close all relays"""
         for idx, relay in enumerate(self.relay_open):
-            print(idx)
             self._close(idx)
 
-
+    @relay_lock
     def open_string(self,string_no):
         """Opens relays for given string"""
         for relay in self.string_library[string_no]:
             self._open(relay)
 
-
+    @relay_lock
     def close_string(self,string_no):
         """Closes relays for given string"""
         for relay in self.string_library[string_no]:
             self._close(relay)
 
-
+    @relay_lock
     def open_cell(self,string_no):
         """Opens relays for given cell"""
         for relay in self.dev_library[string_no]:
             self._open(relay)
 
-
+    @relay_lock
     def close_cell(self,string_no):
         """Closes relays for given cell"""
         for relay in self.dev_library[string_no]:
