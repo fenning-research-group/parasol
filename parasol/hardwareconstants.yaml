@@ -53,7 +53,7 @@ RUN_UI:
   jv_mode: 0 # Default JV mode
   mpp_mode: 0 # Default MPP mode
   jv_frequency: 60 # Time between JV scans (s)
-  mpp_frequency: 20 # Time between MPP scans (s)
+  mpp_frequency: 30 # Time between MPP scans (s)
   v_min: -0.1 # Minimum voltage for JV/MPP scan (V)
   v_max: 0.7 # Maximum voltage for JV/MPP scan (V)
   v_steps: 100 # Number of voltage steps for JV scan

@@ -33,13 +33,13 @@ class Relay():
         self.lock = Lock()
 
         self.SERIAL_PORT = 'COM4' # com port --> shift to comfinder
-        self.DELAY = 0.1 # delay between commands 
+        self.DELAY = 0.15 # delay between commands 
         
         self.NUM_DEVS = 4# 4 # number of devices per load string
         self.NUM_WIRES = 4 # number of wires used per device (4 or 2)
         self.NUM_RELAYS = 16 # number of relays per load board
         
-        self.NUM_STRINGS = 2 # 6 number of load strings
+        self.NUM_STRINGS = 6 # 6 number of load strings
         self.NUM_BOARDS = self.NUM_STRINGS*2 #12 # number of installed load boards
 
         self.create_relay_tables() # create useful relay tables  
@@ -47,6 +47,9 @@ class Relay():
         
         self.modbus = self.connect_modbus() # open modbus get object
         self.relayboards = self.connect_R421B16() # open relay board and get dict[id] = object
+
+        self.reset_relays()
+
 
 
     def create_relay_tables(self):
@@ -117,7 +120,6 @@ class Relay():
         relay_boards = {}
         for board_id in range(self.NUM_BOARDS):
             relay_boards[board_id+1] =  R421B16(modbus_obj = self.modbus, address = (board_id+1))
-        
         return relay_boards
 
 
@@ -135,8 +137,8 @@ class Relay():
         board = self.relayboards[relayboard_no]
         
         return board, relay_no
-
-
+    
+    @relay_lock
     def _open(self,relay):
         """Workhorse function to open relays based on internal id"""
         if self.relay_open[relay] == False: # check if closed 
@@ -145,7 +147,7 @@ class Relay():
             self.relay_open[relay] = True
             time.sleep(self.DELAY)
 
-
+    @relay_lock
     def _close(self,relay):
         """Workhorse function to close relays based on internal id"""
         if self.relay_open[relay] == True: # check if open 
@@ -153,51 +155,57 @@ class Relay():
             board.off(relay_no) # turn off
             self.relay_open[relay] = False
             time.sleep(self.DELAY)
-
+    
     @relay_lock
+    def _hard_close(self,relay):
+        """Workhorse function to close relays based on internal id"""
+        board, relay_no = self.relay_to_boardspecifics(relay) # grab board and relay number
+        board.off(relay_no) # turn off
+        self.relay_open[relay] = False
+        time.sleep(self.DELAY)
+
+    
     def on(self,cell_no):
         """Open the neccisary ports to scan specified cell"""
         for relay in self.relay_library[cell_no]:
             self._open(relay)
 
-    @relay_lock
     def off(self,cell_no):
         """Close the neccisary ports to return the specified cell to its load"""
         for relay in self.relay_library[cell_no]:
             self._close(relay)
 
-    @relay_lock
     def all_on(self):
         """Open all relays"""
-        for relay in self.relay_open:
+        for relay in range(1,len(self.relay_open)):
             self._open(relay)
 
-    @relay_lock
     def all_off(self):
         """Close all relays"""
-        for idx, relay in enumerate(self.relay_open):
-            self._close(idx)
+        for relay in range(1,len(self.relay_open)):
+            self._close(relay)
 
-    @relay_lock
     def open_string(self,string_no):
         """Opens relays for given string"""
         for relay in self.string_library[string_no]:
             self._open(relay)
 
-    @relay_lock
     def close_string(self,string_no):
         """Closes relays for given string"""
         for relay in self.string_library[string_no]:
             self._close(relay)
 
-    @relay_lock
     def open_cell(self,string_no):
         """Opens relays for given cell"""
         for relay in self.dev_library[string_no]:
             self._open(relay)
 
-    @relay_lock
     def close_cell(self,string_no):
         """Closes relays for given cell"""
         for relay in self.dev_library[string_no]:
             self._close(relay)
+    
+    def reset_relays(self):
+        """Closes all relays regarldess of status -- useful for reset"""
+        for relay in range(1,len(self.relay_open)):
+            self._hard_close(relay)
