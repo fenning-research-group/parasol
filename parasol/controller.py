@@ -230,7 +230,8 @@ class Controller:
         # Turn on the load here, stays on when not being scanned
         self.logger.debug(f"Turning on load output for string {id}")
         ch = self.load_channels[id]
-        self.load.output_on(ch)
+        #self.load.output_on(ch)
+        self.load.load_on(ch, 0.00)
         self.logger.debug(f"Turned off load output for string {id}")
 
         return self.strings[id]["name"]
@@ -300,8 +301,9 @@ class Controller:
             # Turn load output off
             self.logger.debug(f"Resetting load for {id}")
             ch = self.load_channels[id]
-            self.load.srcV_measI(ch)
-            self.load.output_off(ch)
+            # self.load.srcV_measI(ch) # not needed
+            # self.load.output_off(ch)
+            self.load.load_off(ch)
             self.logger.debug(f"Load reset for {id}")
 
             # Analyze the saveloc in a new thread
@@ -659,7 +661,8 @@ class Controller:
             # Turn off load output
             self.logger.debug(f"Turning off load output for string {id}")
             ch = self.load_channels[id]
-            self.load.output_off(ch)
+            # self.load.output_off(ch)
+            self.load.load_off(ch)
             self.logger.debug(f"Turned off load output for string {id}")
 
             # Cycle through each device on the string
@@ -734,15 +737,26 @@ class Controller:
             # Increase JV scan count
             d["jv"]["scan_count"] += 1
 
+            time.sleep(0.5)
+
             # Turn on load output at old vmpp if we have one
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 self.logger.debug(f"Turning on load output for string {id}")
-                self.load.output_on(ch)
-                self.load.set_voltage(ch, vmp)
+                
+                ## SWAPPED ORDER
+                # self.load.output_on(ch)
+                # self.load.set_voltage(ch, vmp)
+                
+                # self.load._set_voltage(ch, vmp)
+                # self.load._output_on(ch)
+                self.load.load_on(ch,vmp)
+
                 self.logger.debug(f"Turned on load output for string {id}")
 
             self.logger.info(f"Scanned {id}")
+
+            time.sleep(0.5)
 
     def track_mpp(self, id: int) -> None:
         """Conduct an MPP scan using Chroma class
@@ -781,6 +795,22 @@ class Controller:
             self.logger.debug(f"Tracking MPP for {id}")
             t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
+
+            #TODO: this may be a good idea but we should also average the tracking measurent
+            #TODO: with shade this is tracking close to voc and then getting shaded and then returning
+            if d["mpp"]["last_currents"][1] is not None:
+                if((i==0 and d["mpp"]["last_currents"][1]>0) or (i>2*d["mpp"]["last_currents"][1])):
+                    # self.load.output_on(ch, last_vmpp) #NEWNEW
+                    t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
+                    print('i=0')
+                elif((v==0 and d["mpp"]["last_voltages"][1]>0) or (v > 2*d["mpp"]["last_voltages"][1])):
+                    # self.load.output_on(ch, last_vmpp) #NEWNEW
+                    t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
+                    print('v=0')
+            
+            if (i==0 or v ==0):
+                print('still hit 0')
+
 
             # Convert current to mA and calc j and p
             i *= 1000

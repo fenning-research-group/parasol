@@ -5,29 +5,37 @@ filestructure:
   # environment characteriation in root_dir\\Environment\\
   num_modules: 24 # Number of modules
 
+# relay:
+#   device_identifiers: # Generally COM3
+#     pid: 24577
+#     vid: 1027
+#     serial_number : 'AQ01FVSHA'
+#   response_time: 0.25 # Seconds for relay switch to settle
+#   settle_time: 1 # Time to wait after relay shuts
+
 relay:
-  device_identifiers: # Generally COM3
-    pid: 24577
-    vid: 1027
-    serial_number : 'AQ01FVSHA'
-  response_time: 0.25 # TODO: changed from 0.1 4/13/2022 # Seconds for relay switch to settle
-  settle_time: 1 # Time to wait after relay shuts
+  num_strings: 6
+  port: 'COM4'
+  device_identifiers: # TODO: get to work
+    pid: '6001'
+    vid: '0403'
+
 
 yokogawa:
   address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
   timeout : 10 # Time before timeout error (s)
   source_delay: 0.25 # Time source to settle (ms)
   sense_delay: 0.25 # Time for sense to settle (ms)
-  integration_time: 0.25 # Time for integration (ms)
-  max_voltage: 2 # 30 # Max volts (V) (200 mV, 2 V, 12 V, 20 V, 30 V, 60 V, or 110 V
-  max_current: 1 # 2 # Max amps (A) g (2 µA, 200 µA, 2 mA, 20 mA, 200 mA, 0.5 A, 1 A, 2 A, or 3 A)
+  integration_time: 1 # 0.25 # Time for integration (ms)
+  max_voltage: 30 # Max volts (V) (200 mV, 2 V, 12 V, 20 V, 30 V, 60 V, or 110 V
+  max_current: 2 # 2 # Max amps (A) g (2 µA, 200 µA, 2 mA, 20 mA, 200 mA, 0.5 A, 1 A, 2 A, or 3 A)
 
 chroma:
   address: 'GPIB1::15::INSTR' # GPIB adress
-  time_out: 1000 # Timeout for Chroma (ms)
-  source_delay: 0.5 # Time for source to settle (s)
-  sense_delay: 'SLOW' # Time for sense to return value (SLOW/FAST)
-  avg_num: 10 # Number of currents to avg for reading
+  time_out: 5000 # 1000 # Timeout for Chroma (ms)
+  source_delay: 1 # Time for source to settle (s)
+  sense_delay: 'FAST' #'SLOW' # Time for sense to return value (SLOW/FAST)
+  avg_num: 20 # Number of currents to avg for reading
   max_voltage: 80 # Max voltage (V) of 'high' range, 16 V for low range
   max_current: 2 # Max current (A) of 'low' range, 20 A for high range
 
@@ -40,7 +48,7 @@ labjack:
   # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py
 
 characterization:
-  mppt_voltage_step: 0.02 # MPPT voltage iteration (V) // floor resolution of Chroma
+  mppt_voltage_step: 0.05 # 0.02 # MPPT voltage iteration (V) // floor resolution of Chroma
 
 analysis:
   derivative_v_step : 0.05 # Voltage step for derivative (Rs, Rsh, Rch) in JV post-analysis (V)
@@ -49,11 +57,11 @@ controller:
   monitor_delay: 15 # Time between environmental monitoring (s)
 
 RUN_UI:
-  area : 1 # Area of the module (cm^2)
+  area : 100 # Area of the module (cm^2)
   jv_mode: 0 # Default JV mode
   mpp_mode: 0 # Default MPP mode
-  jv_frequency: 60 # Time between JV scans (s)
-  mpp_frequency: 30 # Time between MPP scans (s)
+  jv_frequency: 900 # Time between JV scans (s)
+  mpp_frequency: 20 # Time between MPP scans (s)
   v_min: -0.1 # Minimum voltage for JV/MPP scan (V)
   v_max: 0.7 # Maximum voltage for JV/MPP scan (V)
   v_steps: 100 # Number of voltage steps for JV scan

@@ -1,3 +1,6 @@
+import yaml
+import os
+
 from .modbus import Modbus
 from .R421B16 import R421B16
 from threading import Lock
@@ -10,7 +13,14 @@ import time
 
 ## DRIVER: https://ftdichip.com/drivers/vcp-drivers/
 
+from parasol.hardware.port_finder import get_port
 
+# Set module directory, import constants from yaml file
+MODULE_DIR = os.path.dirname(__file__)
+with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
+    constants = yaml.safe_load(f)["relay"]
+
+# lock for relays
 def relay_lock(f):
     """Locks relay
 
@@ -31,16 +41,15 @@ class Relay():
         # 1 board runs 2 cells so 12 boards will handle 6 strings of 4 cells
         # general rule: (NUM_STRINGS * NUM_DEVS * NUM_WIRES <= NUM_BOARDS * NUM_RELAYS / 2)
         self.lock = Lock()
-
-        self.SERIAL_PORT = 'COM4' # com port --> shift to comfinder
-        self.DELAY = 0.15 # delay between commands 
+        self.SERIAL_PORT = constants['port']#'COM4' #get_port(constants["device_identifiers"])
+        # self.DELAY = 0.15 # delay between commands 
         
-        self.NUM_DEVS = 4# 4 # number of devices per load string
+        self.NUM_DEVS = 4 # number of devices per load string
         self.NUM_WIRES = 4 # number of wires used per device (4 or 2)
         self.NUM_RELAYS = 16 # number of relays per load board
         
-        self.NUM_STRINGS = 6 # 6 number of load strings
-        self.NUM_BOARDS = self.NUM_STRINGS*2 #12 # number of installed load boards
+        self.NUM_STRINGS = constants["num_strings"] # number of load strings
+        self.NUM_BOARDS = self.NUM_STRINGS*2 # number of installed load boards
 
         self.create_relay_tables() # create useful relay tables  
         self.relay_open = [False] * (self.NUM_RELAYS*self.NUM_BOARDS+1)  # create list[relay #] = Open boolean
@@ -145,7 +154,7 @@ class Relay():
             board, relay_no = self.relay_to_boardspecifics(relay) # grab board and relay number
             board.on(relay_no) # turn on 
             self.relay_open[relay] = True
-            time.sleep(self.DELAY)
+            # time.sleep(self.DELAY)
 
     @relay_lock
     def _close(self,relay):
@@ -154,7 +163,7 @@ class Relay():
             board, relay_no = self.relay_to_boardspecifics(relay) # grab board and relay number
             board.off(relay_no) # turn off
             self.relay_open[relay] = False
-            time.sleep(self.DELAY)
+            # time.sleep(self.DELAY)
     
     @relay_lock
     def _hard_close(self,relay):
@@ -162,7 +171,7 @@ class Relay():
         board, relay_no = self.relay_to_boardspecifics(relay) # grab board and relay number
         board.off(relay_no) # turn off
         self.relay_open[relay] = False
-        time.sleep(self.DELAY)
+        # time.sleep(self.DELAY)
 
     
     def on(self,cell_no):

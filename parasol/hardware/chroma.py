@@ -62,6 +62,7 @@ class Chroma:
         """Disconnects from the chroma"""
         self.inst.close()
         self.rm.close()
+
         
     def channel_check(self, channel: int) -> None:
         """Checks and switches to new channel ID
@@ -72,6 +73,7 @@ class Chroma:
         if channel != self.channel:
             self.ca.write("CHAN " + str(channel)) # sets new channel
             self.channel = channel
+
 
     def srcV_measI(self, channel: int) -> None:
         """Setup for sourcing voltage and measuring current
@@ -111,6 +113,7 @@ class Chroma:
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.ca.write("LOAD OFF") # turn off load
 
+
     def output_on(self, channel: int) -> None:
         """Turns output on
 
@@ -124,6 +127,32 @@ class Chroma:
         self.channel_check(channel) # sets channel
         self.ca.write("CHAN:ACT ON") # turn on measurement
         self.ca.write("LOAD ON") # turn on load
+
+    
+    ## ADDED
+    def load_on(self, channel: int, voltage: float) -> None:
+        """Turns output on and applies voltage with lock
+
+        Args:
+            channel (int or string): chroma channel to alter
+            voltage (float)
+        """
+        with self.lock:
+            self.set_voltage(channel, voltage)
+            self.output_on(channel)
+            
+    
+    ## ADDED
+    def load_off(self, channel: int) -> None:
+        """Turns output off and applies voltage with lock
+
+        Args:
+            channel (int or string): chroma channel to alter
+        """
+
+        with self.lock:
+            self.output_off(channel)
+    
 
 
     def output_off(self, channel: int) -> None:

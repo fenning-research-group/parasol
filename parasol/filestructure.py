@@ -488,7 +488,7 @@ class FileStructure:
                 "MPP": mpp_folder,
                 "JV": jv_folders,
                 "Analyzed": analyzed_folder,
-            }
+            } 
 
         return test_dict
 
@@ -594,8 +594,10 @@ class FileStructure:
             sub_folders = folder_map[select_test][filetype]
             for sub_folder in sub_folders:
                 analyzed_folders.append(sub_folder)
+
         # Create dictionary holding files in each analyzedfolder
         file_map = self.map_test_files(analyzed_folders)
+
         # Create list of analyzed files
         analyzed_files = []
         for select_analyzed_folder in analyzed_folders:

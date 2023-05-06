@@ -89,7 +89,7 @@ class Characterization:
             )
 
         return v, fwd_vm, fwd_i, rev_vm, rev_i
-
+    
 
     def track_mpp(
         self, d: dict, chroma: object, ch: int, vmpp_last: float
@@ -345,7 +345,7 @@ class Characterization:
                     voltage_step = -self.et_voltage_step
 
                 # if power isnt increasing, invert voltage step to move in the other direction
-                if d["mpp"]["last_powers"][1] < d["mpp"]["last_powers"][0]:
+                if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
                     voltage_step *= -1
 
             # set the voltage equal to last voltage + voltage step (determined above)
@@ -357,11 +357,12 @@ class Characterization:
 
             # If we read 0 current (floor), set v to maximum of (voltage step, vmin + voltagestep)
             # Removing this section of code causes the ET to read 1/0 and ramp in voltage to max voltage
-            if d["mpp"]["last_currents"][1] is not None:
-                if d["mpp"]["last_currents"][1] == 0.0:
-                    v = max(
-                        self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
-                    )
+            ## removed x230501
+            # if d["mpp"]["last_currents"][1] is not None:
+            #     if d["mpp"]["last_currents"][1] == 0.0:
+            #         v = max(
+            #             self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
+            #         )
 
             # get time, set voltage measure current
             t = time.time()
@@ -453,12 +454,13 @@ class Characterization:
         orientation_correct = None
         isc = scanner.isc()
 
-        minisc = 0.0005
-        if isc > minisc:
+        minisc = -0.0005
+        if isc < minisc:
             orientation_correct = True
-        elif isc < minisc:
+        elif isc > minisc:
             orientation_correct = False
 
+        print(isc)
         return orientation_correct
 
     def monitor_environment(self, labjack: object) -> float:

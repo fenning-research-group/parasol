@@ -243,11 +243,9 @@ def GRAPHER():
             test_folders = self.get_selected_folders()
 
             # Get selected test files seperated by test (list of lists)
-
-            analyzed_files = self.filestructure.get_files(test_folders, "Analyzed")
+            analyzed_files = self.filestructure.get_files(test_folders, "Analyzed") #TODO: this can throw error
             mpp_files = self.filestructure.get_files(test_folders, "MPP")
 
-            # Update Plots
             self.update_plots(analyzed_files, mpp_files, test_folders)
 
         def setrootdir_clicked(self) -> None:
