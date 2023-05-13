@@ -49,6 +49,7 @@ class Controller:
 
         # Get constants
         self.monitor_delay = constants["monitor_delay"]
+        self.measurement_delay = constants["measurement_delay"]
 
         # Initialize running
         self.running = False
@@ -230,7 +231,6 @@ class Controller:
         # Turn on the load here, stays on when not being scanned
         self.logger.debug(f"Turning on load output for string {id}")
         ch = self.load_channels[id]
-        #self.load.output_on(ch)
         self.load.load_on(ch, 0.00)
         self.logger.debug(f"Turned off load output for string {id}")
 
@@ -301,8 +301,6 @@ class Controller:
             # Turn load output off
             self.logger.debug(f"Resetting load for {id}")
             ch = self.load_channels[id]
-            # self.load.srcV_measI(ch) # not needed
-            # self.load.output_off(ch)
             self.load.load_off(ch)
             self.logger.debug(f"Load reset for {id}")
 
@@ -661,7 +659,6 @@ class Controller:
             # Turn off load output
             self.logger.debug(f"Turning off load output for string {id}")
             ch = self.load_channels[id]
-            # self.load.output_off(ch)
             self.load.load_off(ch)
             self.logger.debug(f"Turned off load output for string {id}")
 
@@ -687,7 +684,11 @@ class Controller:
                 self.relay.on(module)
                 self.logger.debug(f"Opened relay for string {id}")
                 self.logger.debug(f"Scanning string {id}")
+
+                # wait set time and scan
+                time.sleep(self.measurement_delay)
                 v, fwd_vm, fwd_i, rev_vm, rev_i = self.characterization.scan_jv(d, self.scanner)
+
                 self.logger.debug(f"Scanned string {id}")
                 self.logger.debug(f"Closing relay for string {id}")
                 self.relay.all_off()
@@ -736,26 +737,20 @@ class Controller:
 
             # Increase JV scan count
             d["jv"]["scan_count"] += 1
-
-            time.sleep(0.5)
+            
+            # After last scan/relay shut, wait 0.5s before turning on mpp
+            time.sleep(self.measurement_delay)
 
             # Turn on load output at old vmpp if we have one
             vmp = self.characterization.calc_last_vmp(d)
             if vmp is not None:
                 self.logger.debug(f"Turning on load output for string {id}")
-                
-                ## SWAPPED ORDER
-                # self.load.output_on(ch)
-                # self.load.set_voltage(ch, vmp)
-                
-                # self.load._set_voltage(ch, vmp)
-                # self.load._output_on(ch)
                 self.load.load_on(ch,vmp)
-
                 self.logger.debug(f"Turned on load output for string {id}")
 
             self.logger.info(f"Scanned {id}")
 
+            #TODO: remove this sleep
             time.sleep(0.5)
 
     def track_mpp(self, id: int) -> None:
@@ -797,7 +792,6 @@ class Controller:
             self.logger.debug(f"Tracked MPP for {id}")
 
             #TODO: this may be a good idea but we should also average the tracking measurent
-            #TODO: with shade this is tracking close to voc and then getting shaded and then returning
             if d["mpp"]["last_currents"][1] is not None:
                 if((i==0 and d["mpp"]["last_currents"][1]>0) or (i>2*d["mpp"]["last_currents"][1])):
                     # self.load.output_on(ch, last_vmpp) #NEWNEW
@@ -887,6 +881,9 @@ class Controller:
             self.relay.on(module)
             self.logger.debug(f"Turned on relay for module {module}")
 
+            # Wait for everything to settle
+            time.sleep(self.measurement_delay)
+
             # Pass scanner to characterization module, returns true if Isc < 0, false otherwise
             self.logger.debug(f"Checking orientation for module {module}")
             self.scanner.output_on()
@@ -917,7 +914,8 @@ class Controller:
             self.message = check_module_string[0:-2] + "."
         else:
             self.message = "No modules were checked."
-
+    
+    #TODO: this is used in RUN_UI could prob do better.
     def pass_message(self) -> str:
         """
         Passes message from controller using self.message, set to None after

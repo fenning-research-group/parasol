@@ -70,7 +70,8 @@ class Analysis:
             analyzed_folder,
         ) = self.filestructure.get_test_subfolders(stringpath)
 
-        os.mkdir(analyzed_folder[0])
+        if not os.path.exists(analyzed_folder[0]):
+            os.mkdir(analyzed_folder[0])
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
@@ -82,6 +83,22 @@ class Analysis:
         )
 
         return analyzed_waves
+
+    #TODO:complete
+    def analyze_all(self,overwrite=False):
+        
+        # get list of paths to test folder
+        tests = self.filestructure.get_tests()
+
+        if overwrite == False:
+            for test in tests:
+
+                analyzedfile = self.filestructure.get_files([test])
+                print(analyzedfile)
+                # if len(analyzedfile) > 0:
+                #     self.analyze_from_savepath(test)
+                #     print('Analyzed: ', test)
+
 
     # Workhorse functions for check_test
 
@@ -226,7 +243,7 @@ class Analysis:
                 d["date"], d["name"], d["string_id"], d["module_id"]
             )
             save_loc = os.path.join(analyzed_folder, analysis_file)
-            scalar_df_filtered.to_csv(save_loc, index=False)
+            scalar_df_filtered.to_csv(save_loc, index=False, mode = 'w+')
             save_locations.append(save_loc)
 
         return save_locations
@@ -263,10 +280,11 @@ class Analysis:
 
             # Try to calculate scalars
             try:
-
+                
                 # Calculate Jsc and Rsh using J(v=0) to J(v = v_dir)
                 wherevis0 = np.nanargmin(np.abs(v))
                 wherevis0_1 = np.nanargmin(np.abs(v - self.derivative_v_step))
+
                 j1 = j[wherevis0]
                 j2 = j[wherevis0_1]
                 v1 = v[wherevis0]
@@ -365,7 +383,7 @@ class Analysis:
             direction + " Vmp (V)": vmp_vals,
             direction + " Pmp (mW/cm2)": pmp_vals,
         }
-
+        
         return returndict
 
     def get_env_data(self, startdate: str, enddate: str) -> list:
@@ -443,12 +461,12 @@ class Analysis:
         df_filtered = df[
             (df["REV FF (%)"] < 100)
             & (df["REV FF (%)"] > 0)
-            & (df["REV Voc (V)"] < 10)
-            & (df["REV Voc (V)"] > 0)
+            # & (df["REV Voc (V)"] < 10)
+            # & (df["REV Voc (V)"] > 0)
             & (df["FWD FF (%)"] < 100)
             & (df["FWD FF (%)"] > 0)
-            & (df["FWD Voc (V)"] < 10)
-            & (df["FWD Voc (V)"] > 0)
+            # & (df["FWD Voc (V)"] < 10)
+            # & (df["FWD Voc (V)"] > 0)
         ]
 
         # Drop any rows with NaN values

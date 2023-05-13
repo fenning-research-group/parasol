@@ -5,7 +5,7 @@ import time
 import numpy as np
 from threading import Lock
 
-# Set module directory, import constants from yaml file
+# set module directory, import constants from yaml file
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
     constants = yaml.safe_load(f)["chroma"]
@@ -19,27 +19,30 @@ class Chroma:
         Note:Chroma default status is on
         """
 
-        # Get constants from hardwareconstants
+        # get constants from hardwareconstants
         self.time_out = constants["time_out"]
         self.source_delay = constants["source_delay"]
         self.sense_delay = constants["sense_delay"]
-        self.ca_avg_num = constants["avg_num"] # unused
+        #TODO:Check these/clean up
+        self.ca_avg_num = constants["avg_num"] # number of measurments to average
+
         self.ca_v_max = constants["max_voltage"] # unused (use H below)
-        self.ca_i_max = constants["max_current"] # will be used (need max current for CV, can be # max or min)
+        self.ca_i_max = constants["max_current"] # unused (need max current for CV, can be # max or min)
         self.ca_address = constants["address"]
         self.ca_cc_mode = "CCH"
         self.ca_cv_mode = "CV"
         self.v_mode = 'H'
-        
+
+        # create lock        
         self.lock = Lock()
 
-        # Connect and setup lock
+        # connect 
         self.connect()
 
-        # indicator of channel so we dont keep spamming
+        # create indicator of channel so we dont keep spamming to switch
         self.channel = None
 
-        # Set both channels to source voltage and measure current when initialized (1st is dummy index)
+        # set all channels to source voltage and measure current when initialized (1st is dummy index)
         self._sourcing_current = [False, False, False, False, False, False, False, False, False]
         self.srcV_measI(1)
         self.srcV_measI(2)
@@ -82,15 +85,12 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        # if channel != self.channel:
-        #     self.ca.write("CHAN " + str(channel)) # set channel
-        #     self.channel = channel
-        self.channel_check(channel) # sets channel
+        self.channel_check(channel) # set channel
         self.ca.write("MODE " + self.ca_cv_mode) # set mode to CV
-        self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
+        self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num)) # set averge number
         # self.ca.write("VOLT:CURR " + str(self.ca_i_max))
-        self.ca.write("VOLT:MODE "+ str(self.sense_delay)) # CV respone slow
-        self.ca.write("VOLT:L1 0") # set voltage of load to 0
+        self.ca.write("VOLT:MODE "+ str(self.sense_delay)) # set CV response to slow
+        self.ca.write("VOLT:L1 0") # set voltage of load to 0 V
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.ca.write("LOAD OFF") # turn off load
 
@@ -102,13 +102,10 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        # if channel != self.channel:
-        #     self.ca.write("CHAN " + str(channel)) # set channel
-        #     self.channel = channel
-        self.channel_check(channel) # sets channel
+        self.channel_check(channel) # set channel
         self.ca.write("MODE " + self.ca_cc_mode) # set mode to CC
         self.ca.write("CURR:STATIC:L1 0") # set current of load to 0
-        self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num))
+        self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num)) # set averge number
         self.ca.write("CONF:VOLT:RANG " + str(self.v_mode)) # set the volt range to high/low for CC mode 
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.ca.write("LOAD OFF") # turn off load
@@ -121,15 +118,11 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        # if channel != self.channel:
-        #     self.ca.write("CHAN " + str(channel)) # set channel
-        #     self.channel = channel
-        self.channel_check(channel) # sets channel
+        self.channel_check(channel) # set channel
         self.ca.write("CHAN:ACT ON") # turn on measurement
         self.ca.write("LOAD ON") # turn on load
 
-    
-    ## ADDED
+
     def load_on(self, channel: int, voltage: float) -> None:
         """Turns output on and applies voltage with lock
 
@@ -142,9 +135,8 @@ class Chroma:
             self.output_on(channel)
             
     
-    ## ADDED
     def load_off(self, channel: int) -> None:
-        """Turns output off and applies voltage with lock
+        """Turns output off with lock
 
         Args:
             channel (int or string): chroma channel to alter
@@ -154,7 +146,6 @@ class Chroma:
             self.output_off(channel)
     
 
-
     def output_off(self, channel: int) -> None:
         """Turns output off
 
@@ -162,9 +153,6 @@ class Chroma:
             channel (int or string): chroma channel to alter
         """
         
-        # if channel != self.channel:
-        #     self.ca.write("CHAN " + str(channel)) # set channel
-        #     self.channel = channel
         self.channel_check(channel) # sets channel
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.ca.write("LOAD OFF") # turn off load
@@ -184,10 +172,7 @@ class Chroma:
             self.output_on(channel)
             self._sourcing_current[channel] = False
         
-        # if channel != self.channel:
-        #     self.ca.write("CHAN " + str(channel)) # set channel
-        #     self.channel = channel
-        self.channel_check(channel) # sets channel
+        self.channel_check(channel) # set channel
         self.ca.write("VOLT:L1 " + str(voltage)) # set load voltage
         time.sleep(self.source_delay) # delay for system to settle
 
@@ -206,11 +191,7 @@ class Chroma:
             self.output_on(channel)
             self._sourcing_current[channel] = True
 
-        # set to input channel
-        # if channel != self.channel:
-        #     self.ca.write("CHAN " + str(channel)) # set channel
-        #     self.channel = channel
-        self.channel_check(channel)
+        self.channel_check(channel) # set channel
         self.ca.write("CURR:STATIC:L1 " + str(current)) # set load current
         time.sleep(self.source_delay) # delay for system to settle
 
@@ -225,11 +206,8 @@ class Chroma:
             float: voltage (V) reading
         """
 
-        # sets to input channel
-        # if channel != self.channel:
-        #     self.ca.write("CHAN " + str(channel)) # set channel
-        #     self.channel = channel
-        self.channel_check(channel)
+        
+        self.channel_check(channel) # set channel
         volt = float(self.ca.query("MEAS:VOLT?")) # measure voltage
 
         return volt
@@ -245,9 +223,6 @@ class Chroma:
             float: current (A) reading
         """
 
-        # if channel != self.channel:
-        #     self.ca.write("CHAN " + str(channel)) # set channel
-        #     self.channel = channel
         self.channel_check(channel) # sets channel
         curr = float(self.ca.query("MEAS:CURR?")) # measure current
 
@@ -319,8 +294,8 @@ class Chroma:
             float: open circut voltage (V)
         """
 
-        # Set current to 0, measure voltage
-        i,v = self.set_I_measure_V(0)
+        self.channel_check(channel) # set channel
+        i,v = self.set_I_measure_V(0) # set current to 0, measure voltage
 
         return v
 
@@ -334,9 +309,8 @@ class Chroma:
         Returns:
             float: short circut current (A)
         """
-
-        # Set voltage to 0, measure current
-        v,i = self.set_V_measure_I(0)
+        self.channel_check(channel) # set channel
+        v,i = self.set_V_measure_I(0) # set voltage to 0, measure current
 
         return i
 
@@ -357,18 +331,18 @@ class Chroma:
 
         with self.lock:
 
-            # Make empty numpy arrays for data
+            # make empty numpy arrays for data
             v = np.linspace(vstart, vend, steps)
             vm = np.zeros(v.shape)
             i = np.zeros(v.shape)
 
-            # Turn on output, set voltage, measure current, turn off output
+            # turn on output, set voltage, measure current, turn off output
             self.output_on(channel)
             for idx, v_point in enumerate(v):
                 vm[idx],i[idx] = self.set_V_measure_I(channel,v_point, lock = False)
             self.output_off(channel)
 
-            # Flip reverse scan order so that it aligns with voltage
+            # flip reverse scan order so that it aligns with voltage
             if abs(vstart) > abs(vend):
                 i = i[::-1]
                 vm = vm[::-1]
@@ -395,7 +369,7 @@ class Chroma:
 
         with self.lock:
 
-            # Make empty numpy arrays for data
+            # make empty numpy arrays for data
             v = np.linspace(vstart, vend, steps)
             vm_fwd = np.zeros(v.shape)
             i_fwd = np.zeros(v.shape)
@@ -404,10 +378,10 @@ class Chroma:
             i_fwd[:] = np.nan
             i_rev[:] = np.nan
 
-            # Turn on output
+            # turn on output
             self.output_on(channel)
 
-            # Find point before 1st point in quadrant
+            # find point before 1st point in quadrant
             index = 0
             for v_point in v:
                 if v_point >= 0:
@@ -416,19 +390,19 @@ class Chroma:
             index -= 1
             start_index = index
 
-            # Cycle from there until we get out of the quadrant
+            # cycle from there until we get out of the quadrant
             while index <= len(v):
                 vm_fwd[index], i_fwd[index] = self.set_V_measure_I(channel,v[index], lock = False)
                 if i_fwd[index] > 0:
                     break
                 index += 1
 
-            # Scan backwards until we get back to starting point
+            # scan backwards until we get back to starting point
             while index >= start_index:
                 vm_rev[index], i_rev[index] = self.set_V_measure_I(channel,v[index], lock = False)
                 index -= 1
 
-            # Turn output off
+            # turn output off
             self.output_off(channel)
 
         return v, vm_fwd, i_fwd, vm_rev, i_rev
@@ -453,7 +427,7 @@ class Chroma:
 
         with self.lock:
 
-            # Make empty numpy arrays for data
+            # make empty numpy arrays for data
             v = np.linspace(vstart, vend, steps)
             vm_fwd = np.zeros(v.shape)
             i_fwd = np.zeros(v.shape)
@@ -462,13 +436,13 @@ class Chroma:
             i_fwd[:] = np.nan
             i_rev[:] = np.nan
 
-            # Find point after voc
+            # find point after voc
             voc = self.voc(0)
             end_index = np.where(np.diff(np.signbit(v - voc)))[0]
             if (v[end_index] - voc) < 0:
                 end_index += 1
 
-            # Find point before jsc
+            # find point before jsc
             index = 0
             for v_point in v:
                 if v_point >= 0:
@@ -477,22 +451,22 @@ class Chroma:
             index -= 1
             start_index = index
 
-            # Turn on output
+            # turn on output
             self.output_on(channel)
 
-            # Scan rev until we get back to starting point
+            # scan rev until we get back to starting point
             index = end_index
             while index >= start_index:
                 vm_rev[index], i_rev[index] = self.set_V_measure_I(channel,v[index], lock = False)
                 index -= 1
 
-            # Cycle from there until we get out of the quadrant
+            # cycle from there until we get out of the quadrant
             index = start_index
             while index <= end_index:
                 vm_fwd[index], i_fwd[index] = self.set_V_measure_I(channel,v[index], lock = False)
                 index += 1
 
-            # Turn output off
+            # turn output off
             self.output_off(channel)
 
         return v, vm_fwd, i_fwd, vm_rev, i_rev

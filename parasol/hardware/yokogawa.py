@@ -68,13 +68,12 @@ class Yokogawa:
 
         # source current options
         self.yoko.write(":SOUR:CURR:PROT:ULIM " + str(self.max_current) + "A") # Limit current to user specification
-        self.yoko.write(":SOUR:CURR:PROT:LLIM -" + str(self.max_current) + "A") # NEW Limit current to user specification
+        self.yoko.write(":SOUR:CURR:PROT:LLIM -" + str(self.max_current) + "A") # Limit current to user specification
         self.yoko.write(":SOUR:CURR:PROT:LINK ON")  # Limiter tracking on
         self.yoko.write(":SOUR:CURR:PROT:STAT ON")  # Limiter on
 
         # sense options
         self.yoko.write(":SENS:FUNC CURR")  # Measurement function current
-        # self.yoko.write(":SENS:CURR:RANG 1A") # NEW doesnt work
         self.yoko.write((":SENS:DEL " + str(self.sense_delay) + "ms"))  # Sense delay minmum in ms
         self.yoko.write((":SENS:ITIM " + str(self.int_time) + "ms"))  # Integration time in ms
         self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero off
@@ -89,7 +88,7 @@ class Yokogawa:
 
         # Source functions
         self.yoko.write(":SOUR:FUNC CURR")  # Source function current
-        self.yoko.write((":SOUR:DEL " + str(self.source_delay) + "ms"))  # Source delay minmum in ms #
+        self.yoko.write((":SOUR:DEL " + str(self.source_delay) + "ms"))  # Source delay minmum in ms
 
         # source current options
         self.yoko.write((":SOUR:CURR:RANG " + str(self.max_current) + "A"))
@@ -97,13 +96,12 @@ class Yokogawa:
 
         # source volt options
         self.yoko.write((":SOUR:VOLT:PROT:ULIM " + str(self.max_voltage) + "V")) # Limit current to user specification
-        self.yoko.write((":SOUR:VOLT:PROT:ULIM -" + str(self.max_voltage) + "V")) # NEW Limit current to user specification
+        self.yoko.write((":SOUR:VOLT:PROT:ULIM -" + str(self.max_voltage) + "V")) # Limit current to user specification
         self.yoko.write(":SOUR:VOLT:PROT:LINK ON")  # Limiter tracking on#
         self.yoko.write(":SOUR:VOLT:PROT:STAT ON")  # Limiter on#
 
         # sense functions
         self.yoko.write(":SENS:FUNC VOLT")  # Measurement function voltage
-        # curr equiv self.yoko.write(":SENS:CURR:RANG 1A") # NEW doesnt work
         self.yoko.write((":SENS:DEL " + str(self.sense_delay) + "ms"))  # Sense delay minmum in ms #
         self.yoko.write((":SENS:ITIM " + str(self.int_time) + "ms"))  # Integration time in ms #
         self.yoko.write(":SENS:AZER:STAT OFF")  # Auto zero off #
