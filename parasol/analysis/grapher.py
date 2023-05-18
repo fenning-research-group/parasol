@@ -80,11 +80,9 @@ class Grapher:
 
         # Cycle through y labels
         for y_param in ys:
-
             # For each parameter, plot x versus y
             y_vals = df[y_param]
             for i in range(len(y_vals)):
-
                 # If FWD/REV data plot using fwd/rev arrows, otherwise plot using dots
                 if "FWD" in y_param:
                     plt.scatter(
@@ -184,7 +182,10 @@ class Grapher:
         # Plot FWD and REV curves, REV with --
         for jvpair in range(len(all_t_elapsed)):
             plt.plot(
-                all_vm_fwd[jvpair], all_j_fwd[jvpair], color=colors[jvpair], **plt_kwargs
+                all_vm_fwd[jvpair],
+                all_j_fwd[jvpair],
+                color=colors[jvpair],
+                **plt_kwargs,
             )
             plt.plot(
                 all_vm_rev[jvpair],
@@ -230,11 +231,11 @@ class Grapher:
         Returns:
             plt.ax: plotted axes
         """
-            
+
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
-        
+
         if len(mppfiles) == 0:
             return ax
 
@@ -284,13 +285,12 @@ class Grapher:
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
-        
+
         if len(paramfiles) == 0:
             return ax
 
         # Cycle through paramfiles
         for paramfile in paramfiles:
-
             # Read in dataframe
             df = pd.read_csv(paramfile)
 
@@ -324,13 +324,12 @@ class Grapher:
         # If not passed axes, use last set
         if ax is None:
             ax = plt.gca()
-        
+
         if len(paramfiles) == 0:
             return ax
 
         # Cycle through paramfiles
         for paramfile in paramfiles:
-
             # Read in dataframe
             df = pd.read_csv(paramfile)
 
@@ -380,7 +379,6 @@ class Grapher:
 
         # Cycle through # of points in each array
         for n in range(df.shape[0]):
-
             # Get values for x and y
             xval = df[x][n]
             yval = df[y][n]

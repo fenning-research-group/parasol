@@ -34,6 +34,7 @@ labjack:
   photodiode_port: 0 # AIN Port for photodoide
   hygrometer_port: 1 # AIN Port for hygrometer
   thermocouple_port: 2 # AIN Port for thermocouple
+  ground_port: 3 # AIN Port for ground
   average_num: 5 # Number of readings to average
   delay_time: 0.05 # Seconds to wait between readings
   # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py

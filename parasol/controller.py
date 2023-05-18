@@ -11,7 +11,6 @@ import time
 import logging
 import sys
 
-#from parasol.hardware.relay import Relay
 from parasol.relay.relay import Relay
 from parasol.hardware.yokogawa import Yokogawa
 from parasol.hardware.labjack import LabJack
@@ -69,14 +68,6 @@ class Controller:
             os.mkdir(self.logdir)
 
         # Map string ID to load port and channel
-        # self.load_channels = {
-        #     1: ("12", 1),
-        #     2: ("12", 2),
-        #     3: ("34", 1),
-        #     4: ("34", 2),
-        #     5: ("56", 1),
-        #     6: ("56", 2),
-        # }
         self.load_channels = {
             1: 1,
             2: 2,
@@ -537,7 +528,7 @@ class Controller:
         # Add worker to que and start when possible
         await asyncio.sleep(1)
         while self.running:           
-            # add worker to queue, increase mpp worker count
+            # Add worker to queue, increase mpp worker count
             self.mpp_queue.put_nowait(id)
             await asyncio.sleep(self.strings[id]["mpp"]["interval"])
 
