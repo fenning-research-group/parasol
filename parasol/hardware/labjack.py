@@ -101,7 +101,7 @@ class LabJack:
         rh = self.get_rh(temp)
         intensity = self.get_intensity(temp)
 
-        return temp, intensity, rh
+        return temp, rh, intensity
 
 
     def get_temp_rtd(self)-> float:

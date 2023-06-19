@@ -353,16 +353,8 @@ class Characterization:
 
             # Ensure min v,0 < voltage < max v, else step in the other direction
             if (v <= max(d["mpp"]["vmin"], 0)) or (v >= d["mpp"]["vmax"]):
-                v = vmpp_last - 2 * voltage_step
-
-            # If we read 0 current (floor), set v to maximum of (voltage step, vmin + voltagestep)
-            # Removing this section of code causes the ET to read 1/0 and ramp in voltage to max voltage
-            ## removed x230501
-            # if d["mpp"]["last_currents"][1] is not None:
-            #     if d["mpp"]["last_currents"][1] == 0.0:
-            #         v = max(
-            #             self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step
-            #         )
+                voltage_step *= -1
+                v = vmpp_last + 2 * voltage_step
 
             # get time, set voltage measure current
             t = time.time()
@@ -478,7 +470,7 @@ class Characterization:
 
         t = time.time()
         # TODO: Add read monitoring
-        # temp, rh, intensity = labjack.monitor_env()
+        temp, rh, intensity = labjack.monitor_env()
 
-        # return t, temp, rh, intensity
-        return t, 27, 50.0, 1.0
+        return t, temp, rh, intensity
+        # return t, 27, 50.0, 1.0

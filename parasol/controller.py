@@ -43,7 +43,7 @@ class Controller:
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
-        self.monitor = ""#LabJack()
+        self.monitor = LabJack()
         self.load = Chroma()
 
         # Get constants
