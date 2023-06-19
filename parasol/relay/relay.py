@@ -69,6 +69,8 @@ class Relay():
                 3. self.dev_library[cell_number]=[relays to add/remove cell]
         """
         
+        # grouping one: allows Voc option
+        
         # create library of string relays, ignore # per board
         self.string_library = {}
         index = 1
@@ -107,6 +109,20 @@ class Relay():
             temp1 = self.string_library[(dev_num//self.NUM_DEVS)+1]
             temp2 = self.dev_library[dev_num+1]
             self.relay_library[dev_num+1] = temp1+temp2
+        
+        
+        # grouping 2: doesnt allow voc option
+        # self.relay_library = {}
+        # index = 0
+        # dev_no = 0
+        # for idx in range(self.NUM_STRINGS):
+        #     temp = []
+        #     for idx2 in range(int(self.NUM_DEVS)):
+        #         dev_no += 1
+        #         for idx3 in range(self.NUM_WIRES):
+        #             temp.append(index)
+        #             index += 1
+        #         self.relay_library[dev_no]= temp
         
 
 
