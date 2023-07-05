@@ -25,7 +25,7 @@ chroma:
   address: 'GPIB1::15::INSTR' # GPIB adress
   time_out: 5000 # Timeout for Chroma (ms)
   source_delay: 1 # Time for source to settle (s)
-  sense_delay: 'FAST' # Time for sense to return value (SLOW/FAST)
+  sense_delay: 'SLOW' # 'FAST' # Time for sense to return value (SLOW/FAST)
   avg_num: 20 # Number of currents to avg for reading
   max_voltage: 80 # 80 V is max voltage (V) of 'high' range, 16 V for low range
   max_current: 2 # 2 A is max current (A) of 'low' range, 20 A for high range
@@ -40,10 +40,10 @@ labjack:
   # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py
 
 characterization:
-  mppt_voltage_step: 1 # MPPT voltage iteration (V). note that 0.02 is the floor resolution of the Chroma
+  mppt_voltage_step: 0.1 # MPPT voltage iteration (V). note that 0.02 is the floor resolution of the Chroma (Error approx 0.01)
 
 analysis:
-  derivative_v_step : 1 # Voltage step for derivative (Rs, Rsh, Rch) in JV post-analysis (V)
+  derivative_v_step : 0.5 # Voltage step for derivative (Rs, Rsh, Rch) in JV post-analysis (V)
 
 controller:
   monitor_delay: 15 # Time between environmental monitoring (s)
@@ -55,8 +55,8 @@ RUN_UI:
   mpp_mode: 0 # Default MPP mode
   jv_frequency: 900 # Default time between JV scans (s)
   mpp_frequency: 20 # Default time between MPP scans (s)
-  v_min: -0.1 # Default minimum voltage for JV/MPP scan (V)
-  v_max: 0.7 # Default maximum voltage for JV/MPP scan (V)
+  v_min: -1 # Default minimum voltage for JV/MPP scan (V)
+  v_max: 25 # Default maximum voltage for JV/MPP scan (V)
   v_steps: 100 # Default number of voltage steps for JV scan
 
 GRAPH_UI:
@@ -87,38 +87,3 @@ GRAPH_UI:
   y10: ["FWD Rsh (Ohm/cm2)", "REV Rsh (Ohm/cm2)"] # Graph10 y data
   y11: ["FWD Rch (Ohm/cm2)", "REV Rch (Ohm/cm2)"] # Graph11 y data
   y12: "MPPT MPP (mW/cm2)" # Graph12 y data
-
-# old and outdated
-# easttester:
-#   device_identifiers:
-#     ET_1: # Generally COM10
-#       pid: 29987
-#       vid: 6790
-#       location: "1-4.2"
-#     ET_2: # Generally COM11
-#       pid: 29987
-#       vid: 6790
-#       location: "1-4.3"
-#     ET_3: # Generally COM9
-#       pid: 29987
-#       vid: 6790
-#       location: "1-4.4"
-#   baud_rate: 115200 # Baud rate for ET
-#   time_out: 2 #changed from 0.05 #changed from 0.005 # Timeout for ET (s)
-#   source_delay: 0.5 # changed from 1 # 0.5 # Time for source to settle (s) 
-#   sense_delay: 0.5 # 0.25 #1 # 0.25 # Time for sense to return value (s)
-#   command_delay: 0.25 #1 #0.25 # 0.05 # Time between commands (s)
-#   avg_num: 2 # Number of currents to avg for reading 
-#   max_voltage: 5 # Max voltage (V) of 'low' range, 155 V for high range 
-#   max_current: 3.3 # Max current (A) of 'low' range, 22 A for high range
-#   v_min: 0.1 # Min voltage registered by ET (V)
-#   voltage_range: "LOW" # "LOW" or "HIGH"
-#   current_range: "LOW" # "LOW" or "HIGH"
-
-  # relay:
-#   device_identifiers: # Generally COM3
-#     pid: 24577
-#     vid: 1027
-#     serial_number : 'AQ01FVSHA'
-#   response_time: 0.25 # Seconds for relay switch to settle
-#   settle_time: 1 # Time to wait after relay shuts

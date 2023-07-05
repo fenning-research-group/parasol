@@ -73,61 +73,62 @@ class Relay():
         # Utilizes 2nd relay to pull string off load (leaving open circut) while scanning cells indivisually
         # --------------------------------------------------------------------------------------------------
         
-        # create library of string relays, ignore # per board
-        self.string_library = {}
-        index = 1
-        index += self.NUM_WIRES
-        string_no = 0
-        for idx in range(self.NUM_STRINGS):
-            string_no += 1
-            temp = []
-            for idx2 in range(int(self.NUM_DEVS/2)):
-                for idx3 in range(self.NUM_WIRES*2):
-                    temp.append(index)
-                    index += 1
-                index += self.NUM_WIRES*2
-            self.string_library[string_no]= temp
+        # # create library of string relays, ignore # per board
+        # self.string_library = {}
+        # index = 1
+        # index += self.NUM_WIRES
+        # string_no = 0
+        # for idx in range(self.NUM_STRINGS):
+        #     string_no += 1
+        #     temp = []
+        #     for idx2 in range(int(self.NUM_DEVS/2)):
+        #         for idx3 in range(self.NUM_WIRES*2):
+        #             temp.append(index)
+        #             index += 1
+        #         index += self.NUM_WIRES*2
+        #     self.string_library[string_no]= temp
         
-        # create library of cell relays, ignore # per board
-        self.dev_library = {}
-        index = 1
-        dev_no = 0
-        for idx in range(self.NUM_STRINGS):
-            for idx2 in range(self.NUM_DEVS):
-                dev_no += 1
-                temp = []
-                for idx3 in range(self.NUM_WIRES): # appends 4x
-                    temp.append(index)
-                    index +=1
-                if idx2 % 2 == 0: # acts every other so groups by 8
-                    index += self.NUM_WIRES*2
-                else:
-                    index += 0
-                self.dev_library[dev_no]=temp
+        # # create library of cell relays, ignore # per board
+        # self.dev_library = {}
+        # index = 1
+        # dev_no = 0
+        # for idx in range(self.NUM_STRINGS):
+        #     for idx2 in range(self.NUM_DEVS):
+        #         dev_no += 1
+        #         temp = []
+        #         for idx3 in range(self.NUM_WIRES): # appends 4x
+        #             temp.append(index)
+        #             index +=1
+        #         if idx2 % 2 == 0: # acts every other so groups by 8
+        #             index += self.NUM_WIRES*2
+        #         else:
+        #             index += 0
+        #         self.dev_library[dev_no]=temp
         
-        # combine the two so we have a list of relays needed for each cell
-        self.relay_library = {}
-        for dev_num in range(self.NUM_STRINGS*self.NUM_DEVS):
-            temp1 = self.string_library[(dev_num//self.NUM_DEVS)+1]
-            temp2 = self.dev_library[dev_num+1]
-            self.relay_library[dev_num+1] = temp1+temp2
+        # # combine the two so we have a list of relays needed for each cell
+        # self.relay_library = {}
+        # for dev_num in range(self.NUM_STRINGS*self.NUM_DEVS):
+        #     temp1 = self.string_library[(dev_num//self.NUM_DEVS)+1]
+        #     temp2 = self.dev_library[dev_num+1]
+        #     self.relay_library[dev_num+1] = temp1+temp2
+
             
         # ---------------------------------- RELAY CONFIGURATION # 2 ---------------------------------------
         # Turns off 2nd relay that pull strings off load (leaving open circut) while scanning cells indivisually
         # This means that cells not being JV scanned will have the same load applied when not scanned 
         # --------------------------------------------------------------------------------------------------
         
-        # self.relay_library = {}
-        # index = 1
-        # dev_no = 0
-        # for idx in range(self.NUM_STRINGS):
-        #     for idx2 in range(int(self.NUM_DEVS/2)):
-        #         dev_no += 1
-        #         temp = []
-        #         for idx3 in range(self.NUM_WIRES*2):
-        #             temp.append(index)
-        #             index += 1
-        #         self.relay_library[dev_no]= temp
+        self.relay_library = {}
+        index = 1
+        dev_no = 0
+        for idx in range(self.NUM_STRINGS):
+            for idx2 in range(int(self.NUM_DEVS)):
+                dev_no += 1
+                temp = []
+                for idx3 in range(self.NUM_WIRES*2):
+                    temp.append(index)
+                    index += 1
+                self.relay_library[dev_no]= temp
         
         # ---------------------------------- RELAY CONFIGURATION # 3 ---------------------------------------
         # Eliminates 2nd relay that pull strings off load (leaving open circut) while scanning cells indivisually
