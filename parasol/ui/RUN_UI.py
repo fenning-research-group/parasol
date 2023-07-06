@@ -1217,11 +1217,7 @@ def RUNNER():
         def checkorientation6(self) -> None:
             """Checks orientation of test 6"""
             self.checkorientation(6)
-
-        # TODO: might delete this, its never run
-        # def __del__(self) -> None:
-        #     print("Shutting Down")
-
+            
         def closeEvent(self, event):
             """Confirms & closes the GUI upon X being clicked"""
 

@@ -23,15 +23,15 @@ class Chroma:
         self.time_out = constants["time_out"]
         self.source_delay = constants["source_delay"]
         self.sense_delay = constants["sense_delay"]
-        #TODO:Check these/clean up
         self.ca_avg_num = constants["avg_num"] # number of measurments to average
 
-        self.ca_v_max = constants["max_voltage"] # unused (use H below)
-        self.ca_i_max = constants["max_current"] # unused (need max current for CV, can be # max or min)
+        #TODO:Rooftop. Clean these up/ uncomment below and check (could also nee MAX or MIN) 
+        self.v_mode = constants["voltage_range"] # voltage range to use
+        self.ca_i_max = constants["current_range"] # unused (need max current for CV, can be # max or min)
+        
         self.ca_address = constants["address"]
         self.ca_cc_mode = "CCH"
         self.ca_cv_mode = "CV"
-        self.v_mode = 'H'
 
         # create lock        
         self.lock = Lock()
@@ -89,7 +89,7 @@ class Chroma:
         self.ca.write("MODE " + self.ca_cv_mode) # set mode to CV
         self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num)) # set averge number
         # self.ca.write("VOLT:CURR " + str(self.ca_i_max))
-        self.ca.write("VOLT:MODE "+ str(self.sense_delay)) # set CV response to slow
+        self.ca.write("VOLT:MODE "+ str(self.sense_delay)) # set CV response (fast or slow)
         self.ca.write("VOLT:L1 0") # set voltage of load to 0 V
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.ca.write("LOAD OFF") # turn off load
@@ -104,9 +104,9 @@ class Chroma:
         
         self.channel_check(channel) # set channel
         self.ca.write("MODE " + self.ca_cc_mode) # set mode to CC
-        self.ca.write("CURR:STATIC:L1 0") # set current of load to 0
         self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num)) # set averge number
         self.ca.write("CONF:VOLT:RANG " + str(self.v_mode)) # set the volt range to high/low for CC mode 
+        self.ca.write("CURR:STATIC:L1 0") # set current of load to 0
         self.ca.write("CHAN:ACT OFF") # turn off measurement
         self.ca.write("LOAD OFF") # turn off load
 

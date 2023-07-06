@@ -326,7 +326,7 @@ class Modbus(object):
         if rx_length and len(self._rx_data) != rx_length:
             raise TransferException('RX error: Incorrect receive length {} '
                                     'Bytes, expected {} Bytes.'.format(len(self._rx_data),
-                                                                       rx_length))
+                                    rx_length))
 
         return self._rx_data
 
@@ -427,7 +427,7 @@ class MonitorThread(threading.Thread):
     @property
     def is_stopped(self):
         """
-           Is stop event generated
+            Is stop event generated
         :return:
             True: Stop event generated
             False: No stop event generated

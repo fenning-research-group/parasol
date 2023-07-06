@@ -109,6 +109,8 @@ class Characterization:
             np.ndarray: current (A) values
         """
 
+        # TODO: Clean up
+
         # Get MPP mode
         mpp_mode = d["mpp"]["mode"]
 
@@ -295,7 +297,6 @@ class Characterization:
         #         delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
 
         #         # Modified perturb and observe logic
-        #         # TODO: Not working great. If we get stuck at 0 then dv = 0 and we get v_inc = 0 unless we decrease in energy.
         #         if delta_p == 0:
         #             v_increase = 0
         #         elif delta_i < 0:

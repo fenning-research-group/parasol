@@ -38,11 +38,11 @@ def relay_lock(f):
 class Relay():
     
     def __init__(self):
+        
         # 1 board runs 2 cells so 12 boards will handle 6 strings of 4 cells
         # general rule: (NUM_STRINGS * NUM_DEVS * NUM_WIRES <= NUM_BOARDS * NUM_RELAYS / 2)
         self.lock = Lock()
-        self.SERIAL_PORT = constants['port']#'COM4' #get_port(constants["device_identifiers"])
-        # self.DELAY = 0.15 # delay between commands 
+        self.SERIAL_PORT = constants['port']#'COM4' #get_port(constants["device_identifiers"]) #TODO: Fix port finder
         
         self.NUM_DEVS = 4 # number of devices per load string
         self.NUM_WIRES = 4 # number of wires used per device (4 or 2)
@@ -50,6 +50,8 @@ class Relay():
         
         self.NUM_STRINGS = constants["num_strings"] # number of load strings
         self.NUM_BOARDS = self.NUM_STRINGS*2 # number of installed load boards
+        
+        self.relay_mode = 0
 
         self.create_relay_tables() # create useful relay tables  
         self.relay_open = [False] * (self.NUM_RELAYS*self.NUM_BOARDS+1)  # create list[relay #] = Open boolean
@@ -69,84 +71,92 @@ class Relay():
                 3. self.dev_library[cell_number]=[relays to add/remove cell]
         """
         
-        # ---------------------------------- RELAY CONFIGURATION # 1 ---------------------------------------
+        # ---------------------------------- RELAY CONFIGURATION # v0 ---------------------------------------
         # Utilizes 2nd relay to pull string off load (leaving open circut) while scanning cells indivisually
         # --------------------------------------------------------------------------------------------------
         
-        # # create library of string relays, ignore # per board
-        # self.string_library = {}
-        # index = 1
-        # index += self.NUM_WIRES
-        # string_no = 0
-        # for idx in range(self.NUM_STRINGS):
-        #     string_no += 1
-        #     temp = []
-        #     for idx2 in range(int(self.NUM_DEVS/2)):
-        #         for idx3 in range(self.NUM_WIRES*2):
-        #             temp.append(index)
-        #             index += 1
-        #         index += self.NUM_WIRES*2
-        #     self.string_library[string_no]= temp
-        
-        # # create library of cell relays, ignore # per board
-        # self.dev_library = {}
-        # index = 1
-        # dev_no = 0
-        # for idx in range(self.NUM_STRINGS):
-        #     for idx2 in range(self.NUM_DEVS):
-        #         dev_no += 1
-        #         temp = []
-        #         for idx3 in range(self.NUM_WIRES): # appends 4x
-        #             temp.append(index)
-        #             index +=1
-        #         if idx2 % 2 == 0: # acts every other so groups by 8
-        #             index += self.NUM_WIRES*2
-        #         else:
-        #             index += 0
-        #         self.dev_library[dev_no]=temp
-        
-        # # combine the two so we have a list of relays needed for each cell
-        # self.relay_library = {}
-        # for dev_num in range(self.NUM_STRINGS*self.NUM_DEVS):
-        #     temp1 = self.string_library[(dev_num//self.NUM_DEVS)+1]
-        #     temp2 = self.dev_library[dev_num+1]
-        #     self.relay_library[dev_num+1] = temp1+temp2
+        if self.relay_mode == 0:
 
+            # create library of string relays, ignore # per board
+            self.string_library = {}
+            index = 1
+            index += self.NUM_WIRES
+            string_no = 0
+            for idx in range(self.NUM_STRINGS):
+                string_no += 1
+                temp = []
+                for idx2 in range(int(self.NUM_DEVS/2)):
+                    for idx3 in range(self.NUM_WIRES*2):
+                        temp.append(index)
+                        index += 1
+                    index += self.NUM_WIRES*2
+                self.string_library[string_no]= temp
             
-        # ---------------------------------- RELAY CONFIGURATION # 2 ---------------------------------------
+            # create library of cell relays, ignore # per board
+            self.dev_library = {}
+            index = 1
+            dev_no = 0
+            for idx in range(self.NUM_STRINGS):
+                for idx2 in range(self.NUM_DEVS):
+                    dev_no += 1
+                    temp = []
+                    for idx3 in range(self.NUM_WIRES): # appends 4x
+                        temp.append(index)
+                        index +=1
+                    if idx2 % 2 == 0: # acts every other so groups by 8
+                        index += self.NUM_WIRES*2
+                    else:
+                        index += 0
+                    self.dev_library[dev_no]=temp
+            
+            # combine the two so we have a list of relays needed for each cell
+            self.relay_library = {}
+            for dev_num in range(self.NUM_STRINGS*self.NUM_DEVS):
+                temp1 = self.string_library[(dev_num//self.NUM_DEVS)+1]
+                temp2 = self.dev_library[dev_num+1]
+                self.relay_library[dev_num+1] = temp1+temp2
+
+        
+        # ---------------------------------- RELAY CONFIGURATION # v1 ---------------------------------------
         # Turns off 2nd relay that pull strings off load (leaving open circut) while scanning cells indivisually
         # This means that cells not being JV scanned will have the same load applied when not scanned 
         # --------------------------------------------------------------------------------------------------
         
-        self.relay_library = {}
-        index = 1
-        dev_no = 0
-        for idx in range(self.NUM_STRINGS):
-            for idx2 in range(int(self.NUM_DEVS)):
-                dev_no += 1
-                temp = []
-                for idx3 in range(self.NUM_WIRES*2):
-                    temp.append(index)
-                    index += 1
-                self.relay_library[dev_no]= temp
+        if self.relay_mode == 1:
+            
+            # create library of cell+string relays.
+            self.relay_library = {}
+            index = 1
+            dev_no = 0
+            for idx in range(self.NUM_STRINGS):
+                for idx2 in range(int(self.NUM_DEVS)):
+                    dev_no += 1
+                    temp = []
+                    for idx3 in range(self.NUM_WIRES*2):
+                        temp.append(index)
+                        index += 1
+                    self.relay_library[dev_no]= temp
         
-        # ---------------------------------- RELAY CONFIGURATION # 3 ---------------------------------------
+        # ---------------------------------- RELAY CONFIGURATION # v2 ---------------------------------------
         # Eliminates 2nd relay that pull strings off load (leaving open circut) while scanning cells indivisually
         # This means that cells not being JV scanned will have the same load applied when not scanned 
         # --------------------------------------------------------------------------------------------------
         
-        # self.relay_library = {}
-        # index = 1
-        # dev_no = 0
-        # for idx in range(self.NUM_STRINGS):
-        #     for idx2 in range(int(self.NUM_DEVS)):
-        #         dev_no += 1
-        #         temp = []
-        #         for idx3 in range(self.NUM_WIRES):
-        #             temp.append(index)
-        #             index += 1
-        #         self.relay_library[dev_no]= temp
-        
+        if self.relay_mode == 2:
+            
+            # create library of cell relays.
+            self.relay_library = {}
+            index = 1
+            dev_no = 0
+            for idx in range(self.NUM_STRINGS):
+                for idx2 in range(int(self.NUM_DEVS)):
+                    dev_no += 1
+                    temp = []
+                    for idx3 in range(self.NUM_WIRES):
+                        temp.append(index)
+                        index += 1
+                    self.relay_library[dev_no]= temp
+            
 
 
     def connect_modbus(self):

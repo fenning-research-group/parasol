@@ -243,7 +243,7 @@ def GRAPHER():
             test_folders = self.get_selected_folders()
 
             # Get selected test files seperated by test (list of lists)
-            analyzed_files = self.filestructure.get_files(test_folders, "Analyzed") #TODO: this can throw error
+            analyzed_files = self.filestructure.get_files(test_folders, "Analyzed") #TODO: this can throw error if data is not analyzed. Should analyze instead
             mpp_files = self.filestructure.get_files(test_folders, "MPP")
 
             self.update_plots(analyzed_files, mpp_files, test_folders)

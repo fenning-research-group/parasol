@@ -49,7 +49,8 @@ class Analysis:
         data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
         plot_df = pd.DataFrame(columns=col_names, data=data)
 
-        # TODO: Could improve this by plotting the MPP values as well
+        # TODO: BROKEN. Also --- Could improve this by plotting the MPP values as well
+        
 
         return plot_df
 
@@ -83,22 +84,6 @@ class Analysis:
         )
 
         return analyzed_waves
-
-    #TODO:complete
-    def analyze_all(self,overwrite=False):
-        
-        # get list of paths to test folder
-        tests = self.filestructure.get_tests()
-
-        if overwrite == False:
-            for test in tests:
-
-                analyzedfile = self.filestructure.get_files([test])
-                print(analyzedfile)
-                # if len(analyzedfile) > 0:
-                #     self.analyze_from_savepath(test)
-                #     print('Analyzed: ', test)
-
 
     # Workhorse functions for check_test
 
@@ -170,14 +155,14 @@ class Analysis:
         """Cycle through JV files, analyze, and make output file for parameters
 
         Args:
-             jv_folders (list[str]): list of jv folders
-             jv_dict (dict): dictionary mapping jv folders to file paths
-             mpp_folders (list[str]): list of mpp folders
-             mpp_dict (dict): dictionary mapping mpp folders to file paths
-             analyzed_folder (str): analyzed folder path
+            jv_folders (list[str]): list of jv folders
+            jv_dict (dict): dictionary mapping jv folders to file paths
+            mpp_folders (list[str]): list of mpp folders
+            mpp_dict (dict): dictionary mapping mpp folders to file paths
+            analyzed_folder (str): analyzed folder path
 
-         Returns:
-             list[str]: path to analyzed files
+        Returns:
+            list[str]: path to analyzed files
         """
 
         # Make blank array to keep save locations
@@ -226,7 +211,7 @@ class Analysis:
                 scalardict[k] = v
 
             # Interpolate environmental data.
-            # TODO: This reforms the large matrix every time right now, which could be prohibitive for large data sets.
+            # TODO: Optimize. This reforms the large matrix every time right now, which could be costly for large data sets.
             t = np.asarray([t_epoch for t_epoch in all_t])
             env_headers, env_data = self.interp_env_data(t)
             for idx in range(1, len(env_headers)):
@@ -431,7 +416,6 @@ class Analysis:
         last_t = datetime.fromtimestamp(float(epochstamps[-1])).strftime("x%Y%m%d")
 
         # Get enviornmental monitoring header and data from first time to last time
-        # ["Time (Epoch)", "Temperature (C)", "RH (%)", "Intensity (mW/m2)"]
         df_headers, df_data = self.get_env_data(first_t, last_t)
 
         # Create seccond list to start interpolating data. Start data with start time
@@ -531,16 +515,16 @@ class Analysis:
             jv_file_path (string): path to JV file
 
         Returns:
-           np.ndarray: time vector
-           np.ndarray: voltage applied vector
-           np.ndarray: FWD voltage measured vector
-           np.ndarray: FWD current vector
-           np.ndarray: FWD current density vector
-           np.ndarray: FWD power density vector
-           np.ndarray: REV voltage measured vector
-           np.ndarray: REV current vector
-           np.mdarray: REV current density vector
-           np.ndarray: REV power vector
+            np.ndarray: time vector
+            np.ndarray: voltage applied vector
+            np.ndarray: FWD voltage measured vector
+            np.ndarray: FWD current vector
+            np.ndarray: FWD current density vector
+            np.ndarray: FWD power density vector
+            np.ndarray: REV voltage measured vector
+            np.ndarray: REV current vector
+            np.mdarray: REV current density vector
+            np.ndarray: REV power vector
         """
 
         # Get time information
@@ -625,16 +609,6 @@ class Analysis:
             list[float]: current denisty vector
             list[float]: power denisty vector
         """
-
-        # Get the time information
-        # with open(mpp_file_path) as f:
-        #     reader = csv.reader(f)
-        #     _ = next(reader)  # date
-        #     _ = next(reader)  # time
-        #     t_start = float(next(reader)[-1])  # epoch time
-        #     _ = next(reader)  # string
-        #     _ = next(reader)  # module
-        #     _ = next(reader)  # area
 
         # Initialize lists
         t = []
@@ -748,6 +722,3 @@ class Analysis:
                 rh.append(float(line[2]))
                 intensity.append(float(line[3]))
         return t, temp, rh, intensity
-
-
-# TODO: should be able to fit between two points near jsc, mpp, voc to get values

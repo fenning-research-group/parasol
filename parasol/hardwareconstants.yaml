@@ -27,8 +27,8 @@ chroma:
   source_delay: 1 # Time for source to settle (s)
   sense_delay: 'SLOW' # 'FAST' # Time for sense to return value (SLOW/FAST)
   avg_num: 20 # Number of currents to avg for reading
-  max_voltage: 80 # 80 V is max voltage (V) of 'high' range, 16 V for low range
-  max_current: 2 # 2 A is max current (A) of 'low' range, 20 A for high range
+  voltage_range: 'H' # 80 V is max voltage (V) of 'high' range, 16 V for low range ## Use 'H' or 'L'
+  current_range: 'L' # 2 A is max current (A) of 'low' range, 20 A for high range
 
 labjack:
   photodiode_port: 0 # AIN Port for photodoide

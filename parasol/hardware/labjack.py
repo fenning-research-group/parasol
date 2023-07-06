@@ -16,6 +16,7 @@ class ExtendedList(list):
         list.__init__(self)
         self.extended = None
 
+#TODO: Change to fit 2nd board.
 
 class LabJack:
     """General LabJack U6-PRO class for monitoring environmental data"""
@@ -87,11 +88,6 @@ class LabJack:
         DAC_REGISTER = 5000 + idx * 1
         self.d.writeRegister(DAC_REGISTER, v)
 
-
-
-
-
-
     # Monitor Env and supporting Functions
 
     def monitor_env(self) -> float:
@@ -112,7 +108,7 @@ class LabJack:
         """
         
         # Get calibrated current output in amps
-        RTD_A = self.d.calInfo.currentOutput1 ##TODO:EDIT
+        RTD_A = self.d.calInfo.currentOutput1 
 
         # average over n readings
         temp = 0
@@ -207,7 +203,7 @@ class LabJack:
         """
 
         # Get applied voltage
-        vapplied = 4.75 #estimate at end of cable. self.hm.get_hg_vapplied()  # 5V #TODO:EDIT
+        vapplied = 4.75 #estimate at end of cable. self.hm.get_hg_vapplied()  # 5V 
 
         # iterate over n readinds
         rh = 0
@@ -481,7 +477,7 @@ class LabJack:
                 x (float): location to evaluate the function
 
             Returns:
-               float: calculated y value for given x and coefficients
+                float: calculated y value for given x and coefficients
             """
 
             # for each coefficient, add (x^i * ci) to the sum

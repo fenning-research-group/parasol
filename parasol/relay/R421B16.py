@@ -71,12 +71,12 @@ class ModbusException(Exception):
 class R421B16(object):
     """ R421B16 relay board class """
     def __init__(self,
-                 modbus_obj,
-                 address=1,
-                 board_name='Relay board {}'.format(BOARD_TYPE),
-                 num_address=NUM_ADDRESSES,
-                 num_relays=NUM_RELAYS,
-                 verbose=False):
+                modbus_obj,
+                address=1,
+                board_name='Relay board {}'.format(BOARD_TYPE),
+                num_address=NUM_ADDRESSES,
+                num_relays=NUM_RELAYS,
+                verbose=False):
         """
             R421B16 relay board constructor
         :param modbus_obj:

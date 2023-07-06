@@ -602,7 +602,7 @@ class Controller:
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
-        # TODO: Reset hardware on stop
+        # TODO: Reset hardware on stop -> check if this works in person
         # force wait until all active strings have been terminated
         # while any(self.active_strings):
         #     time.sleep(1)
@@ -686,7 +686,6 @@ class Controller:
                 self.logger.debug(f"Closed relay for string {id}")
 
                 # Convert to mA, calculate parameters
-                # TODO: GET RID OF (-) SIGN
                 fwd_i *= -1000
                 rev_i *= -1000
                 fwd_j = fwd_i / d["area"]
@@ -782,20 +781,18 @@ class Controller:
             t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
 
+            #TODO: check at night to see if this is needed.
             #TODO: this may be a good idea but we should also average the tracking measurent
             if d["mpp"]["last_currents"][1] is not None:
                 if((i==0 and d["mpp"]["last_currents"][1]>0) or (i>2*d["mpp"]["last_currents"][1])):
-                    # self.load.output_on(ch, last_vmpp) #NEWNEW
                     t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
                     print('i=0')
                 elif((v==0 and d["mpp"]["last_voltages"][1]>0) or (v > 2*d["mpp"]["last_voltages"][1])):
-                    # self.load.output_on(ch, last_vmpp) #NEWNEW
                     t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
                     print('v=0')
             
             if (i==0 or v ==0):
                 print('still hit 0')
-
 
             # Convert current to mA and calc j and p
             i *= 1000
@@ -803,6 +800,9 @@ class Controller:
             p = v * j
             pm = vm*j
 
+            # TODO: with increased resolution, check if this is needed
+            # TODO: WHENEVER potentially expand this list so that we can do a better job in the future (e.g. PID)
+            
             # Update dictionary by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = (p+pm)/2 # incase resolution doesnt change V value
@@ -906,7 +906,7 @@ class Controller:
         else:
             self.message = "No modules were checked."
     
-    #TODO: this is used in RUN_UI could prob do better.
+    #TODO: this is used in RUN_UI could prob do better. (likley not use functionm just call variable then set to None)
     def pass_message(self) -> str:
         """
         Passes message from controller using self.message, set to None after
