@@ -352,10 +352,23 @@ class Characterization:
             # set the voltage equal to last voltage + voltage step (determined above)
             v = vmpp_last + voltage_step
 
-            # Ensure min v,0 < voltage < max v, else step in the other direction
-            if (v <= max(d["mpp"]["vmin"], 0)) or (v >= d["mpp"]["vmax"]):
-                voltage_step *= -1
-                v = vmpp_last + 2 * voltage_step
+            # NEW NEW
+            # If we are less than 0, move to voltage step or in correct direction
+            if (v <= max(d["mpp"]["vmin"], 0)):
+                voltage_step = self.et_voltage_step
+                v = max(voltage_step, vmpp_last + voltage_step)
+            
+            # If we are greater than max mpp, move to max mpp - voltage step or in correct direction
+            elif (v >= d["mpp"]["vmax"]):
+                voltage_step = -1*self.et_voltage_step
+                v = min((vmpp_last + voltage_step), (d["mpp"]["vmax"] + voltage_step))
+
+            # If last current was 0, move to max mpp - voltage step or in correct direction
+            elif (d["mpp"]["last_currents"][0] is not None):
+                if (d["mpp"]["last_currents"][0] <= 0):
+                    voltage_step = -1*self.et_voltage_step
+                    v = min((vmpp_last + voltage_step), (d["mpp"]["vmax"] + voltage_step))
+
 
             # get time, set voltage measure current
             t = time.time()

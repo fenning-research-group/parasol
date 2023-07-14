@@ -25,8 +25,8 @@ chroma:
   address: 'GPIB1::15::INSTR' # GPIB adress
   time_out: 5000 # Timeout for Chroma (ms)
   source_delay: 1 # Time for source to settle (s)
-  sense_delay: 'SLOW' # 'FAST' # Time for sense to return value (SLOW/FAST)
-  avg_num: 20 # Number of currents to avg for reading
+  sense_delay: 'SLOW' #'SLOW' # 'FAST' # Time for sense to return value (SLOW/FAST)
+  avg_num: 10 # 20 # Number of currents to avg for reading
   voltage_range: 'H' # 80 V is max voltage (V) of 'high' range, 16 V for low range ## Use 'H' or 'L'
   current_range: 'L' # 2 A is max current (A) of 'low' range, 20 A for high range
 
@@ -40,14 +40,14 @@ labjack:
   # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py
 
 characterization:
-  mppt_voltage_step: 0.1 # MPPT voltage iteration (V). note that 0.02 is the floor resolution of the Chroma (Error approx 0.01)
+  mppt_voltage_step: 0.2 # MPPT voltage iteration (V). note that 0.02 is the floor resolution of the Chroma (Error approx 0.01)
 
 analysis:
   derivative_v_step : 0.5 # Voltage step for derivative (Rs, Rsh, Rch) in JV post-analysis (V)
 
 controller:
   monitor_delay: 15 # Time between environmental monitoring (s)
-  measurement_delay: 0.5 # Time to wait between switching relay and measuring
+  measurement_delay: 1 # Time to wait between switching relay and measuring
 
 RUN_UI:
   area : 100 # Area of the module (cm^2)

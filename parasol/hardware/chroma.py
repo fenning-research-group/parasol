@@ -58,6 +58,9 @@ class Chroma:
         rm = pyvisa.ResourceManager()
         self.ca = rm.open_resource(self.ca_address)
         self.ca.timeout = constants["time_out"]
+        # NEW
+        self.ca.write('*CLS')
+        # END NEW
         self.ca.write('*RST')
 
 
