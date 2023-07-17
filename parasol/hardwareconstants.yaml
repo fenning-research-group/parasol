@@ -1,6 +1,6 @@
 filestructure:
-  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" # Root directory
-  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" # Analysis directory
+  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" #"C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\"  # Root directory
+  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" #"C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\Analysis\\"  # Analysis directory
   # cell characteriation in root_dir\\Characterization\\
   # environment characteriation in root_dir\\Environment\\
   num_modules: 24 # Number of modules
@@ -31,10 +31,12 @@ chroma:
   current_range: 'L' # 2 A is max current (A) of 'low' range, 20 A for high range
 
 labjack:
-  photodiode_port: 0 # AIN Port for photodoide
-  hygrometer_port: 1 # AIN Port for hygrometer
-  thermocouple_port: 2 # AIN Port for thermocouple
-  ground_port: 3 # AIN Port for ground
+  voltage_port: None # 11 AIN port for +5V in
+  ground_port: None # 9 AIN port for ground
+  thermocouple2_port: None # 7 AIN port for between thermocouple1 and thermocouple2
+  thermocouple1_port: 2 # 5  AIN Port pre thermocouple1
+  hygrometer_port: 1 # 3 AIN Port for post hygrometer
+  photodiode_port: 0 # 1 AIN Port for post photodoide
   average_num: 5 # Number of readings to average
   delay_time: 0.05 # Seconds to wait between readings
   # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py

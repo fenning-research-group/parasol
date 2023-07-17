@@ -332,9 +332,6 @@ class R421B16(object):
                 return False
         return True
 
-    # def poll_multi(self, relays, interval=1.0):
-    #     print_stderr('TODO: Not implement yet')
-
     def on_multi(self, relays):
         for relay in relays:
             retval = self.on(relay)

@@ -466,7 +466,6 @@ class Characterization:
         elif isc > minisc:
             orientation_correct = False
 
-        print(isc)
         return orientation_correct
 
     def monitor_environment(self, labjack: object) -> float:
@@ -483,8 +482,6 @@ class Characterization:
         """
 
         t = time.time()
-        # TODO: Add read monitoring
         temp, rh, intensity = labjack.monitor_env()
 
         return t, temp, rh, intensity
-        # return t, 27, 50.0, 1.0

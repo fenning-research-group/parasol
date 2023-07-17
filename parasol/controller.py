@@ -781,8 +781,7 @@ class Controller:
             t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
 
-            #TODO: check at night to see if this is needed.
-            #TODO: this may be a good idea but we should also average the tracking measurent
+            #TODO: check at night to see if this is needed, this may be a good idea but we should also average the tracking measurent
             if d["mpp"]["last_currents"][1] is not None:
                 if((i==0 and d["mpp"]["last_currents"][1]>0) or (i>2*d["mpp"]["last_currents"][1])):
                     t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)

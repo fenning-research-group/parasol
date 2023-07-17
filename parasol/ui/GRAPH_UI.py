@@ -24,6 +24,8 @@ import numpy as np
 from parasol.filestructure import FileStructure
 from parasol.analysis.grapher import Grapher
 
+from parasol.analysis.analysis import Analysis
+
 
 # Set module directory
 MODULE_DIR = os.path.dirname(__file__)
@@ -53,6 +55,8 @@ def GRAPHER():
             # Load other modules
             self.filestructure = FileStructure()
             self.grapher = Grapher()
+            
+            self.analysis = Analysis()
 
             # Create user variables
             nrows = 4
@@ -243,7 +247,14 @@ def GRAPHER():
             test_folders = self.get_selected_folders()
 
             # Get selected test files seperated by test (list of lists)
-            analyzed_files = self.filestructure.get_files(test_folders, "Analyzed") #TODO: this can throw error if data is not analyzed. Should analyze instead
+            analyzed_files = self.filestructure.get_files(test_folders, "Analyzed") 
+            
+            # If we dont have an analyzed file, analyze it
+            for idx, file in enumerate(analyzed_files):
+                if not file:
+                    self.analysis.analyze_from_savepath(test_folders[idx])
+                    analyzed_files = self.filestructure.get_files(test_folders, "Analyzed")
+                
             mpp_files = self.filestructure.get_files(test_folders, "MPP")
 
             self.update_plots(analyzed_files, mpp_files, test_folders)

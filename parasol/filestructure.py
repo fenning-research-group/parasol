@@ -373,12 +373,17 @@ class FileStructure:
         Returns:
             list[str]: paths to subfiles
         """
-        list1 = [f.path for f in os.scandir(folder) if f.is_file()]
+        if os.path.exists(folder):
         
-        if partial is None:
-            return_list = list1
+            list1 = [f.path for f in os.scandir(folder) if f.is_file()]
+            
+            if partial is None:
+                return_list = list1
+            else:
+                return_list = [file for file in list1 if partial in file]
+
         else:
-            return_list = [file for file in list1 if partial in file]
+            return_list = []
 
         return return_list
 

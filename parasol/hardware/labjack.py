@@ -29,7 +29,7 @@ class LabJack:
         self.d.getCalibrationData() #
 
         # AIN ports for measurements
-        self.tc_port = constants["thermocouple_port"]
+        self.tc_port = constants["thermocouple1_port"]
         self.pd_port = constants["photodiode_port"]
         self.hg_port = constants["hygrometer_port"]
         self.ground_port = constants["ground_port"]
