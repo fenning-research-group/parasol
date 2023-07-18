@@ -16,7 +16,6 @@ class ExtendedList(list):
         list.__init__(self)
         self.extended = None
 
-#TODO: Change to fit 2nd board.
 
 class LabJack:
     """General LabJack U6-PRO class for monitoring environmental data"""

@@ -46,6 +46,7 @@ class Yokogawa:
         self.yoko = rm.open_resource(self.yoko_address)
         self.yoko.timeout = constants["timeout"]
         self.yoko.write("*RST")  # Reset factory
+        self.yoko.write("*CLS")  # Clear errors 
         self.yoko.write(":SENS:RSEN 1") # Set 4 terminal
         self.yoko.write(":TRIG:SOUR EXT")  # Trigger source external trigger
 

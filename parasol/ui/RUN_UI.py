@@ -799,10 +799,12 @@ def RUNNER():
             # Check orientation of modules
             self.controller.load_check_orientation(module_channels)
 
+            # NEW
             message = None
             while message is None:
                 time.sleep(1)
-                message = self.controller.pass_message()
+                message = self.controller.message
+                self.controller.message = None
 
             QMessageBox.about(self, "Module Orientation", f"{message}")
 

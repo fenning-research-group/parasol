@@ -224,7 +224,6 @@ class Controller:
         ch = self.load_channels[id]
         self.load.load_on(ch, 0.00)
         self.logger.debug(f"Turned off load output for string {id}")
-
         return self.strings[id]["name"]
 
     def load_check_orientation(self, modules: list) -> None:
@@ -590,10 +589,11 @@ class Controller:
         # Turn on running
         self.running = True
 
+
     def stop(self) -> None:
         """Delete workers,  stop queue, and reset hardware"""
 
-        # Unload all strings
+        # Unload all strings, reset loads
         ids = list(self.strings.keys())
         for id in ids:
             self.unload_string(id)
@@ -602,23 +602,22 @@ class Controller:
         self.loop.call_soon_threadsafe(self.loop.stop)
         self.thread.join()
 
-        # TODO: Reset hardware on stop -> check if this works in person
         # force wait until all active strings have been terminated
-        # while any(self.active_strings):
-        #     time.sleep(1)
+        while any(self.active_strings):
+            time.sleep(1)
 
-        # # Close all channels on the relay
-        # self.logger.debug(f"Turning off relays")
-        # self.relay.all_off()
-        # self.logger.debug(f"Turned off relays")
+        # Close all channels on the relay
+        self.logger.debug(f"Turning off relays")
+        self.relay.all_off()
+        self.logger.debug(f"Turned off relays")
 
-        # # Reset scanner
-        # self.logger.debug(f"Resetting scanner")
-        # self.scanner.output_off()
-        # self.logger.debug(f"Scanner reset")
+        # Reset scanner
+        self.logger.debug(f"Resetting scanner")
+        self.scanner.output_off()
+        self.logger.debug(f"Scanner reset")
 
-        # # Turn off running
-        # self.running = False
+        # Turn off running
+        self.running = False
 
     # Worker Functions
 
@@ -669,7 +668,7 @@ class Controller:
                     d["start_date"], d["name"], id, module, d["jv"]["scan_count"]
                 )
                 fpath = os.path.join(jvfolder, jvfile) 
-                
+
                 # Open relay, scan device foward + reverse, turn off relay
                 self.logger.debug(f"Opening relay for string {id}")
                 self.relay.on(module)
@@ -679,6 +678,7 @@ class Controller:
                 # wait set time and scan
                 time.sleep(self.measurement_delay)
                 v, fwd_vm, fwd_i, rev_vm, rev_i = self.characterization.scan_jv(d, self.scanner)
+
 
                 self.logger.debug(f"Scanned string {id}")
                 self.logger.debug(f"Closing relay for string {id}")
@@ -740,8 +740,9 @@ class Controller:
 
             self.logger.info(f"Scanned {id}")
 
-            #TODO: remove this sleep
-            time.sleep(0.5)
+            #TODO V: remove this sleep
+            # time.sleep(0.5)
+
 
     def track_mpp(self, id: int) -> None:
         """Conduct an MPP scan using Chroma class
@@ -781,17 +782,17 @@ class Controller:
             t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
 
-            #TODO: check at night to see if this is needed, this may be a good idea but we should also average the tracking measurent
-            if d["mpp"]["last_currents"][1] is not None:
-                if((i==0 and d["mpp"]["last_currents"][1]>0) or (i>2*d["mpp"]["last_currents"][1])):
-                    t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
-                    print('i=0')
-                elif((v==0 and d["mpp"]["last_voltages"][1]>0) or (v > 2*d["mpp"]["last_voltages"][1])):
-                    t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
-                    print('v=0')
+            #TODO V: check at night to see if this is needed, this may be a good idea but we should also average the tracking measurent
+            # if d["mpp"]["last_currents"][1] is not None:
+            #     if((i==0 and d["mpp"]["last_currents"][1]>0) or (i>2*d["mpp"]["last_currents"][1])):
+            #         t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
+            #         print('i=0')
+            #     elif((v==0 and d["mpp"]["last_voltages"][1]>0) or (v > 2*d["mpp"]["last_voltages"][1])):
+            #         t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
+            #         print('v=0')
             
-            if (i==0 or v ==0):
-                print('still hit 0')
+            # if (i==0 or v ==0):
+            #     print('still hit 0')
 
             # Convert current to mA and calc j and p
             i *= 1000
@@ -799,9 +800,7 @@ class Controller:
             p = v * j
             pm = vm*j
 
-            # TODO: with increased resolution, check if this is needed
             # TODO: WHENEVER potentially expand this list so that we can do a better job in the future (e.g. PID)
-            
             # Update dictionary by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = (p+pm)/2 # incase resolution doesnt change V value
@@ -862,8 +861,9 @@ class Controller:
 
         # Make string to hold # of correct orientations
         correct_orientation = [None] * len(modules)
+        check_module_string = ""
 
-        # Cycle through each module
+        # Cycle through each module, calc orientation
         for idx, module in enumerate(modules):
 
             # Turn on relay
@@ -888,38 +888,20 @@ class Controller:
             self.relay.all_off()
             self.logger.debug(f"Turned off all relays")
 
+        
         # Return true if orientation is correct, False otherwise
-        check_module_string = ""
-        for module in modules:
+        for idx, module in enumerate(modules):
             self.logger.info(
                 f"Module {module} orientation correct: {correct_orientation[idx]}"
             )
             check_module_string += (
                 f"Module {module} orientation correct: {correct_orientation[idx]},\n"
             )
-
         self.logger.info(f"Checked orientation of modules {modules}")
-
         if len(check_module_string) > 1:
             self.message = check_module_string[0:-2] + "."
         else:
             self.message = "No modules were checked."
-    
-    #TODO: this is used in RUN_UI could prob do better. (likley not use functionm just call variable then set to None)
-    def pass_message(self) -> str:
-        """
-        Passes message from controller using self.message, set to None after
-
-        Args:
-            message (str): message to pass
-        """
-
-        self.logger.debug(f"Passing message to controller")
-
-        # Pass message to controller
-        message = self.message
-        self.message = None
-        return message
 
     def __del__(self) -> None:
         """Stops queue and program on exit"""

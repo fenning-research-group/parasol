@@ -352,7 +352,6 @@ class Characterization:
             # set the voltage equal to last voltage + voltage step (determined above)
             v = vmpp_last + voltage_step
 
-            # NEW NEW
             # If we are less than 0, move to voltage step or in correct direction
             if (v <= max(d["mpp"]["vmin"], 0)):
                 voltage_step = self.et_voltage_step
@@ -368,7 +367,6 @@ class Characterization:
                 if (d["mpp"]["last_currents"][0] <= 0):
                     voltage_step = -1*self.et_voltage_step
                     v = min((vmpp_last + voltage_step), (d["mpp"]["vmax"] + voltage_step))
-
 
             # get time, set voltage measure current
             t = time.time()
@@ -483,5 +481,4 @@ class Characterization:
 
         t = time.time()
         temp, rh, intensity = labjack.monitor_env()
-
         return t, temp, rh, intensity

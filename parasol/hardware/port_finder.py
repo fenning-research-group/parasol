@@ -24,7 +24,7 @@ def _get_port_windows(device_identifiers):
     for p in lp.comports():
         match = True
         for attr, value in device_identifiers.items():
-            if getattr(p, attr) != value:
+            if int(getattr(p, attr)) != int(value):
                 match = False
         if match:
             return p.device

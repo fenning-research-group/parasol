@@ -25,9 +25,8 @@ class Chroma:
         self.sense_delay = constants["sense_delay"]
         self.ca_avg_num = constants["avg_num"] # number of measurments to average
 
-        #TODO:Rooftop. Clean these up/ uncomment below and check (could also nee MAX or MIN) 
         self.v_mode = constants["voltage_range"] # voltage range to use
-        self.ca_i_max = constants["current_range"] # unused (need max current for CV, can be # max or min)
+        self.ca_i_max = constants["current_range"] # current range to use
         
         self.ca_address = constants["address"]
         self.ca_cc_mode = "CCH"
@@ -58,9 +57,7 @@ class Chroma:
         rm = pyvisa.ResourceManager()
         self.ca = rm.open_resource(self.ca_address)
         self.ca.timeout = constants["time_out"]
-        # NEW
         self.ca.write('*CLS')
-        # END NEW
         self.ca.write('*RST')
 
 
@@ -91,7 +88,7 @@ class Chroma:
         self.channel_check(channel) # set channel
         self.ca.write("MODE " + self.ca_cv_mode) # set mode to CV
         self.ca.write("CONF:MEAS:AVE " + str(self.ca_avg_num)) # set averge number
-        # self.ca.write("VOLT:CURR " + str(self.ca_i_max))
+        self.ca.write("VOLT:CURR " + str(self.ca_i_max)) # set current range 
         self.ca.write("VOLT:MODE "+ str(self.sense_delay)) # set CV response (fast or slow)
         self.ca.write("VOLT:L1 0") # set voltage of load to 0 V
         self.ca.write("CHAN:ACT OFF") # turn off measurement

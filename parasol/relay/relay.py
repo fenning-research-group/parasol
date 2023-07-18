@@ -42,7 +42,7 @@ class Relay():
         # 1 board runs 2 cells so 12 boards will handle 6 strings of 4 cells
         # general rule: (NUM_STRINGS * NUM_DEVS * NUM_WIRES <= NUM_BOARDS * NUM_RELAYS / 2)
         self.lock = Lock()
-        self.SERIAL_PORT = constants['port']#'COM4' #get_port(constants["device_identifiers"]) #TODO: Fix port finder
+        self.SERIAL_PORT = get_port(constants["device_identifiers"]) 
         
         self.NUM_DEVS = 4 # number of devices per load string
         self.NUM_WIRES = 4 # number of wires used per device (4 or 2)
@@ -51,7 +51,7 @@ class Relay():
         self.NUM_STRINGS = constants["num_strings"] # number of load strings
         self.NUM_BOARDS = self.NUM_STRINGS*2 # number of installed load boards
         
-        self.relay_mode = 1
+        self.relay_mode = 0
 
         self.create_relay_tables() # create useful relay tables  
         self.relay_open = [False] * (self.NUM_RELAYS*self.NUM_BOARDS+1)  # create list[relay #] = Open boolean

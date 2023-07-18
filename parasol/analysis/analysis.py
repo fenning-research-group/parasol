@@ -40,6 +40,8 @@ class Analysis:
             pd.DataFrame: ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         """
 
+        #TODO: Verify this works on several JVs on same string.
+
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
 
@@ -47,11 +49,9 @@ class Analysis:
         t_vals, pmp_fwd_vals, pmp_rev_vals = self.check_pmps(jv_folders, jv_dict)
         col_names = ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         data = list(zip(t_vals, pmp_fwd_vals, pmp_rev_vals))
-        plot_df = pd.DataFrame(columns=col_names, data=data)
+        plot_df = pd.DataFrame(columns=col_names, data=data)        
 
-        # TODO: BROKEN. Also --- Could improve this by plotting the MPP values as well
-        
-
+        # return datafolder for plotting
         return plot_df
 
     def analyze_from_savepath(self, stringpath: str) -> list:
@@ -419,7 +419,6 @@ class Analysis:
         df_headers, df_data = self.get_env_data(first_t, last_t)
 
         # Create seccond list to start interpolating data. Start data with start time
-        # x220415 -> fill this will time data from epoch stamps instad of df_data[0] # TODO: Check this is correct
         df2_data = [epochstamps]
 
         # Grab monitoring_time, interpolate monitoring data to epochstamps
