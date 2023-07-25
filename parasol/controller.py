@@ -876,11 +876,9 @@ class Controller:
 
             # Pass scanner to characterization module, returns true if Isc < 0, false otherwise
             self.logger.debug(f"Checking orientation for module {module}")
-            self.scanner.output_on()
             correct_orientation[idx] = self.characterization.check_orientation(
                 self.scanner
             )
-            self.scanner.output_off()
             self.logger.debug(f"Checked orientation for module {module}")
 
             # Turn off relay

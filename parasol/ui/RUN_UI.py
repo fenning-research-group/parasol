@@ -62,11 +62,13 @@ def _check_test(jv_paths: list, mpp_paths: list) -> None:
         mpp_paths(list[str]): list of paths to MPP folders
     """
     # Get analysis and grapher classes
-    analysis = Analysis()
+    # analysis = Analysis()
+
+    # Get grapher class, it will create anlaysis class as well
     grapher = Grapher()
 
     # Calculate "Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"
-    plot_df = analysis.check_test(jv_paths, mpp_paths)
+    plot_df = grapher.analysis.check_test(jv_paths, mpp_paths) #NEW
 
     # Plot "Time Elapsed (s)" vsersus "FWD Pmp (mW/cm2)" and "REV Pmp (mW/cm2)"
     grapher.plot_x_v_ys(

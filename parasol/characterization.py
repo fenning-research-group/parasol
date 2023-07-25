@@ -456,7 +456,8 @@ class Characterization:
         """
 
         orientation_correct = None
-        isc = scanner.isc()
+        # check_orientation turns on scanner, checks isc, turns off scanner
+        isc = scanner.check_orientation()
 
         minisc = -0.0005
         if isc < minisc:

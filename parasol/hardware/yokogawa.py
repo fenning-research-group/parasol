@@ -50,7 +50,6 @@ class Yokogawa:
         self.yoko.write(":SENS:RSEN 1") # Set 4 terminal
         self.yoko.write(":TRIG:SOUR EXT")  # Trigger source external trigger
 
-
     def disconnect(self):
         """Disconnects from the yokogawa"""
         self.inst.close()
@@ -161,12 +160,13 @@ class Yokogawa:
         # Ensure we are sourcing current
         if not self._sourcing_current:
             self.srcI_measV()
-            self.output_on
+            self.output_on()
             self._sourcing_current = True
 
         # Set current (A)
         tempstr = ":SOUR:CURR:LEV " + str(i) + "A"
         self.yoko.write(tempstr)
+
 
     def measure_voltage(self) -> float:
         """Measures the voltage (V) reading
@@ -240,7 +240,7 @@ class Yokogawa:
         return curr, volt
 
 
-    def voc(self) -> float:
+    def voc(self, lock = True) -> float:
         """Measures the open circuit voltage (V) at I = 0
 
         Returns:
@@ -248,12 +248,12 @@ class Yokogawa:
         """
 
         # Set current to 0, measure voltage (V)
-        i,v = self.set_I_measure_V(0)
+        i,v = self.set_I_measure_V(0, lock)
 
         return v
 
 
-    def isc(self) -> float:
+    def isc(self, lock = True) -> float:
         """Measures the short circuit current (A) at V = 0
 
         Returns:
@@ -261,10 +261,23 @@ class Yokogawa:
         """
 
         # Set voltage to 0, measure current (A)
-        v,i = self.set_V_measure_I(0)
+        v,i = self.set_V_measure_I(0, lock)
 
         return i
+    
 
+    def check_orientation(self) -> float:
+        """
+        Turns scanner on, checks isc, turns scanner off
+        """
+
+        with self.lock:
+            self.output_on()
+            isc = self.isc(lock = False)
+            self.output_off()
+        
+        return isc
+    
 
     def iv_sweep(self, vstart: float, vend: float, steps: int) -> np.ndarray:
         """Runs a single IV sweep and returns the data
@@ -383,7 +396,7 @@ class Yokogawa:
             i_rev[:] = np.nan
 
             # Find point after voc
-            voc = self.voc(0)
+            voc = self.voc(lock = False)
             end_index = np.where(np.diff(np.signbit(v - voc)))[0]
             if (v[end_index] - voc) < 0:
                 end_index += 1
@@ -402,6 +415,7 @@ class Yokogawa:
 
             # Scan rev until we get back to starting point
             index = end_index
+            #TODO: THIS IS PASSING ERROR --> v[index] cant be made float
             while index >= start_index:
                 vm_rev[index], i_rev[index] = self.set_V_measure_I(v[index], lock = False)
                 index -= 1
