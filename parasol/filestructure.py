@@ -6,6 +6,8 @@ import datetime
 MODULE_DIR = os.path.dirname(__file__)
 with open(os.path.join(MODULE_DIR, "hardwareconstants.yaml"), "r") as f:
     constants = yaml.safe_load(f)["filestructure"]
+with open(os.path.join(MODULE_DIR, "userconstants.yaml"), "r") as f:
+    user_constants = yaml.safe_load(f)["filestructure"]
 
 
 class FileStructure:
@@ -15,8 +17,8 @@ class FileStructure:
         """Initializes the FileStructure class"""
 
         # Load constants
-        self.root_folder = constants["root_dir"]
-        self.analysis_folder = constants["analysis_dir"]
+        self.root_folder = user_constants["root_dir"]
+        self.analysis_folder = user_constants["analysis_dir"]
         self.NUM_MODULES = constants["num_modules"]
 
         if not os.path.exists(self.root_folder):

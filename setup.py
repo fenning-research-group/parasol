@@ -15,7 +15,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Sean P. Dunfield, Rishi Kumar, Deniz Cakan",
-    author_email="sdunfield@eng.ucsd.edu, rek010@eng.ucsd.edu, dcakan@eng.ucsd.edu",
+    author_email="seandunfield@gmail.com, rek010@eng.ucsd.edu, dcakan@eng.ucsd.edu",
     download_url="https://github.com/fenning-research-group/parasol",
     license="MIT",
     install_requires=[

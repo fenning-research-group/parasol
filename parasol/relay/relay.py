@@ -51,7 +51,7 @@ class Relay():
         self.NUM_STRINGS = constants["num_strings"] # number of load strings
         self.NUM_BOARDS = self.NUM_STRINGS*2 # number of installed load boards
         
-        self.relay_mode = 1
+        self.relay_mode = constants["relay_mode"]
 
         self.create_relay_tables() # create useful relay tables  
         self.relay_open = [False] * (self.NUM_RELAYS*self.NUM_BOARDS+1)  # create list[relay #] = Open boolean

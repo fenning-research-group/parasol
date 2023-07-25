@@ -740,9 +740,6 @@ class Controller:
 
             self.logger.info(f"Scanned {id}")
 
-            #TODO V: remove this sleep
-            # time.sleep(0.5)
-
 
     def track_mpp(self, id: int) -> None:
         """Conduct an MPP scan using Chroma class

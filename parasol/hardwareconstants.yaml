@@ -1,15 +1,16 @@
 filestructure:
-  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" #"C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\"  # Root directory
-  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" #"C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\Analysis\\"  # Analysis directory
+  # root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" #"C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\"  # Root directory
+  # analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" #"C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\Analysis\\"  # Analysis directory
   # cell characteriation in root_dir\\Characterization\\
   # environment characteriation in root_dir\\Environment\\
   num_modules: 24 # Number of modules
 
 relay:
   num_strings: 6 # should be num_modes/4
+  relay_mode: 1
   device_identifiers:
-    pid: '24577' #'6001'
-    vid: '1027' #'0403'
+    pid: '24577' # physical ID
+    vid: '1027' # virtual ID
 
 yokogawa:
   address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
@@ -24,8 +25,8 @@ chroma:
   address: 'GPIB1::15::INSTR' # GPIB adress
   time_out: 5000 # Timeout for Chroma (ms)
   source_delay: 1 # Time for source to settle (s)
-  sense_delay: 'SLOW' #'SLOW' # 'FAST' # Time for sense to return value (SLOW/FAST)
-  avg_num: 10 # 20 # Number of currents to avg for reading
+  sense_delay: 'SLOW' # Time for sense to return value (SLOW/FAST)
+  avg_num: 10 # Number of currents to avg for reading
   voltage_range: 'H' # 80 V is max voltage (V) of 'high' range, 16 V for low range ## Use 'H' or 'L'
   current_range: 2 # 2 A is max current (A) of low range, 20 A for high range
 
