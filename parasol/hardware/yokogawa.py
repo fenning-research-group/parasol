@@ -415,7 +415,6 @@ class Yokogawa:
 
             # Scan rev until we get back to starting point
             index = end_index
-            #TODO: THIS IS PASSING ERROR --> v[index] cant be made float
             while index >= start_index:
                 vm_rev[index], i_rev[index] = self.set_V_measure_I(v[index], lock = False)
                 index -= 1

@@ -53,27 +53,27 @@ def run_async_thread(func):
 
 
 # _check_test function outside of the class so that we can use multiprocessing on it
-def _check_test(jv_paths: list, mpp_paths: list) -> None:
-    """
-    Process to check test and plot
+# def _check_test(jv_paths: list, mpp_paths: list) -> None:
+#     """
+#     Process to check test and plot
 
-    Args:
-        jv_paths(list[str]): list of paths to JV folders
-        mpp_paths(list[str]): list of paths to MPP folders
-    """
-    # Get analysis and grapher classes
-    # analysis = Analysis()
+#     Args:
+#         jv_paths(list[str]): list of paths to JV folders
+#         mpp_paths(list[str]): list of paths to MPP folders
+#     """
+#     # Get analysis and grapher classes
+#     # analysis = Analysis()
 
-    # Get grapher class, it will create anlaysis class as well
-    grapher = Grapher()
+#     # Get grapher class, it will create anlaysis class as well
+#     grapher = Grapher()
 
-    # Calculate "Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"
-    plot_df = grapher.analysis.check_test(jv_paths, mpp_paths) #NEW
+#     # Calculate "Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"
+#     plot_df = grapher.analysis.check_test(jv_paths, mpp_paths) #NEW
 
-    # Plot "Time Elapsed (s)" vsersus "FWD Pmp (mW/cm2)" and "REV Pmp (mW/cm2)"
-    grapher.plot_x_v_ys(
-        plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
-    )
+#     # Plot "Time Elapsed (s)" vsersus "FWD Pmp (mW/cm2)" and "REV Pmp (mW/cm2)"
+#     grapher.plot_x_v_ys(
+#         plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+#     )
 
 
 def RUNNER():
@@ -780,8 +780,29 @@ def RUNNER():
                 )
             ]
 
+            self.check_test(jv_paths, mpp_paths)
+            # TODO: It would be ideal to do this in another frame but the following code throw error
+            # This throws an error because it tries to load all files above class to for _check_test for new process
             # Start process to anlayze and plot data in new process --> requires multiple cores
-            Process(target=_check_test, args=(jv_paths, mpp_paths)).start()
+            # Process(target=_check_test, args=(jv_paths, mpp_paths)).start() 
+
+
+        def check_test(self, jv_paths: list, mpp_paths: list) -> None:
+            """
+            Process to check test and plot
+
+            Args:
+                jv_paths(list[str]): list of paths to JV folders
+                mpp_paths(list[str]): list of paths to MPP folders
+            """
+
+            # Calculate "Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"
+            plot_df = self.analysis.check_test(jv_paths, mpp_paths) #NEW
+
+            # Plot "Time Elapsed (s)" vsersus "FWD Pmp (mW/cm2)" and "REV Pmp (mW/cm2)"
+            self.grapher.plot_x_v_ys(
+                plot_df, "Time Elapsed (s)", ["FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
+            )
 
         def checkorientation(self, stringid: int) -> None:
             """Checks Orientaion of wiring to see if its is correct for the string

@@ -40,8 +40,6 @@ class Analysis:
             pd.DataFrame: ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         """
 
-        #TODO: Fix (See other in yoko)
-
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
 
@@ -770,5 +768,4 @@ class Analysis:
 
 
 
-#TODO: Grab photodiode reading and calc 
-#TODO: Function to combine folders
+#TODO: Grab photodiode reading and calc new powers, etc.
