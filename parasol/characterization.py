@@ -109,224 +109,19 @@ class Characterization:
             np.ndarray: current (A) values
         """
 
-        # TODO: Clean up
+        # TODO Community: Expand! Examples below.
+        
+        # Perturb and observe, two measurements to eliminate time axes, Hidenori SAITO no check for stabilization
+        # DOI:10.5796/electrochemistry.20-00022
+
+        # Modified perturb and observe: taken from David Sanz Morales Thesis
+        # http://lib.tkk.fi/Dipl/2010/urn100399.pdf
+        
+        # PID?
 
         # Get MPP mode
         mpp_mode = d["mpp"]["mode"]
-
-        # # Perturb and observe, standard
-        # if mpp_mode == 0:
-
-        #     # If we have not tracked yet, step in standard direction from MPP calc from JV, else run algorithm
-        #     if (d["mpp"]["last_powers"][0] is None) or (
-        #             d["mpp"]["last_powers"][1] is None
-        #         ):
-        #             v= vmpp_last + self.et_voltage_step
-        #             t = time.time()
-        #             i = chroma.set_V_measure_I(ch, v)
-
-        #     else:
-
-        #         # calcualte changes in I, P, V
-        #         delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
-        #         delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
-        #         delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
-
-        #         # apply standard perturb and observe logic
-        #         if delta_p == 0:
-        #             v = vmpp_last
-        #         elif delta_p > 0:
-        #             if delta_v > 0:
-        #                 v = vmpp_last + self.et_voltage_step
-        #             else:
-        #                 v = vmpp_last - self.et_voltage_step
-        #         elif delta_p < 0:
-        #             if delta_v > 0:
-        #                 v = vmpp_last - self.et_voltage_step
-        #             else:
-        #                 v = vmpp_last + self.et_voltage_step
-
-        #         # ensure we are within bounds and in correct quadrant
-        #         if v <= max(d["mpp"]["vmin"], 0):
-        #             v = vmpp_last + 2 * self.et_voltage_step
-        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0):
-        #             v = vmpp_last - 2 * self.et_voltage_step
-
-        #         # ensure we arent sitting in the noise
-        #         if 0 <= d["mpp"]["last_currents"][1] <= 1:
-        #             v = max(self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step)
-
-        #         # bias at calc point
-        #         t = time.time()
-        #         i = chroma.set_V_measure_I(ch, v)
-
-        # # Perturb and observe, two measurements to eliminate time axes
-        # elif mpp_mode == 1:
-
-        #      # If we have not tracked yet, step in standard direction from MPP calc from JV, else run algorithm
-        #     if (d["mpp"]["last_powers"][0] is None) or (
-        #             d["mpp"]["last_powers"][1] is None
-        #         ):
-        #             v= vmpp_last + self.et_voltage_step
-        #             t = time.time()
-        #             i = chroma.set_V_measure_I(ch, v)
-
-        #     else:
-
-        #         # calcualte changes in I, P, V
-        #         delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
-        #         delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
-        #         delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
-
-        #         # standard perturb and observe logic
-        #         if delta_p == 0:
-        #             v = vmpp_last
-        #         elif delta_p > 0:
-        #             if delta_v > 0:
-        #                 v = vmpp_last + self.et_voltage_step
-        #             else:
-        #                 v = vmpp_last - self.et_voltage_step
-        #         elif delta_p < 0:
-        #             if delta_v > 0:
-        #                 v = vmpp_last - self.et_voltage_step
-        #             else:
-        #                 v = vmpp_last + self.et_voltage_step
-
-        #         # ensure we are within bounds and in correct quadrant
-        #         if v <= max(d["mpp"]["vmin"], 0):
-        #             v = vmpp_last + 2 * self.et_voltage_step
-        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0):
-        #             v = vmpp_last - 2 * self.et_voltage_step
-
-        #         # ensure we arent sitting in the noise
-        #         if 0 <= d["mpp"]["last_currents"][1] <= 1:
-        #             v = max(self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step)
-
-        #         # bias at calc point and last point, determine greater value
-        #         p0 = chroma.set_V_measure_I(ch, vmpp_last)*vmpp_last
-        #         p1 = chroma.set_V_measure_I(ch, v)*v
-        #         if p1 > p0:
-        #             v_set = v
-        #         else:
-        #             v_set = vmpp_last
-
-        #         # set voltage and measure
-        #         t = time.time()
-        #         i = chroma.set_V_measure_I(ch, v_set)
-
-        # # Perturb and observe, two measurements to eliminate time axes, Hidenori SAITO no check for stabilization
-        # # DOI:10.5796/electrochemistry.20-00022
-        # elif mpp_mode == 2:
-
-        #      # If we have not tracked yet, step in standard direction from MPP calc from JV, else run algorithm
-        #     if (d["mpp"]["last_powers"][0] is None) or (
-        #             d["mpp"]["last_powers"][1] is None
-        #         ):
-        #             v= vmpp_last + self.et_voltage_step
-        #             t = time.time()
-        #             i = chroma.set_V_measure_I(ch, v)
-
-        #     else:
-
-        #         # calcualte changes in I, P, V
-        #         delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
-        #         delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
-        #         delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
-
-        #         # standard perturb and observe logic
-        #         if delta_p == 0:
-        #             v = vmpp_last
-        #         elif delta_p > 0:
-        #             if delta_v > 0:
-        #                 v = vmpp_last + self.et_voltage_step
-        #             else:
-        #                 v = vmpp_last - self.et_voltage_step
-        #         elif delta_p < 0:
-        #             if delta_v > 0:
-        #                 v = vmpp_last - self.et_voltage_step
-        #             else:
-        #                 v = vmpp_last + self.et_voltage_step
-
-        #         # ensure we are within bounds and in correct quadrant
-        #         if v <= max(d["mpp"]["vmin"], 0):
-        #             v = vmpp_last + 2 * self.et_voltage_step
-        #         elif (v >= d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0):
-        #             v = vmpp_last - 2 * self.et_voltage_step
-
-        #         # ensure we arent sitting in the noise
-        #         if 0 <= d["mpp"]["last_currents"][1] <= 1:
-        #             v = max(self.et_voltage_step, d["mpp"]["vmin"] + self.et_voltage_step)
-
-        #         # bias at calc point and last point, determine greater value
-        #         firstv = max((min(vmpp_last, v)-self.et_voltage_step),(d["mpp"]["vmin"]+ self.et_voltage_step)) # smallest point - vstep or vmin+vstep
-        #         seccondv = min(vmpp_last, v) # smallest point
-        #         thirdv = max(vmpp_last, v) # smallest point + vstep
-
-        #         # set voltage and measure
-        #         _ = chroma.set_V_measure_I(ch, firstv)*firstv
-        #         p0 = chroma.set_V_measure_I(ch, seccondv)*seccondv
-        #         p1 = chroma.set_V_measure_I(ch, thirdv)*thirdv
-
-        #         # compare last two measurements
-        #         if p1 > p0:
-        #             v_set = thirdv
-        #         else:
-        #             v_set = seccondv
-
-        #         # set voltage and measure at max power point
-        #         t = time.time()
-        #         i = chroma.set_V_measure_I(ch, v_set)
-
-        # # Modified perturb and observe: taken from David Sanz Morales Thesis
-        # # http://lib.tkk.fi/Dipl/2010/urn100399.pdf
-        # elif mpp_mode == 3:
-
-        # if mpp_mode == 0:
-        #     # If we have not tracked yet, step in standard direction from MPP calc from JV, else run algorithm
-        #     if (d["mpp"]["last_powers"][0] is None) or (
-        #         d["mpp"]["last_powers"][1] is None
-        #     ):
-        #         v = vmpp_last + self.et_voltage_step
-        #         t = time.time()
-        #         i = chroma.set_V_measure_I(ch, v)
-
-        #     else:
-        #         # Calcualte changes in I, P, V
-        #         delta_v = d["mpp"]["last_voltages"][1] - d["mpp"]["last_voltages"][0]
-        #         delta_i = d["mpp"]["last_currents"][1] - d["mpp"]["last_currents"][0]
-        #         delta_p = d["mpp"]["last_powers"][1] - d["mpp"]["last_powers"][0]
-
-        #         # Modified perturb and observe logic
-        #         if delta_p == 0:
-        #             v_increase = 0
-        #         elif delta_i < 0:
-        #             if delta_i / delta_p == 0:
-        #                 v_increase = 0
-        #             elif delta_i / delta_p < 0:
-        #                 v_increase = 1
-        #             else:
-        #                 v_increase = -1
-        #         else:
-        #             if delta_v / delta_p == 0:
-        #                 v_increase = 0
-        #             elif delta_v / delta_p > 0:
-        #                 v_increase = 1
-        #             else:
-        #                 v_increase = -1
-
-        #         # Set voltage using constant step + direction determined above
-        #         v = vmpp_last + v_increase * self.et_voltage_step
-
-        #         # Ensure we are within bounds and in correct quadrant
-        #         if v < max(d["mpp"]["vmin"], 0.0):
-        #             v = vmpp_last + 2 * self.et_voltage_step
-        #         elif (v > d["mpp"]["vmax"]) or (d["mpp"]["last_currents"][1] < 0.0):
-        #             v = vmpp_last - 2 * self.et_voltage_step
-
-        #         # bias at calc point
-        #         t = time.time()
-        #         i = chroma.set_V_measure_I(ch, v)
-
+        
         # Constant perturb and observe (1 = newest, 0 = oldest)
         if mpp_mode == 0:
 
@@ -373,6 +168,7 @@ class Characterization:
             vm, i = chroma.set_V_measure_I(ch, v)
 
         # Mode = 1, bias at 75% of Voc
+        # This is just an example. 
         elif mpp_mode == 1:
 
             num_modules = len(d["module_channels"])

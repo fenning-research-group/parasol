@@ -11,6 +11,7 @@ from parasol.analysis.analysis import Analysis
 class Grapher:
     """Grapher package for PARASOL"""
 
+
     def __init__(self) -> None:
         """Initializes Grapher class"""
 
@@ -112,14 +113,25 @@ class Grapher:
         plt.xlabel(x, weight="black")
         plt.show()
 
-    # Plot JV/MPPT scans for a single module folder
+    # Plot from folder
 
-    def plot_module_jvs(self, jvfolder: str, **plt_kwargs) -> None:
+    def plot_module_jvs(self, jvfolder: str, ax: plt.axes = None, **plt_kwargs) -> plt.axes:
         """Plot JVs in given JV folder
 
         Args:
             jvfolder (str): path to JV folder
+            ax (plt.axes): axes
+            **plt_kwargs : additional plot options
+
+        Returns:
+            plt.ax: plotted axes
         """
+        
+        if ax is None:
+            ax = plt.gca()
+            
+        if len(jvfolder) == 0:
+            return ax
 
         # Create dictionary where dict[testfolder] = list of JV files
         jv_dict = self.filestructure.map_test_files([jvfolder])
@@ -128,14 +140,26 @@ class Grapher:
         jv_file_paths = jv_dict[jvfolder]
 
         # Plot JVs for each module
-        self.plot_jvs(jv_file_paths, **plt_kwargs)
+        self.plot_jvs(jv_file_paths, ax, **plt_kwargs)
 
-    def plot_string_mpp(self, mppfolder: str, **plt_kwargs) -> None:
+
+    def plot_string_mpp(self, mppfolder: str, ax: plt.axes = None, labels: str = None, **plt_kwargs) -> plt.axes:
         """Plot MPP information in given MPP folder
 
         Args:
             mppfolder (str): path to MPP folder
+            ax (plt.axes): axes
+            **plt_kwargs : additional plot options
+
+        Returns:
+            plt.ax: plotted axes
         """
+        
+        if ax is None:
+            ax = plt.gca()
+            
+        if len(mppfolder) == 0:
+            return ax
 
         # Create dictionary where dict[testfolder] = list of mpp files
         mpp_dict = self.filestructure.map_test_files([mppfolder])
@@ -144,14 +168,29 @@ class Grapher:
         mpp_file_paths = mpp_dict[mppfolder]
 
         # Plot MPPs for each module
-        self.plot_mpps(self, mpp_file_paths, None, **plt_kwargs)
+        self.plot_mpps(mpp_file_paths, ax, labels, **plt_kwargs)
 
-    def plot_jvs(self, jvfiles: list, **plt_kwargs) -> None:
+
+    # Plot from file list
+
+
+    def plot_jvs(self, jvfiles: list, ax: plt.axes = None, **plt_kwargs) -> plt.axes:
         """Plot JVs for input JV files
 
         Args:
             jvfiles (list[str]): paths to JV files
+            ax (plt.axes): axes
+            **plt_kwargs : additional plot options
+
+        Returns:
+            plt.ax: plotted axes
         """
+
+        if ax is None:
+            ax = plt.gca()
+            
+        if len(jvfiles) == 0:
+            return ax
 
         # Load JV files
         (
@@ -181,13 +220,13 @@ class Grapher:
 
         # Plot FWD and REV curves, REV with --
         for jvpair in range(len(all_t_elapsed)):
-            plt.plot(
+            ax.plot(
                 all_vm_fwd[jvpair],
                 all_j_fwd[jvpair],
                 color=colors[jvpair],
                 **plt_kwargs,
             )
-            plt.plot(
+            ax.plot(
                 all_vm_rev[jvpair],
                 all_j_rev[jvpair],
                 "--",
@@ -196,31 +235,19 @@ class Grapher:
             )
 
         # Create legend for 4 files to show change over time
-        if len(jvfiles) >= 4:
-            l1 = 0
-            l2 = math.floor((1 / 3) * (len(all_j_fwd) - 1))
-            l3 = math.ceil((2 / 3) * (len(all_j_fwd) - 1))
-            l4 = len(all_j_fwd) - 1
-            plt.legend(
-                [all_j_fwd[l1], all_j_fwd[l2], all_j_fwd[l3], all_j_fwd[l4]],
-                [
-                    all_t_elapsed[l1],
-                    all_t_elapsed[l2],
-                    all_t_elapsed[l3],
-                    all_t_elapsed[l4],
-                ],
-                loc="upper left",
-            )
+        l1 = 0
+        l4 = len(all_j_fwd) - 1
+        ax.text(1,1,f'{all_t_elapsed[l1]} to {all_t_elapsed[l4]/3600:.1f} h',horizontalalignment='right',verticalalignment='top', transform=ax.transAxes)
 
         # Customize plot and show
-        plt.ylabel("J (mA/cm2)", weight="black")
-        plt.xlabel("V (V)", weight="black")
-        plt.title(titlestr)
-        plt.show()
+        ax.set_ylabel("J (mA/cm2)", weight="black")
+        ax.set_xlabel("V (V)", weight="black")
+        ax.set_title(titlestr)
+        
+        return ax
 
-    # These functions take axes and plot on them
 
-    def plot_mpps(self, mppfiles: list, ax: plt.axes = None, **plt_kwargs) -> plt.axes:
+    def plot_mpps(self, mppfiles: list, ax: plt.axes = None, labels: str = None, **plt_kwargs) -> plt.axes:
         """Plots MPPs for input MPP files
 
         Args:
@@ -257,17 +284,21 @@ class Grapher:
         ax.plot(
             t_elapsed,
             all_p,
+            label = labels,
             **plt_kwargs,
         )
 
         # Customize plot and show
         ax.set_ylabel("MPPT MPP (mW/cm2)", weight="black")
         ax.set_xlabel("Time Elapsed (sec)", weight="black")
+        if labels:
+            ax.legend()
 
         return ax
 
+
     def plot_xy_scalars(
-        self, paramfiles: list, x: str, y: str, ax: plt.axes = None, **plt_kwargs
+        self, paramfiles: list, x: str, y: str, ax: plt.axes = None, labels: list = None, **plt_kwargs
     ) -> plt.axes:
         """Plot x vs. y for a set of scalar files
 
@@ -290,23 +321,28 @@ class Grapher:
             return ax
 
         # Cycle through paramfiles
-        for paramfile in paramfiles:
+        for idx, paramfile in enumerate(paramfiles):
+            
             # Read in dataframe
             df = pd.read_csv(paramfile)
 
             # Get x and y values, add to plot
             x_vals = df[x]
             y_vals = df[y]
-            ax.scatter(x_vals, y_vals, **plt_kwargs)
+            
+            ax.scatter(x_vals, y_vals, label = labels, **plt_kwargs)
 
         # Label axes, no title
         ax.set_ylabel(y, weight="black")
         ax.set_xlabel(x, weight="black")
+        if labels:
+            ax.legend()
 
         return ax
 
+
     def plot_xy2_scalars(
-        self, paramfiles: list, x: str, ys: list, ax: plt.axes = None, **plt_kwargs
+        self, paramfiles: list, x: str, ys: list, ax: plt.axes = None, labels: list = None, **plt_kwargs
     ) -> plt.axes:
         """Plots x vs. y for a set of scalar files
 
@@ -340,7 +376,7 @@ class Grapher:
             for idx, y in enumerate(ys):
                 y_vals = df[y]
                 ax.scatter(
-                    x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx], **plt_kwargs
+                    x_vals, y_vals, marker=self.fwd_rev_cursor_dict[idx], label = labels, **plt_kwargs
                 )
 
         # Label axes, no title
@@ -350,11 +386,14 @@ class Grapher:
         ylab = ylab[:-3]
         ax.set_ylabel(ylab, weight="black")
         ax.set_xlabel(x, weight="black")
+        if labels:
+            ax.legend()
 
         return ax
 
-    def plot_xyz_scalar(
-        self, paramfile: str, x: str, y: str, z: str, ax: plt.axes = None, **plt_kwargs
+
+    def plot_xyz_scalars(
+        self, paramfile: str, x: str, y: str, z: str, ax: plt.axes = None, labels: list = None, **plt_kwargs
     ) -> plt.axes:
         """Plots x vs. y with z colorbar for a set of scalar files
 
@@ -391,7 +430,7 @@ class Grapher:
             colors = plt.cm.viridis(znorm.astype(float))
 
             # Plot (x,y) with colorbar
-            ax.scatter(xval, yval, color=colors[n], **plt_kwargs)
+            ax.scatter(xval, yval, color=colors[n], label = labels, **plt_kwargs)
 
         # Manage colorbar
         norm = mpl.colors.Normalize(vmin=np.nanmin(zval), vmax=np.nanmax(zval))
@@ -413,8 +452,7 @@ class Grapher:
         # Label axes and show plot
         ax.set_ylabel(y, weight="black")
         ax.set_xlabel(x, weight="black")
+        if labels:
+            ax.legend()
 
         return ax
-
-
-# TODO: plot_mpps take plot axes, plot_jvs should as well. make things function better on either axes or figure

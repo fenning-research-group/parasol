@@ -1,3 +1,3 @@
 call C:/ProgramData/Anaconda3/Scripts/activate.bat rooftop
 
-start python C:\\Users\\FRG-LAPTOP\\Documents\\GitHub\\parasol\\parasol\\ui\\RUNNER.pyw
+start python ..\\ui\\RUNNER.pyw

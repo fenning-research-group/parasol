@@ -59,10 +59,10 @@ def GRAPHER():
             self.analysis = Analysis()
 
             # Create user variables
-            nrows = 4
-            ncols = 3
-            fontsize = 8
-            markersize = 1.0
+            nrows = defaults['n_rows']
+            ncols = defaults['n_cols']
+            fontsize = defaults['font_size'] 
+            markersize = defaults['marker_size']
             dpival = 50
 
             # Load the UI file

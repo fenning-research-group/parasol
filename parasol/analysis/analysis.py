@@ -40,7 +40,7 @@ class Analysis:
             pd.DataFrame: ["Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"]
         """
 
-        #TODO: Verify this works on several JVs on same string.
+        #TODO: Fix (See other in yoko)
 
         # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
@@ -210,8 +210,7 @@ class Analysis:
             for k, v in scalardict_fwd.items():
                 scalardict[k] = v
 
-            # Interpolate environmental data.
-            # TODO: Optimize. This reforms the large matrix every time right now, which could be costly for large data sets.
+            # Interpolate environmental data for each set of JV curves
             t = np.asarray([t_epoch for t_epoch in all_t])
             env_headers, env_data = self.interp_env_data(t)
             for idx in range(1, len(env_headers)):
@@ -721,3 +720,55 @@ class Analysis:
                 rh.append(float(line[2]))
                 intensity.append(float(line[3]))
         return t, temp, rh, intensity
+
+#TODO: COMPLETE & VERIFY
+    def combine_tests(self, tests: list):
+        
+        # Create test dictionary
+        tests = ['C:\\Users\\seand\OneDrive - UC San Diego\\Documents\\PARASOL\\Characterization\\x20230710\\x20230710_A12D80852_2' ,
+                'C:\\Users\\seand\OneDrive - UC San Diego\\Documents\\PARASOL\\Characterization\\x20230717\\x20230717_A12D80852_2']
+        test_folders_dict = self.filestructure.map_test_folders(tests)
+        
+        # Cycle through scan type folders
+        for scan_type in test_folders_dict[tests[0]].keys():
+            
+            # list of list of files for all scans [[],[]]
+            files = self.filestructure.get_files(tests, scan_type)
+            
+            # get last file and last index for first set of files
+            last_file = (files[0])[-1]
+            directory = os.path.dirname(last_file)
+            current_index = int((last_file.split('_')[-1]).split('.')[0])
+            last_index = current_index
+
+            # interate through all but first file
+            for scan_set in files[1::]:
+                for scan in scan_set:
+                    current_index += 1
+                    
+
+                    scan_name = os.path.basename(scan)
+                    scan_prefix = scan_name.removesuffix(scan_name.split('_')[-1])
+                    new_name = os.path.join(directory, scan_prefix + f'{current_index}.csv')
+                    os.rename(scan,new_name)
+        
+        test_folders_dict = self.filestructure.map_test_folders(tests)
+        
+        files = self.filestructure.get_files(tests,'Analyzed')
+        for scan_set in files:
+            for scan in scan_set:
+                os.remove(scan)
+        
+        self.analyze_from_savepath(tests[0])
+        
+
+        for test in tests[1::]:
+            for folder in test:
+                os.rmdir(folder)
+            os.rmdir(test)
+        
+
+
+
+#TODO: Grab photodiode reading and calc 
+#TODO: Function to combine folders

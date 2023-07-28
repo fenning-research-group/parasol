@@ -63,6 +63,11 @@ RUN_UI:
 
 GRAPH_UI:
 
+  font_size: 14
+  marker_size: 3
+  n_rows: 4
+  n_cols: 3
+
   # These hold column names from the Scalars file in Analyzed.
   x1: "Time Elapsed (s)" # Graph1 x data
   x2: "Time Elapsed (s)" # Graph2 x data

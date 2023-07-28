@@ -779,25 +779,13 @@ class Controller:
             t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
             self.logger.debug(f"Tracked MPP for {id}")
 
-            #TODO V: check at night to see if this is needed, this may be a good idea but we should also average the tracking measurent
-            # if d["mpp"]["last_currents"][1] is not None:
-            #     if((i==0 and d["mpp"]["last_currents"][1]>0) or (i>2*d["mpp"]["last_currents"][1])):
-            #         t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
-            #         print('i=0')
-            #     elif((v==0 and d["mpp"]["last_voltages"][1]>0) or (v > 2*d["mpp"]["last_voltages"][1])):
-            #         t, v, vm, i = self.characterization.track_mpp(d, self.load, ch, last_vmpp)
-            #         print('v=0')
-            
-            # if (i==0 or v ==0):
-            #     print('still hit 0')
-
             # Convert current to mA and calc j and p
             i *= 1000
             j = i / (d["area"] * len(d["module_channels"]))
             p = v * j
             pm = vm*j
 
-            # TODO: WHENEVER potentially expand this list so that we can do a better job in the future (e.g. PID)
+            # TODO Sean: Expand this list so that we can do a better job in the future (e.g. PID)
             # Update dictionary by moving last value to first and append new values
             d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
             d["mpp"]["last_powers"][1] = (p+pm)/2 # incase resolution doesnt change V value
@@ -834,7 +822,8 @@ class Controller:
         self.logger.debug(f"Monitoring environment")
 
         # Get Temperature, Humidity, Relative Humidity, and Temperature
-        t, temp, rh, intensity = self.characterization.monitor_environment(self.monitor)
+        #TODO V: verify that making these self.temp didnt cause problems. 
+        self.t, self.temp, self.rh, self.intensity = self.characterization.monitor_environment(self.monitor)
 
         # Make env file if needed (done 1x per experiment)
         fpath = self.make_env_file()
@@ -842,7 +831,7 @@ class Controller:
         # Append to file
         with open(fpath, "a", newline="") as f:
             writer = csv.writer(f, delimiter=",")
-            writer.writerow([t, temp, rh, intensity])
+            writer.writerow([self.t, self.temp, self.rh, self.intensity])
 
         self.logger.debug(f"Writing Monitoring file at {fpath}")
         self.logger.debug(f"Monitored environment")

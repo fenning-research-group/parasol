@@ -582,7 +582,7 @@ class FileStructure:
 
     # Use previous commands to get files for given test
 
-    def get_files(self, test_folders: str, filetype="Analyzed") -> str:
+    def get_files(self, test_folders: list, filetype="Analyzed") -> str:
         """Returns a list of all files in test folders
 
         Args:

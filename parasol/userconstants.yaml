@@ -1,6 +1,6 @@
 filestructure:
-  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" #"C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\"  # Root directory
-  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" #"C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\Analysis\\"  # Analysis directory
+  root_dir: "C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\"  # "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" # Root directory
+  analysis_dir: "C:\\Users\\seand\\OneDrive - UC San Diego\\Documents\\PARASOL\\Analysis\\"  #"C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" # # Analysis directory
   # cell characteriation in root_dir\\Characterization\\
   # environment characteriation in root_dir\\Environment\\
   num_modules: 24 # Number of modules
