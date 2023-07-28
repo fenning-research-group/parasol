@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # User Preferences File
-/parasol/userconstants.yaml
-/parasol/notebook/usernotebook.ipynb
+/userconstants.yaml
+/notebook/usernotebook.ipynb
