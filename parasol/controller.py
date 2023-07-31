@@ -822,7 +822,6 @@ class Controller:
         self.logger.debug(f"Monitoring environment")
 
         # Get Temperature, Humidity, Relative Humidity, and Temperature
-        #TODO V: verify that making these self.temp didnt cause problems. 
         self.t, self.temp, self.rh, self.intensity = self.characterization.monitor_environment(self.monitor)
 
         # Make env file if needed (done 1x per experiment)
