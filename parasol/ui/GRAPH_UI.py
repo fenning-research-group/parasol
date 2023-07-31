@@ -13,24 +13,21 @@ import PyQt5.QtGui
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import yaml
 from PyQt5 import QtCore
 from PyQt5 import uic
 import sys
 import os
 import numpy as np
 
-
 from parasol.filestructure import FileStructure
 from parasol.analysis.grapher import Grapher
-
 from parasol.analysis.analysis import Analysis
 
+from parasol.configuration.configuration import Configuration
+config = Configuration()
+defaults = config.get_config()['GRAPH_UI']
 
-# Set module directory
 MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    defaults = yaml.safe_load(f)["GRAPH_UI"]
 
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):

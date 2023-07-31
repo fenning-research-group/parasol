@@ -1,14 +1,11 @@
 import u6
 import time
 import math
-import yaml
-import os
 import numpy as np
 
-# Set module directory, import constants from yaml file
-MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f)["labjack"]
+from parasol.configuration.configuration import Configuration
+config = Configuration()
+constants = config.get_config()['labjack']
 
 
 class ExtendedList(list):

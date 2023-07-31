@@ -1,16 +1,13 @@
-import yaml
-import os
 import pyvisa
 import numpy as np
 import matplotlib as mpl
 from threading import Lock
 
-mpl.rcParams.update(mpl.rcParamsDefault)
+from parasol.configuration.configuration import Configuration
+config = Configuration()
+constants = config.get_config()['yokogawa']
 
-# Set module directory, import constants from yaml file
-MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f)["yokogawa"] 
+mpl.rcParams.update(mpl.rcParamsDefault)
 
 class Yokogawa:
     """Yokowaga package for PARASOL

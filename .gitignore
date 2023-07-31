@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # User Preferences File
-userconstants.yaml
-usernotebook.ipynb
+/configuration/userconstants.yaml
+/notebook/usernotebook.ipynb

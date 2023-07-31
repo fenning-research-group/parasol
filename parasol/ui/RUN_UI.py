@@ -5,7 +5,6 @@ from PyQt5 import QtCore, uic, QtGui
 import sys
 import os
 from datetime import datetime
-import yaml
 import time
 from multiprocessing import Process
 
@@ -15,11 +14,11 @@ from parasol.analysis.analysis import Analysis
 from parasol.analysis.grapher import Grapher
 from parasol.filestructure import FileStructure
 
+from parasol.configuration.configuration import Configuration
+config = Configuration()
+constants = config.get_config()['RUN_UI']
 
-# Set module directory, load yaml preferences
 MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    defaults = yaml.safe_load(f)["RUN_UI"]  # , Loader=yaml.FullLoader)["relay"]
 
 # Ensure resolution/dpi is correct for UI
 if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):

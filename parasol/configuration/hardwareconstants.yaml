@@ -1,0 +1,97 @@
+filestructure:
+  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" # Root directory
+  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" # Analysis directory
+  # cell characteriation in root_dir\\Characterization\\
+  # environment characteriation in root_dir\\Environment\\
+  num_modules: 24 # Number of modules
+
+relay:
+  num_strings: 6 # should be num_modes/4
+  relay_mode: 1
+  device_identifiers:
+    pid: '24577' # physical ID
+    vid: '1027' # virtual ID
+
+yokogawa:
+  address: 'GPIB1::1::INSTR' # GPIB address for Yokogawa
+  timeout : 100 # Time before timeout error (s)
+  source_delay: 2.5 # Time source to settle (ms)
+  sense_delay: 2.5 # Time for sense to settle (ms)
+  integration_time: 1 # Time for integration (ms)
+  max_voltage: 30 # Max volts (V) (200 mV to 110 V)
+  max_current: 1.5 # Max amps (A) g (2 µA to 3 A)
+  
+chroma:
+  address: 'GPIB1::15::INSTR' # GPIB adress
+  time_out: 5000 # Timeout for Chroma (ms)
+  source_delay: 1 # Time for source to settle (s)
+  sense_delay: 'SLOW' # Time for sense to return value (SLOW/FAST)
+  avg_num: 10 # Number of currents to avg for reading
+  voltage_range: 'H' # 80 V is max voltage (V) of 'high' range, 16 V for low range ## Use 'H' or 'L'
+  current_range: 2 # 2 A is max current (A) of low range, 20 A for high range
+
+labjack:
+  voltage_port: None # 11 AIN port for +5V in
+  ground_port: 3 # 9 AIN port for ground
+  thermocouple2_port: None # 7 AIN port for between thermocouple1 and thermocouple2
+  thermocouple1_port: 2 # 5  AIN Port pre thermocouple1
+  hygrometer_port: 1 # 3 AIN Port for post hygrometer
+  photodiode_port: 0 # 1 AIN Port for post photodoide
+  average_num: 5 # Number of readings to average
+  delay_time: 0.05 # Seconds to wait between readings
+  # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py
+
+characterization:
+  mppt_voltage_step: 0.2 # MPPT voltage iteration (V). note that 0.02 is the floor resolution of the Chroma (Error approx 0.01)
+
+analysis:
+  derivative_v_step : 0.5 # Voltage step for derivative (Rs, Rsh, Rch) in JV post-analysis (V)
+
+controller:
+  monitor_delay: 15 # Time between environmental monitoring (s)
+  measurement_delay: 1 # Time to wait between switching relay and measuring
+  mpp_points: 20 # Number of MPP points to keep in reccord 
+
+RUN_UI:
+  area : 100 # Area of the module (cm^2)
+  jv_mode: 0 # Default JV mode
+  mpp_mode: 0 # Default MPP mode
+  jv_frequency: 900 # Default time between JV scans (s)
+  mpp_frequency: 20 # Default time between MPP scans (s)
+  v_min: -1 # Default minimum voltage for JV/MPP scan (V)
+  v_max: 25 # Default maximum voltage for JV/MPP scan (V)
+  v_steps: 100 # Default number of voltage steps for JV scan
+
+GRAPH_UI:
+
+  font_size: 14
+  marker_size: 3
+  n_rows: 4
+  n_cols: 3
+
+  # These hold column names from the Scalars file in Analyzed.
+  x1: "Time Elapsed (s)" # Graph1 x data
+  x2: "Time Elapsed (s)" # Graph2 x data
+  x3: "Time Elapsed (s)" # Graph3 x data
+  x4: "Time Elapsed (s)" # Graph4 x data
+  x5: "Time Elapsed (s)" # Graph5 x data
+  x6: "Time Elapsed (s)" # Graph6 x data
+  x7: "Time Elapsed (s)" # Graph7 x data
+  x8: "Time Elapsed (s)" # Graph8 x data
+  x9: "Time Elapsed (s)" # Graph9 x data
+  x10: "Time Elapsed (s)" # Graph10 x data
+  x11: "Time Elapsed (s)" # Graph11 x data
+  x12: "Time Elapsed (s)" # Graph12 x data
+
+  y1: "FWD Jsc (mA/cm2)" # Graph1 y data
+  y2: "FWD Voc (V)" # Graph2 y data
+  y3: "FWD FF (%)" # Graph3 y data
+  y4: "FWD PCE (%)" # Graph4 y data
+  y5: "REV Jsc (mA/cm2)" # Graph5 y data
+  y6: "REV Voc (V)" # Graph6 y data
+  y7: "REV FF (%)" # Graph7 y data
+  y8: "REV PCE (%)" # Graph8 y data
+  y9: ["FWD Rs (Ohm/cm2)", "REV Rs (Ohm/cm2)"] # Graph9 y data
+  y10: ["FWD Rsh (Ohm/cm2)", "REV Rsh (Ohm/cm2)"] # Graph10 y data
+  y11: ["FWD Rch (Ohm/cm2)", "REV Rch (Ohm/cm2)"] # Graph11 y data
+  y12: "MPPT MPP (mW/cm2)" # Graph12 y data

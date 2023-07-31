@@ -1,24 +1,17 @@
-import yaml
-import os
-
 from .modbus import Modbus
 from .R421B16 import R421B16
 from threading import Lock
+from parasol.hardware.port_finder import get_port
 
-import time
+from parasol.configuration.configuration import Configuration
+config = Configuration()
+constants = config.get_config()['relay']
 
 ## Build ontop of existing package for relay board
 ## Original package built in 2018 Erriez
 ## Source: https://github.com/Erriez/R421A08-rs485-8ch-relay-board
 
 ## DRIVER: https://ftdichip.com/drivers/vcp-drivers/
-
-from parasol.hardware.port_finder import get_port
-
-# Set module directory, import constants from yaml file
-MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f)["relay"]
 
 # lock for relays
 def relay_lock(f):

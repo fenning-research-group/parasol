@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 import os
 import csv
-import yaml
 from datetime import datetime
 from csv import reader
 import math
@@ -10,9 +9,13 @@ import math
 from parasol.filestructure import FileStructure
 
 # Set module directory, import constants from yaml file
-MODULE_DIR = os.path.dirname(__file__)
-with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
-    constants = yaml.safe_load(f)["analysis"]
+# MODULE_DIR = os.path.dirname(__file__)
+# with open(os.path.join(MODULE_DIR, "..", "hardwareconstants.yaml"), "r") as f:
+#     constants = yaml.safe_load(f)["analysis"]
+    
+from parasol.configuration.configuration import Configuration
+config = Configuration()
+constants = config.get_config()['analysis']
 
 
 class Analysis:
