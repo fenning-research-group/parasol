@@ -25,7 +25,7 @@ from parasol.analysis.analysis import Analysis
 
 from parasol.configuration.configuration import Configuration
 config = Configuration()
-defaults = config.get_config()['GRAPH_UI']
+constants = config.get_config()['GRAPH_UI']
 
 MODULE_DIR = os.path.dirname(__file__)
 
@@ -56,10 +56,10 @@ def GRAPHER():
             self.analysis = Analysis()
 
             # Create user variables
-            nrows = defaults['n_rows']
-            ncols = defaults['n_cols']
-            fontsize = defaults['font_size'] 
-            markersize = defaults['marker_size']
+            nrows = constants['n_rows']
+            ncols = constants['n_cols']
+            fontsize = constants['font_size'] 
+            markersize = constants['marker_size']
             dpival = 50
 
             # Load the UI file
@@ -68,34 +68,34 @@ def GRAPHER():
 
             # Make dictionary to hold y parameter names
             self.plot_y_dict = {
-                1: defaults["y1"],
-                2: defaults["y2"],
-                3: defaults["y3"],
-                4: defaults["y4"],
-                5: defaults["y5"],
-                6: defaults["y6"],
-                7: defaults["y7"],
-                8: defaults["y8"],
-                9: defaults["y9"],
-                10: defaults["y10"],
-                11: defaults["y11"],
-                12: defaults["y12"],
+                1: constants["y1"],
+                2: constants["y2"],
+                3: constants["y3"],
+                4: constants["y4"],
+                5: constants["y5"],
+                6: constants["y6"],
+                7: constants["y7"],
+                8: constants["y8"],
+                9: constants["y9"],
+                10: constants["y10"],
+                11: constants["y11"],
+                12: constants["y12"],
             }
 
             # Make dictionary to hold x parameter names
             self.plot_x_dict = {
-                1: defaults["x1"],
-                2: defaults["x2"],
-                3: defaults["x3"],
-                4: defaults["x4"],
-                5: defaults["x5"],
-                6: defaults["x6"],
-                7: defaults["x7"],
-                8: defaults["x8"],
-                9: defaults["x9"],
-                10: defaults["x10"],
-                11: defaults["x11"],
-                12: defaults["x12"],
+                1: constants["x1"],
+                2: constants["x2"],
+                3: constants["x3"],
+                4: constants["x4"],
+                5: constants["x5"],
+                6: constants["x6"],
+                7: constants["x7"],
+                8: constants["x8"],
+                9: constants["x9"],
+                10: constants["x10"],
+                11: constants["x11"],
+                12: constants["x12"],
             }
 
             # Get file paths
