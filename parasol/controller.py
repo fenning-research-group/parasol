@@ -41,8 +41,10 @@ class Controller:
         self.characterization = Characterization()
         self.analysis = Analysis()
         self.filestructure = FileStructure()
-        self.monitor = LabJack()
         self.load = Chroma()
+        
+        # self.monitor = None will turn off monitoring without breaking rest of data
+        self.monitor = None # LabJack()
 
         # Get constants
         self.monitor_delay = constants["monitor_delay"]
@@ -814,7 +816,10 @@ class Controller:
         self.logger.debug(f"Monitoring environment")
 
         # Get Temperature, Humidity, Relative Humidity, and Temperature
-        self.t, self.temp, self.rh, self.intensity = self.characterization.monitor_environment(self.monitor)
+        if self.monitor:
+            self.t, self.temp, self.rh, self.intensity = self.characterization.monitor_environment(self.monitor)
+        else:
+            self.t, self.temp, self.rh, self.intensity = time.time(), 1,1,1
 
         # Make env file if needed (done 1x per experiment)
         fpath = self.make_env_file()

@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import math
 
 from parasol.filestructure import FileStructure
 from parasol.analysis.analysis import Analysis

@@ -65,9 +65,10 @@ def run_async_thread(func):
 
 #     # Get grapher class, it will create anlaysis class as well
 #     grapher = Grapher()
+#     analysis = Analysis()
 
 #     # Calculate "Time Elapsed (s)", "FWD Pmp (mW/cm2)", "REV Pmp (mW/cm2)"
-#     plot_df = grapher.analysis.check_test(jv_paths, mpp_paths) #NEW
+#     plot_df = analysis.check_test(jv_paths, mpp_paths) #NEW
 
 #     # Plot "Time Elapsed (s)" vsersus "FWD Pmp (mW/cm2)" and "REV Pmp (mW/cm2)"
 #     grapher.plot_x_v_ys(
@@ -781,9 +782,9 @@ def RUNNER():
 
             self.check_test(jv_paths, mpp_paths)
             # TODO Community: It would be ideal to do this in another frame but the following code throws an error
-            # This throws an error because it tries to load all files above class to for _check_test for new process
+            # Note that this error only gets thrown when launching through .pyw files and not through anaconda
             # Start process to anlayze and plot data in new process --> requires multiple cores
-            # Process(target=_check_test, args=(jv_paths, mpp_paths)).start() 
+            # Process(target=_check_test, args=(jv_paths, mpp_paths)).start()
 
 
         def check_test(self, jv_paths: list, mpp_paths: list) -> None:
