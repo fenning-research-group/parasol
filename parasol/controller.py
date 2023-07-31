@@ -49,6 +49,7 @@ class Controller:
         # Get constants
         self.monitor_delay = constants["monitor_delay"]
         self.measurement_delay = constants["measurement_delay"]
+        self.mpp_points = constants["mpp_points"]
 
         # Initialize running
         self.running = False
@@ -204,9 +205,9 @@ class Controller:
                 "interval": mpp_interval,
                 "vmin": jv_vmin,
                 "vmax": jv_vmax,
-                "last_currents": [None, None],
-                "last_powers": [None, None],
-                "last_voltages": [None, None],
+                "last_currents": [None]*self.mpp_points,
+                "last_powers": [None]*self.mpp_points,
+                "last_voltages": [None]*self.mpp_points,
                 "_future": mpp_future,
                 "vmpp": None,
             },
@@ -785,18 +786,11 @@ class Controller:
             p = v * j
             pm = vm*j
 
-            # TODO Sean: Expand this list so that we can do a better job in the future (e.g. PID)
-            # Update dictionary by moving last value to first and append new values
-            d["mpp"]["last_powers"][0] = d["mpp"]["last_powers"][1]
-            d["mpp"]["last_powers"][1] = (p+pm)/2 # incase resolution doesnt change V value
-
-            d["mpp"]["last_voltages"][0] = d["mpp"]["last_voltages"][1]
-            d["mpp"]["last_voltages"][1] = (v+vm)/2 # incase resolution doesnt change V value
-
-            d["mpp"]["last_currents"][0] = d["mpp"]["last_currents"][1]
-            d["mpp"]["last_currents"][1] = i
-
-            d["mpp"]["vmpp"] = v
+            # shift index to index + 1 and add new reading at 0
+            d["mpp"]["last_voltages"] = [(v+vm)/2] + d["mpp"]["last_voltages"][:-1]
+            d["mpp"]["last_currents"] = [i] + d["mpp"]["last_currents"][:-1]
+            d["mpp"]["last_powers"]= [(p+pm)/2] + d["mpp"]["last_powers"][:-1]
+            d["mpp"]["vmpp"] = v            
 
             # Get MPP file path, if it doesnt exist, create it, iterate for each JV curve taken
             fpath = self.make_mpp_file(id)

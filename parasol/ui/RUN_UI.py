@@ -781,7 +781,7 @@ def RUNNER():
             ]
 
             self.check_test(jv_paths, mpp_paths)
-            # TODO: It would be ideal to do this in another frame but the following code throws an error
+            # TODO Community: It would be ideal to do this in another frame but the following code throws an error
             # This throws an error because it tries to load all files above class to for _check_test for new process
             # Start process to anlayze and plot data in new process --> requires multiple cores
             # Process(target=_check_test, args=(jv_paths, mpp_paths)).start() 

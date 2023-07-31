@@ -50,6 +50,7 @@ analysis:
 controller:
   monitor_delay: 15 # Time between environmental monitoring (s)
   measurement_delay: 1 # Time to wait between switching relay and measuring
+  mpp_points: 20 # Number of MPP points to keep in reccord 
 
 RUN_UI:
   area : 100 # Area of the module (cm^2)

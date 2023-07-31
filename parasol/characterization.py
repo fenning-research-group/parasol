@@ -117,7 +117,8 @@ class Characterization:
         # Modified perturb and observe: taken from David Sanz Morales Thesis
         # http://lib.tkk.fi/Dipl/2010/urn100399.pdf
         
-        # PID?
+        # PID controller?
+        # note that the number of values kept for d['mpp'][parameter] are set in hardwareconstants.yaml
 
         # Get MPP mode
         mpp_mode = d["mpp"]["mode"]
@@ -134,14 +135,14 @@ class Characterization:
             # If we have two scans saved work out direction of voltage step
             else:
                 # if the most recent voltage >= voltage before it, use native voltage step (+)
-                if d["mpp"]["last_voltages"][1] >= d["mpp"]["last_voltages"][0]:
+                if d["mpp"]["last_voltages"][1] <= d["mpp"]["last_voltages"][0]:
                     voltage_step = self.et_voltage_step
                 # if the most recent voltage < voltage before it, use opposite voltage step (-)
                 else:
                     voltage_step = -self.et_voltage_step
 
                 # if power isnt increasing, invert voltage step to move in the other direction
-                if d["mpp"]["last_powers"][1] <= d["mpp"]["last_powers"][0]:
+                if d["mpp"]["last_powers"][1] >= d["mpp"]["last_powers"][0]:
                     voltage_step *= -1
 
             # set the voltage equal to last voltage + voltage step (determined above)
@@ -157,6 +158,7 @@ class Characterization:
                 voltage_step = -1*self.et_voltage_step
                 v = min((vmpp_last + voltage_step), (d["mpp"]["vmax"] + voltage_step))
 
+            # note 23/07/31 --> this was originall written off [0] but meant to be off [1], left as is
             # If last current was 0, move to max mpp - voltage step or in correct direction
             elif (d["mpp"]["last_currents"][0] is not None):
                 if (d["mpp"]["last_currents"][0] <= 0):

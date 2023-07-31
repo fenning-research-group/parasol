@@ -17,6 +17,8 @@ class ExtendedList(list):
         self.extended = None
 
 
+
+#TODO: Get this working with new monitoring setup. 
 class LabJack:
     """General LabJack U6-PRO class for monitoring environmental data"""
 
@@ -154,7 +156,6 @@ class LabJack:
         return temp
 
 
-    #TODO: Update this
     def get_temp_tc(self) -> float:
         """Measures the temperature using the labjack and type K thermocouple.
 
