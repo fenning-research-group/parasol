@@ -29,361 +29,342 @@ constants = config.get_config()['GRAPH_UI']
 
 MODULE_DIR = os.path.dirname(__file__)
 
-# Ensure resolution/dpi is correct for UI
-if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
-    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 
-if hasattr(QtCore.Qt, "AA_UseHighDpiPixmaps"):
-    PyQt5.QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+class GRAPH_UI(QMainWindow):
+    """Graph UI package for PARASOL"""
 
+    def __init__(self) -> None:
+        """Initliazes the GRAPH_UI class"""
 
-def GRAPHER():
-    """Create GRAPH UI window"""
+        # Define UI
+        super(GRAPH_UI, self).__init__()
 
-    class GRAPH_UI(QMainWindow):
-        """Graph UI package for PARASOL"""
+        # Load other modules
+        self.filestructure = FileStructure()
+        self.grapher = Grapher()
+        
+        self.analysis = Analysis()
 
-        def __init__(self) -> None:
-            """Initliazes the GRAPH_UI class"""
+        # Create user variables
+        nrows = constants['n_rows']
+        ncols = constants['n_cols']
+        fontsize = constants['font_size'] 
+        markersize = constants['marker_size']
+        dpival = 50
 
-            # Define UI
-            super(GRAPH_UI, self).__init__()
+        # Load the UI file
+        ui_path = os.path.join(MODULE_DIR, "GRAPH_UI.ui")
+        uic.loadUi(ui_path, self)
 
-            # Load other modules
-            self.filestructure = FileStructure()
-            self.grapher = Grapher()
-            
-            self.analysis = Analysis()
+        # Make dictionary to hold y parameter names
+        self.plot_y_dict = {
+            1: constants["y1"],
+            2: constants["y2"],
+            3: constants["y3"],
+            4: constants["y4"],
+            5: constants["y5"],
+            6: constants["y6"],
+            7: constants["y7"],
+            8: constants["y8"],
+            9: constants["y9"],
+            10: constants["y10"],
+            11: constants["y11"],
+            12: constants["y12"],
+        }
 
-            # Create user variables
-            nrows = constants['n_rows']
-            ncols = constants['n_cols']
-            fontsize = constants['font_size'] 
-            markersize = constants['marker_size']
-            dpival = 50
+        # Make dictionary to hold x parameter names
+        self.plot_x_dict = {
+            1: constants["x1"],
+            2: constants["x2"],
+            3: constants["x3"],
+            4: constants["x4"],
+            5: constants["x5"],
+            6: constants["x6"],
+            7: constants["x7"],
+            8: constants["x8"],
+            9: constants["x9"],
+            10: constants["x10"],
+            11: constants["x11"],
+            12: constants["x12"],
+        }
 
-            # Load the UI file
-            ui_path = os.path.join(MODULE_DIR, "GRAPH_UI.ui")
-            uic.loadUi(ui_path, self)
+        # Get file paths
+        self.characterization_dir_loc = (
+            self.filestructure.get_characterization_dir()
+        )
+        self.rootdir = self.findChild(QLineEdit, "rootdir")
+        self.rootdir.setText(self.characterization_dir_loc)
+        if os.path.exists(self.rootdir.text()) == False:
+            self.rootdir.setText("")
+        self.analysis_dir_loc = self.filestructure.get_analysis_dir()
+        self.savedir = self.analysis_dir_loc
+        if os.path.exists(self.savedir) == False:
+            self.savedir = ""
 
-            # Make dictionary to hold y parameter names
-            self.plot_y_dict = {
-                1: constants["y1"],
-                2: constants["y2"],
-                3: constants["y3"],
-                4: constants["y4"],
-                5: constants["y5"],
-                6: constants["y6"],
-                7: constants["y7"],
-                8: constants["y8"],
-                9: constants["y9"],
-                10: constants["y10"],
-                11: constants["y11"],
-                12: constants["y12"],
-            }
+        # Manage rootdir button
+        self.setrootdir = self.findChild(QPushButton, "setrootdir")
+        self.setrootdir.clicked.connect(self.setrootdir_clicked)
 
-            # Make dictionary to hold x parameter names
-            self.plot_x_dict = {
-                1: constants["x1"],
-                2: constants["x2"],
-                3: constants["x3"],
-                4: constants["x4"],
-                5: constants["x5"],
-                6: constants["x6"],
-                7: constants["x7"],
-                8: constants["x8"],
-                9: constants["x9"],
-                10: constants["x10"],
-                11: constants["x11"],
-                12: constants["x12"],
-            }
+        # Manage savefigure button
+        self.savefigure = self.findChild(QPushButton, "savefigure")
+        self.savefigure.clicked.connect(self.savefigure_clicked)
 
-            # Get file paths
-            self.characterization_dir_loc = (
-                self.filestructure.get_characterization_dir()
-            )
-            self.rootdir = self.findChild(QLineEdit, "rootdir")
-            self.rootdir.setText(self.characterization_dir_loc)
-            if os.path.exists(self.rootdir.text()) == False:
-                self.rootdir.setText("")
-            self.analysis_dir_loc = self.filestructure.get_analysis_dir()
-            self.savedir = self.analysis_dir_loc
-            if os.path.exists(self.savedir) == False:
-                self.savedir = ""
+        # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
+        self.alltestfolders = self.findChild(QListWidget, "AllTestFolders")
+        self.alltestfolders.clear()
+        self.alltestfolders.itemClicked.connect(self.testfolder_clicked)
+        self.alltestfolders.itemDoubleClicked.connect(self.testfolder_doubleclicked)
 
-            # Manage rootdir button
-            self.setrootdir = self.findChild(QPushButton, "setrootdir")
-            self.setrootdir.clicked.connect(self.setrootdir_clicked)
-
-            # Manage savefigure button
-            self.savefigure = self.findChild(QPushButton, "savefigure")
-            self.savefigure.clicked.connect(self.savefigure_clicked)
-
-            # Load testfolderdisplay list widget, clear list, add events on click and doubleclick
-            self.alltestfolders = self.findChild(QListWidget, "AllTestFolders")
-            self.alltestfolders.clear()
-            self.alltestfolders.itemClicked.connect(self.testfolder_clicked)
-            self.alltestfolders.itemDoubleClicked.connect(self.testfolder_doubleclicked)
-
-            # Update list of tests, create dictionary[Foldername] = True/False for plotting and dict[Foldername] = Folderpath if rootdir exsists, else let user change
-            if os.path.exists(self.rootdir.text()):
-                (
-                    self.testname_to_testpath,
-                    self.test_selection_dict,
-                ) = self.update_test_folders(self.rootdir.text())
-            else:
-                self.test_name_to_testpath = {}
-                self.test_selection_dict = {}
-
-            # Get layout to append graphs
-            self.layout = self.findChild(PyQt5.QtWidgets.QFrame, "graphframe")
-
-            # Create figure with several subplots, devide up axes
-            self.figure, self.axes = plt.subplots(
-                ncols, nrows, dpi=dpival, tight_layout=True
-            )
-
-            # Make axes dict for plots, numbering left -> right & top -> down
-            idnum = 1
-            self.plot_axes_dict = {}
-            for colnum in range(ncols):
-                for rownum in range(nrows):
-                    self.plot_axes_dict[idnum] = self.axes[colnum][rownum]
-                    idnum += 1
-
-            # Place figure in canvas, control resize policy, resize, place on UI, and set location
-            self.canvas = FigureCanvas(self.figure)
-            self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-            self.canvas.updateGeometry()
-            self.canvas.setParent(self.layout)
-
-            # Make plots work!
-            self.canvas.resize(1600, 900)
-            mpl.rcParams["font.size"] = fontsize
-            mpl.rcParams["lines.markersize"] = markersize
-            for key in self.plot_axes_dict:
-                self.plot_axes_dict[key].tick_params(direction="in", labelsize="small")
-                self.plot_axes_dict[key].xaxis.label.set_size(fontsize)
-                self.plot_axes_dict[key].yaxis.label.set_size(fontsize)
-
-            # Show UI
-            self.show()
-
-        def update_test_folders(self, rootdir: str) -> list:
-            """Updates the list of test folders
-
-            Args:
-                rootdir[str]: root directory
-
-            Returns
-                dict : dictionary[testfoldername] : testpath
-                dict : dictionary[testfoldername] : True/False for plotting
-            """
-
-            # Clear current displaylist
-            self.alltestfolders.clear()
-
-            # Get test folders and test foldernames
-            test_folderpath_list = self.filestructure.get_tests(rootdir)
-            test_foldername_list = [
-                os.path.basename(os.path.normpath(testfolderpath))
-                for testfolderpath in test_folderpath_list
-            ]
-
-            # Create dictionary [foldername] = folderpath -> map names to paths
-            # Create dictionary [foldername] = True/False -> map names to if they have been selected
-            testname_to_testpath = {}
-            test_selection_dict = {}
-            for idx in range(len(test_foldername_list)):
-                testname_to_testpath[test_foldername_list[idx]] = test_folderpath_list[
-                    idx
-                ]
-                test_selection_dict[test_foldername_list[idx]] = False
-                self.alltestfolders.addItem(test_foldername_list[idx])
-
-            return testname_to_testpath, test_selection_dict
-
-        def get_selected_folders(self) -> list:
-            """
-            Gets list of selected folder paths
-
-            Returns:
-                list[str] : paths to test folders selected
-
-            """
-
-            # cycle through testfoldername, if selected, change list index to True
-            selected_test_folders = []
-            for foldername in self.test_selection_dict:
-                if self.test_selection_dict[foldername] == True:
-                    selected_test_folders.append(self.testname_to_testpath[foldername])
-
-            return selected_test_folders
-
-        def testfolder_clicked(self, item: QListWidgetItem) -> None:
-            """Does Nothing"""
-            # Do nothing on single click
-
-        def testfolder_doubleclicked(self, item: QListWidgetItem) -> None:
-            """Permanantley displays the test folder when double clicked
-
-            Args:
-            item[QListWidgetItem] : item selected
-            """
-
-            # Change status of selected test folder
-            if self.test_selection_dict[str(item.text())] == False:
-                self.test_selection_dict[str(item.text())] = True
-            elif self.test_selection_dict[str(item.text())] == True:
-                self.test_selection_dict[str(item.text())] = False
-
-            # Color input values using dictionary[testfolder] = color
-            self.test_colors = self.colorize_list()
-
-            # Get selected test folders
-            test_folders = self.get_selected_folders()
-
-            # Get selected test files seperated by test (list of lists)
-            analyzed_files = self.filestructure.get_files(test_folders, "Analyzed") 
-            
-            # If we dont have an analyzed file, analyze it
-            for idx, file in enumerate(analyzed_files):
-                if not file:
-                    self.analysis.analyze_from_savepath(test_folders[idx])
-                    analyzed_files = self.filestructure.get_files(test_folders, "Analyzed")
-                
-            mpp_files = self.filestructure.get_files(test_folders, "MPP")
-
-            self.update_plots(analyzed_files, mpp_files, test_folders)
-
-        def setrootdir_clicked(self) -> None:
-            """Manages setting root directory on button click"""
-
-            # Prompts dialoge to let user select root directory
-            file = QFileDialog.getExistingDirectory(
-                self, "Select Directory", self.rootdir.text()
-            )
-            self.rootdir.setText(file)
-
-            # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
+        # Update list of tests, create dictionary[Foldername] = True/False for plotting and dict[Foldername] = Folderpath if rootdir exsists, else let user change
+        if os.path.exists(self.rootdir.text()):
             (
                 self.testname_to_testpath,
                 self.test_selection_dict,
-            ) = self.update_test_folders(file)
+            ) = self.update_test_folders(self.rootdir.text())
+        else:
+            self.test_name_to_testpath = {}
+            self.test_selection_dict = {}
 
-        def savefigure_clicked(self) -> None:
-            """Manages saving figure on button click"""
+        # Get layout to append graphs
+        self.layout = self.findChild(PyQt5.QtWidgets.QFrame, "graphframe")
 
-            # Create new figure
-            fig2 = self.figure
+        # Create figure with several subplots, devide up axes
+        self.figure, self.axes = plt.subplots(
+            ncols, nrows, dpi=dpival, tight_layout=True
+        )
 
-            # Ask for save directory, save if given, else ignore
-            file = QFileDialog.getSaveFileName(
-                self, "Save File", self.savedir, "PNG (*.png)"
+        # Make axes dict for plots, numbering left -> right & top -> down
+        idnum = 1
+        self.plot_axes_dict = {}
+        for colnum in range(ncols):
+            for rownum in range(nrows):
+                self.plot_axes_dict[idnum] = self.axes[colnum][rownum]
+                idnum += 1
+
+        # Place figure in canvas, control resize policy, resize, place on UI, and set location
+        self.canvas = FigureCanvas(self.figure)
+        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+        self.canvas.updateGeometry()
+        self.canvas.setParent(self.layout)
+
+        # Make plots work!
+        self.canvas.resize(1600, 900)
+        mpl.rcParams["font.size"] = fontsize
+        mpl.rcParams["lines.markersize"] = markersize
+        for key in self.plot_axes_dict:
+            self.plot_axes_dict[key].tick_params(direction="in", labelsize="small")
+            self.plot_axes_dict[key].xaxis.label.set_size(fontsize)
+            self.plot_axes_dict[key].yaxis.label.set_size(fontsize)
+
+        # Show UI
+        self.show()
+
+    def update_test_folders(self, rootdir: str) -> list:
+        """Updates the list of test folders
+
+        Args:
+            rootdir[str]: root directory
+
+        Returns
+            dict : dictionary[testfoldername] : testpath
+            dict : dictionary[testfoldername] : True/False for plotting
+        """
+
+        # Clear current displaylist
+        self.alltestfolders.clear()
+
+        # Get test folders and test foldernames
+        test_folderpath_list = self.filestructure.get_tests(rootdir)
+        test_foldername_list = [
+            os.path.basename(os.path.normpath(testfolderpath))
+            for testfolderpath in test_folderpath_list
+        ]
+
+        # Create dictionary [foldername] = folderpath -> map names to paths
+        # Create dictionary [foldername] = True/False -> map names to if they have been selected
+        testname_to_testpath = {}
+        test_selection_dict = {}
+        for idx in range(len(test_foldername_list)):
+            testname_to_testpath[test_foldername_list[idx]] = test_folderpath_list[
+                idx
+            ]
+            test_selection_dict[test_foldername_list[idx]] = False
+            self.alltestfolders.addItem(test_foldername_list[idx])
+
+        return testname_to_testpath, test_selection_dict
+
+    def get_selected_folders(self) -> list:
+        """
+        Gets list of selected folder paths
+
+        Returns:
+            list[str] : paths to test folders selected
+
+        """
+
+        # cycle through testfoldername, if selected, change list index to True
+        selected_test_folders = []
+        for foldername in self.test_selection_dict:
+            if self.test_selection_dict[foldername] == True:
+                selected_test_folders.append(self.testname_to_testpath[foldername])
+
+        return selected_test_folders
+
+    def testfolder_clicked(self, item: QListWidgetItem) -> None:
+        """Does Nothing"""
+        # Do nothing on single click
+
+    def testfolder_doubleclicked(self, item: QListWidgetItem) -> None:
+        """Permanantley displays the test folder when double clicked
+
+        Args:
+        item[QListWidgetItem] : item selected
+        """
+
+        # Change status of selected test folder
+        if self.test_selection_dict[str(item.text())] == False:
+            self.test_selection_dict[str(item.text())] = True
+        elif self.test_selection_dict[str(item.text())] == True:
+            self.test_selection_dict[str(item.text())] = False
+
+        # Color input values using dictionary[testfolder] = color
+        self.test_colors = self.colorize_list()
+
+        # Get selected test folders
+        test_folders = self.get_selected_folders()
+
+        # Get selected test files seperated by test (list of lists)
+        analyzed_files = self.filestructure.get_files(test_folders, "Analyzed") 
+        
+        # If we dont have an analyzed file, analyze it
+        for idx, file in enumerate(analyzed_files):
+            if not file:
+                self.analysis.analyze_from_savepath(test_folders[idx])
+                analyzed_files = self.filestructure.get_files(test_folders, "Analyzed")
+            
+        mpp_files = self.filestructure.get_files(test_folders, "MPP")
+
+        self.update_plots(analyzed_files, mpp_files, test_folders)
+
+    def setrootdir_clicked(self) -> None:
+        """Manages setting root directory on button click"""
+
+        # Prompts dialoge to let user select root directory
+        file = QFileDialog.getExistingDirectory(
+            self, "Select Directory", self.rootdir.text()
+        )
+        self.rootdir.setText(file)
+
+        # Update list of tests, create dict[Foldername] = True/False for plotting and dict[Foldername] = Folderpath
+        (
+            self.testname_to_testpath,
+            self.test_selection_dict,
+        ) = self.update_test_folders(file)
+
+    def savefigure_clicked(self) -> None:
+        """Manages saving figure on button click"""
+
+        # Create new figure
+        fig2 = self.figure
+
+        # Ask for save directory, save if given, else ignore
+        file = QFileDialog.getSaveFileName(
+            self, "Save File", self.savedir, "PNG (*.png)"
+        )
+        if file is not None:
+            fig2.savefig(file[0])
+            self.savedir = os.path.dirname(file[0])
+
+    def colorize_list(self) -> None:
+        """
+        Sets the colors for items clicked and creates dictionary for plots to be set to same color
+
+        Returns:
+            dict: dictionary[testfolderpath] : hexcolor
+
+        """
+
+        # Create list of selected tests
+        selected_tests = []
+        for i, key in enumerate(self.test_selection_dict):
+            if self.test_selection_dict[key] == True:
+                selected_tests.append(key)
+
+        # Create color map dict to hold color for each test
+        colors = plt.cm.viridis(np.linspace(0, 1, len(selected_tests)))
+        test_color_dict = {}
+        for idx, selected_test in enumerate(selected_tests):
+            test_color_dict[self.testname_to_testpath[selected_test]] = str(
+                mpl.colors.to_hex(colors[idx])
             )
-            if file is not None:
-                fig2.savefig(file[0])
-                self.savedir = os.path.dirname(file[0])
 
-        def colorize_list(self) -> None:
-            """
-            Sets the colors for items clicked and creates dictionary for plots to be set to same color
+        # Colorize the list in the file browser. This will behave as a key
+        for i, key in enumerate(self.test_selection_dict):
 
-            Returns:
-                dict: dictionary[testfolderpath] : hexcolor
+            # If dev is selected, get colors and set item to same color as graph
+            if self.test_selection_dict[key] == True:
+                rgbh = test_color_dict[self.testname_to_testpath[key]]
+                self.alltestfolders.item(i).setBackground(PyQt5.QtGui.QColor(rgbh))
 
-            """
+            # Otherwise set it to white
+            elif self.test_selection_dict[key] == False:
+                self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
 
-            # Create list of selected tests
-            selected_tests = []
-            for i, key in enumerate(self.test_selection_dict):
-                if self.test_selection_dict[key] == True:
-                    selected_tests.append(key)
+        return test_color_dict
 
-            # Create color map dict to hold color for each test
-            colors = plt.cm.viridis(np.linspace(0, 1, len(selected_tests)))
-            test_color_dict = {}
-            for idx, selected_test in enumerate(selected_tests):
-                test_color_dict[self.testname_to_testpath[selected_test]] = str(
-                    mpl.colors.to_hex(colors[idx])
-                )
+    def update_plots(
+        self,
+        analyzed_file_lists: list,
+        mpp_file_lists: list,
+        test_folder_list: list,
+    ):
+        """
+        Updates plots
 
-            # Colorize the list in the file browser. This will behave as a key
-            for i, key in enumerate(self.test_selection_dict):
+        Args:
+            analyzed_files_lists (list[list[str]]): list of analyzed file paths seperated by test
+            mpp_files_lists (list[list[str]]): list of mpp file paths seperated by test
+            test_folder_list (list[str]): list of test folder paths
+        """
 
-                # If dev is selected, get colors and set item to same color as graph
-                if self.test_selection_dict[key] == True:
-                    rgbh = test_color_dict[self.testname_to_testpath[key]]
-                    self.alltestfolders.item(i).setBackground(PyQt5.QtGui.QColor(rgbh))
+        # Cycle through dictionaries for each plot (set in __init__) to get desired parameters
+        for key in self.plot_axes_dict:
 
-                # Otherwise set it to white
-                elif self.test_selection_dict[key] == False:
-                    self.alltestfolders.item(i).setBackground(QtCore.Qt.white)
+            # Clear plot
+            self.plot_axes_dict[key].cla()
 
-            return test_color_dict
+            # Get parameters
+            yparam = self.plot_y_dict[key]
+            xparam = self.plot_x_dict[key]
+            axes = self.plot_axes_dict[key]
 
-        def update_plots(
-            self,
-            analyzed_file_lists: list,
-            mpp_file_lists: list,
-            test_folder_list: list,
-        ):
-            """
-            Updates plots
+            # Cycle through each test and plot
+            for index, test_folder in enumerate(test_folder_list):
 
-            Args:
-                analyzed_files_lists (list[list[str]]): list of analyzed file paths seperated by test
-                mpp_files_lists (list[list[str]]): list of mpp file paths seperated by test
-                test_folder_list (list[str]): list of test folder paths
-            """
+                # Get colors
+                rgbh = self.test_colors[test_folder]
 
-            # Cycle through dictionaries for each plot (set in __init__) to get desired parameters
-            for key in self.plot_axes_dict:
+                # Pass to appropriate plotter to plot on given axes
+                if "MPPT MPP (mW/cm2)" in yparam:
+                    self.grapher.plot_mpps(
+                        mppfiles=mpp_file_lists[index], ax=axes, c=rgbh
+                    )
+                elif type(yparam) != list:
+                    self.grapher.plot_xy_scalars(
+                        paramfiles=analyzed_file_lists[index],
+                        x=xparam,
+                        y=yparam,
+                        ax=axes,
+                        c=rgbh,
+                    )
+                else:
+                    self.grapher.plot_xy2_scalars(
+                        paramfiles=analyzed_file_lists[index],
+                        x=xparam,
+                        ys=yparam,
+                        ax=axes,
+                        c=rgbh,
+                    )
 
-                # Clear plot
-                self.plot_axes_dict[key].cla()
-
-                # Get parameters
-                yparam = self.plot_y_dict[key]
-                xparam = self.plot_x_dict[key]
-                axes = self.plot_axes_dict[key]
-
-                # Cycle through each test and plot
-                for index, test_folder in enumerate(test_folder_list):
-
-                    # Get colors
-                    rgbh = self.test_colors[test_folder]
-
-                    # Pass to appropriate plotter to plot on given axes
-                    if "MPPT MPP (mW/cm2)" in yparam:
-                        self.grapher.plot_mpps(
-                            mppfiles=mpp_file_lists[index], ax=axes, c=rgbh
-                        )
-                    elif type(yparam) != list:
-                        self.grapher.plot_xy_scalars(
-                            paramfiles=analyzed_file_lists[index],
-                            x=xparam,
-                            y=yparam,
-                            ax=axes,
-                            c=rgbh,
-                        )
-                    else:
-                        self.grapher.plot_xy2_scalars(
-                            paramfiles=analyzed_file_lists[index],
-                            x=xparam,
-                            ys=yparam,
-                            ax=axes,
-                            c=rgbh,
-                        )
-
-            # Update canvas
-            self.canvas.draw()
-
-    # Create application (required for widget)
-    app = QApplication(sys.argv)
-
-    # Create UI, which is a widget
-    window = GRAPH_UI()
-
-    # Start the application
-    app.exec_()
+        # Update canvas
+        self.canvas.draw()

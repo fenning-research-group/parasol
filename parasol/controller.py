@@ -9,14 +9,21 @@ from datetime import datetime
 import time
 import logging
 import sys
+import traceback #added by ZJD 01/13/2025
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
+
+import numpy as np
 
 from parasol.relay.relay import Relay
 from parasol.hardware.yokogawa import Yokogawa
-from parasol.hardware.labjack import LabJack
+from parasol.hardware.chroma import Chroma
+from parasol.environmental import Environmental
+
 from parasol.analysis.analysis import Analysis
 from parasol.characterization import Characterization
 from parasol.filestructure import FileStructure
-from parasol.hardware.chroma import Chroma
 
 from parasol.configuration.configuration import Configuration
 config = Configuration()
@@ -27,46 +34,52 @@ class Controller:
     """Controller package for PARASOL"""
 
     # Initialize kit, start/stop workers, file management
-
-    def __init__(self, logging_on=True) -> None:
+    
+    def __init__(self, mode = None, logging_on=True, backup = True) -> None:
         """Initializes the Controller class
 
         Args:
             logging_on (boolean): Option to log or not, default True
         """
-
-        # Connect to other modules
-        self.relay = Relay()
-        self.scanner = Yokogawa()
-        self.characterization = Characterization()
-        self.analysis = Analysis()
-        self.filestructure = FileStructure()
-        self.load = Chroma()
         
-        # self.monitor = None will turn off monitoring without breaking rest of data
-        self.monitor = None # LabJack()
+        # Grab mode -> indoor or outdoor
+        self.mode = mode
 
-        # Get constants
+        # Grab backup -> local disk or backup drive
+        # self.backup = backup #added by ZJD 01/29/2024
+        
+        # Get constants from yaml file
         self.monitor_delay = constants["monitor_delay"]
         self.measurement_delay = constants["measurement_delay"]
         self.mpp_points = constants["mpp_points"]
+        self.num_modules = constants["num_modules"]
+        self.num_strings = constants["num_strings"]
+        
+        # Load modules that dont have hardware associated & Relay (needed for base organization), load optionals as False (load in during customize)
+        self.characterization = Characterization()
+        self.analysis = Analysis()
+        self.filestructure = FileStructure() 
+        # self.fstructure_backup = FileStructure(backup = self.backup)# added by ZJD 01/29/2024
+        self.relay = Relay()
+        
+        self.environment = False
+        self.scanner = False
+        self.load = False
+        self.monitor = False
+        self.env_control = False
+
+        # # Create variables to save the name of the file that is to be copied, ZJD 01/29/2024
+        # self.savedEnv = None
+        # self.backup_savedEnv = None
+
+        # self.savedMPP = None
+        # self.backup_savedMPP = None
 
         # Initialize running
         self.running = False
 
-        # Create blank message that can be checked from other programs (mainly GUI)
+        # Create blank message that can be checked from other programs (used in RUN_UI)
         self.message = None
-
-        # Create characterization/monitor/logging directories
-        self.characterizationdir = self.filestructure.get_characterization_dir()
-        if not os.path.exists(self.characterizationdir):
-            os.mkdir(self.characterizationdir)
-        self.monitordir = self.filestructure.get_environment_dir()
-        if not os.path.exists(self.monitordir):
-            os.mkdir(self.monitordir)
-        self.logdir = self.filestructure.get_log_dir()
-        if not os.path.exists(self.logdir):
-            os.mkdir(self.logdir)
 
         # Map string ID to load port and channel
         self.load_channels = {
@@ -87,12 +100,31 @@ class Controller:
             5: [17, 18, 19, 20],
             6: [21, 22, 23, 24],
         }
-
+        
+        # Create a blank dictionary to hold all info about monitoring stations
+        self.monitor_stations = {}
+        
         # Create blank dictionary to hold all info about strings
         self.strings = {}
 
         # Create list of active strings
         self.active_strings = [False] * (len(self.load_channels)+1)
+        
+        # Create characterization and logging directories
+        self.characterizationdir = self.filestructure.get_characterization_dir()
+        if not os.path.exists(self.characterizationdir):
+            os.mkdir(self.characterizationdir)
+        self.logdir = self.filestructure.get_log_dir()
+        if not os.path.exists(self.logdir):
+            os.mkdir(self.logdir)
+
+        # # Create backup characterization and logging directories, added by ZJD 01/29/2024
+        # self.backup_characterizationdir = self.fstructure_backup.get_characterization_dir()
+        # if not os.path.exists(self.backup_characterizationdir):
+        #     os.mkdir(self.backup_characterizationdir)
+        # self.logdir = self.fstructure_backup.get_log_dir()
+        # if not os.path.exists(self.logdir):
+        #     os.mkdir(self.logdir)
 
         # Create logger with options to log or not
         date = datetime.now().strftime("%Y%m%d")
@@ -115,9 +147,90 @@ class Controller:
             self.logger.addHandler(fh)
             self.logger.addHandler(sh)
 
-        # Create workers (1 for scanner, n for loads, 1 for random tasks, 1 for environment) & start queue
-        self.threadpool = ThreadPoolExecutor(max_workers=3+(len(self.load_channels)))
+        # Create workers (1 for scanner, 1 for loads, 1 for random tasks, 1 for environment) & start queue
+        self.threadpool = ThreadPoolExecutor(max_workers=4)
         self.start()
+        
+        # Initialize appropriate modules for the mode
+        self.customize()
+
+
+    def customize(self) -> None:
+        """Initializes hardware for test type"""
+        
+        if self.mode == 'outdoor':
+
+            if constants['outdoor_config']['scanner']:
+                self.scanner = Yokogawa()
+            if constants['outdoor_config']['load']:
+                self.load = Chroma()
+            if constants['outdoor_config']['monitor']:
+                self.monitor = True
+            if constants['outdoor_config']['env_control']:
+                self.env_control = False
+            
+            # Map string id to monitoring station
+            self.monitor_stations = {
+                1: 0,
+                2: 0,
+                3: 0,
+                4: 0,
+                5: 0,
+                6: 0,
+            }
+            
+        if self.mode == 'indoor':
+
+            if constants['indoor_config']['scanner']:
+                self.scanner = Yokogawa()
+            if constants['indoor_config']['load']:
+                self.load = False
+            if constants['indoor_config']['monitor']:
+                self.monitor = True
+            if constants['indoor_config']['env_control']:
+                self.env_control = True
+            
+            
+            # Map string id to monitoring station
+            self.monitor_stations = {
+                1: 1,
+                2: 2,
+                3: 3,
+                4: 4,
+                5: 5,
+                6: 6,
+            }
+        
+        if self.monitor or self.env_control:
+            stations = list(set(self.monitor_stations.values()))
+            self.environment = Environmental(self.mode, stations)
+
+    def update_monitoring(self):
+        
+        # for all active strings, calculate strings that must be monitored
+        self.monitor_list = []
+        for id in range(len(self.active_strings)):
+            if self.active_strings[id]:
+                self.monitor_list.append(self.monitor_stations[id])
+        self.monitor_list = list(set(self.monitor_list))
+
+        # create dictionary to map monitoring stations to string ids for saving
+        self.station_to_id = {}
+
+        # cycle through monitor stations
+        for monitor_station in self.monitor_list:
+            
+            # if string is active and its station is the monitor station were on, then add to list
+            temp = []
+            for id in range(len(self.active_strings)):
+                if self.active_strings[id]:
+                    if self.monitor_stations[id] == monitor_station:
+                        temp.append(id)
+            
+            # create dict item for each monitoring station
+            self.station_to_id[monitor_station] = temp
+        
+
 
     def load_string(
         self,
@@ -133,6 +246,9 @@ class Controller:
         jv_vmin: float,
         jv_vmax: float,
         jv_steps: int,
+        temp: float,
+        rh: float,
+        intensity: float,
     ) -> str:
         """Loads a string of modules
 
@@ -149,6 +265,9 @@ class Controller:
             jv_vmin (float): minimum JV sweep voltage (V)
             jv_vmax (float): maximum JV sweep voltage (V)
             jv_steps (int): number of voltage steps
+            temp (float): temperature setpoint
+            rh (float): relative humidity setpoint
+            intensity (float): light intensity setpoint
 
         Raises:
             ValueError: String ID already loaded
@@ -164,13 +283,19 @@ class Controller:
         if id not in self.load_channels:
             raise ValueError(f"{id} not valid string id!")
 
-        # Setup JV and MPP timers in main loop
-        jv_future = asyncio.run_coroutine_threadsafe(self.jv_timer(id=id), self.loop)
-        jv_future.add_done_callback(future_callback)
-        mpp_future = asyncio.run_coroutine_threadsafe(self.mpp_timer(id=id), self.loop)
-        mpp_future.add_done_callback(future_callback)
-
-        # If we are not monitoring the environment, start the monitor
+        # Setup JV and MPP timers in main loop if interval exists, else set to None
+        if jv_interval:
+            jv_future = asyncio.run_coroutine_threadsafe(self.jv_timer(id=id), self.loop)
+            jv_future.add_done_callback(future_callback)
+        else:
+            jv_future = None
+        if mpp_interval:
+            mpp_future = asyncio.run_coroutine_threadsafe(self.mpp_timer(id=id), self.loop)
+            mpp_future.add_done_callback(future_callback)
+        else:
+            mpp_future = None
+            
+        # If we are not already monitoring the environment, start the monitor
         if not any(self.active_strings):
             self.logger.debug(f"Starting environmental monitoring")
             self.monitor_future = asyncio.run_coroutine_threadsafe(
@@ -179,8 +304,9 @@ class Controller:
             self.monitor_future.add_done_callback(future_callback)
             self.logger.info(f"Started environmental monitoring")
 
-        # Make string active
+        # Make string active, update monitoring list
         self.active_strings[id] = True
+        self.update_monitoring()
 
         # Setup string dict with important information for running the program
         self.strings[id] = {
@@ -211,21 +337,53 @@ class Controller:
                 "_future": mpp_future,
                 "vmpp": None,
             },
+            "setpoints": {
+                "temp": temp,
+                "rh": rh,
+                "intensity": intensity,
+            },
             "lock": Lock(),
         }
 
+        # TODO: check if this works
+        # if JV scans are off, set first mpp to 0 so that MPP progresses
+        if jv_interval is None:
+            self.strings[id]["mpp"]["last_currents"][0] = 0
+            self.strings[id]["mpp"]["last_powers"][0] = 0
+            self.strings[id]["mpp"]["last_voltages"][0] = 0
+            self.strings[id]["mpp"]["vmpp"] = 0
+
+        # Make directories/file structure
         (
             self.strings[id]["_savedir"],
             self.strings[id]["name"],
         ) = self.filestructure.make_module_subdir(name, module_channels, startdate)
+
+        # # Make backup directories/file structure, added by ZJD 01/29/2024
+        # (
+        #     self.strings[id]["_savedir"],
+        #     self.strings[id]["name"],
+        # ) = self.fstructure_backup.make_module_subdir(name, module_channels, startdate)        
         self.logger.info(f"String {id} loaded")
+        
+        # start environmental control
+        if self.env_control:
+            if self.strings[id]["setpoints"]["temp"]:
+                self.environment.set_temperature(id, self.strings[id]["setpoints"]["temp"])
+            if self.strings[id]["setpoints"]["rh"]:
+                self.environment.set_rh(id, self.strings[id]["setpoints"]["rh"])
+            if self.strings[id]["setpoints"]["intensity"]:
+                self.environment.set_intensity(id, self.strings[id]["setpoints"]["intensity"])
 
         # Turn on the load here, stays on when not being scanned
-        self.logger.debug(f"Turning on load output for string {id}")
-        ch = self.load_channels[id]
-        self.load.load_on(ch, 0.00)
-        self.logger.debug(f"Turned off load output for string {id}")
+        if self.load:
+            self.logger.debug(f"Turning on load output for string {id}")
+            ch = self.load_channels[id]
+            self.load.load_on(ch, 0.00)
+            self.logger.debug(f"Turned off load output for string {id}")
         return self.strings[id]["name"]
+    
+    
 
     def load_check_orientation(self, modules: list) -> None:
         """Checks the orientation of the input modules by verifying that Jsc < 0 on the scanner.
@@ -238,6 +396,7 @@ class Controller:
             self.random_task_timer(modules=modules), self.loop
         )
         check_task_future.add_done_callback(future_callback)
+
 
     def unload_string(self, id: int) -> None:
         """Unloads a string of modules
@@ -263,12 +422,14 @@ class Controller:
             # Get saveloc
             saveloc = d["_savedir"]
 
-            # Destroy all future tasks for the string
+            # Destroy all future tasks for the string if that task has a future
             if id not in self.strings:
                 raise ValueError(f"String {id} not loaded!")
             self.logger.debug(f"Canceling tasks for {id}")
-            self.strings[id]["jv"]["_future"].cancel()
-            self.strings[id]["mpp"]["_future"].cancel()
+            if self.strings[id]["jv"]["_future"]:
+                self.strings[id]["jv"]["_future"].cancel()
+            if self.strings[id]["mpp"]["_future"]:
+                self.strings[id]["mpp"]["_future"].cancel()
             self.logger.debug(f"Canceled tasks for {id}")
 
             # Remove all tasks in que not already started (can start 1 from each worker)
@@ -279,8 +440,9 @@ class Controller:
                 self.mpp_queue._queue.remove(id)
             self.logger.debug(f"Removed tasks from que for {id}")
 
-            # Decrease number of tests active by one
+            # Make string inactive, and update monitoring list
             self.active_strings[id] = False
+            self.update_monitoring()
 
             # If we have no active tests, stop monitoring
             if not any(self.active_strings):
@@ -290,10 +452,20 @@ class Controller:
                 self.logger.info(f"Environmental monitoring canceled")
 
             # Turn load output off
-            self.logger.debug(f"Resetting load for {id}")
-            ch = self.load_channels[id]
-            self.load.load_off(ch)
-            self.logger.debug(f"Load reset for {id}")
+            if self.load:
+                self.logger.debug(f"Resetting load for {id}")
+                ch = self.load_channels[id]
+                self.load.load_off(ch)
+                self.logger.debug(f"Load reset for {id}")
+            
+            # Turn off environmental control
+            if self.env_control:
+                if self.strings[id]["setpoints"]["temp"]:
+                    self.environment.temperature_off(id)
+                if self.strings[id]["setpoints"]["rh"]:
+                    self.environment.rh_off(id)
+                if self.strings[id]["setpoints"]["intensity"]:
+                    self.environment.intensity_off(id)
 
             # Analyze the saveloc in a new thread
             self.logger.debug(f"Saving analysis at : {saveloc}")
@@ -307,7 +479,7 @@ class Controller:
 
         self.logger.info(f"Analysis saved at : {saveloc}")
 
-    def make_mpp_file(self, id: int) -> None:
+    def make_mpp_file(self, id: int, backup_mpp = False) -> None:
         """Creates base file for MPP data
 
         Args:
@@ -329,7 +501,16 @@ class Controller:
         )
         fpath = os.path.join(mppfolder, mppfile)
 
-        # If it doesnt exist, make it:
+    #    # Save in backup base filepath: stringname: MPP: stringname_stringid_mpp_# (matches JV #), added by ZJD 01/29/2024
+    #     backup_mppfolder = self.fstructure_backup.get_mpp_folder(d["start_date"], d["name"])
+    #     backup_mppfile = self.fstructure_backup.get_mpp_file_name(
+    #         d["start_date"], d["name"], id, d["jv"]["scan_count"]
+    #     )
+        fpath = os.path.join(mppfolder, mppfile)
+        # backup_fpath = os.path.join(backup_mppfolder, backup_mppfile)
+
+        # if not backup_mpp:
+            # If it doesnt exist, make it:
         if os.path.exists(fpath) != True:
             
             # Open file, write header/column names then fill
@@ -355,22 +536,36 @@ class Controller:
             self.logger.debug(f"MPP file made for {id} at {fpath}")
 
         return fpath
+        # else:
+        #     return backup_fpath
 
-    def make_env_file(self) -> None:
-        """Creates base file for environmental monitoring data"""
+    def make_env_file(self, id, backup_env = False) -> None:
+        """Creates base file for environmental monitoring data
+        
+        Args:
+            id (int): string number
+        """
 
-        # Get date/time and make filepath
+        # Get dictionary for string
+        d = self.strings.get(id, None)
+
+        # Get date/time
         currenttime = datetime.now()
         cdate = currenttime.strftime("x%Y%m%d")
 
         # Get environment folder and file
-        envfolder = self.filestructure.get_environment_folder(cdate)
-        if not os.path.exists(envfolder):
-            os.mkdir(envfolder)
+        envfolder = self.filestructure.get_environment_folder(d["start_date"], d["name"])
         envfile = self.filestructure.get_environment_file_name(cdate)
         fpath = os.path.join(envfolder, envfile)
 
-        # Make file if it doesnt exist
+
+        # # Get backup environment folder and file, added by ZJD 01/29/2024
+        # backup_envfolder = self.fstructure_backup.get_environment_folder(d["start_date"], d["name"])
+        # backup_envfile = self.fstructure_backup.get_environment_file_name(cdate)
+        # backup_fpath = os.path.join(backup_envfolder, backup_envfile)
+
+        # if not backup_env: # ZJD
+        #     Make file if it doesn't exist
         if os.path.exists(fpath) != True:
 
             # Open file, write header/column names then fill
@@ -379,7 +574,8 @@ class Controller:
                 writer.writerow(
                     [
                         "Time (Epoch)",
-                        "Temperature (C)",
+                        "Temperature Dark (C)",
+                        "Temperature Light (C)",
                         "RH (%)",
                         "Intensity (# Suns)",
                     ]
@@ -388,6 +584,8 @@ class Controller:
             self.logger.debug(f"Environmental monitoring file made at {fpath}")
 
         return fpath
+        # else: # ZJD
+        #     return backup_fpath 
 
     # Workers
 
@@ -442,7 +640,6 @@ class Controller:
             # Track the string
             await scan_future
             self.mpp_queue.task_done()
-
 
 
     async def check_orientation_worker(self, loop: asyncio.AbstractEventLoop) -> None:
@@ -549,6 +746,7 @@ class Controller:
         # If we have an issue in the loop, log it
         def exception_handler(loop, context):
             self.logger.info(f"Exception raised in Controller loop")
+            self.send_error_email('Error occured on rooftop')
 
         # Start event loop, add workers
         self.loop = asyncio.new_event_loop()
@@ -574,15 +772,10 @@ class Controller:
         # Create JV worker for scanner
         asyncio.run_coroutine_threadsafe(self.jv_worker(self.loop), self.loop)
 
-        # Create MPP workers for each load
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
-        asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
+        # Create MPP workers for load
         asyncio.run_coroutine_threadsafe(self.mpp_worker(self.loop), self.loop)
 
-        # Create check orientation workers
+        # Create check orientation worker
         asyncio.run_coroutine_threadsafe(
             self.check_orientation_worker(self.loop), self.loop
         )
@@ -648,10 +841,11 @@ class Controller:
                 return
 
             # Turn off load output
-            self.logger.debug(f"Turning off load output for string {id}")
-            ch = self.load_channels[id]
-            self.load.load_off(ch)
-            self.logger.debug(f"Turned off load output for string {id}")
+            if self.load:
+                self.logger.debug(f"Turning off load output for string {id}")
+                ch = self.load_channels[id]
+                self.load.load_off(ch)
+                self.logger.debug(f"Turned off load output for string {id}")
 
             # Cycle through each device on the string
             for index, module in enumerate(d["module_channels"]):
@@ -665,10 +859,21 @@ class Controller:
                 jvfolder = self.filestructure.get_jv_folder(
                     d["start_date"], d["name"], module
                 )
+
                 jvfile = self.filestructure.get_jv_file_name(
                     d["start_date"], d["name"], id, module, d["jv"]["scan_count"]
                 )
+
+
+                # # Save in backup base filepath: stringname: JV_modulechannel: stringname_stringid_modulechannel_JV_scannumber, added by ZJD 01/29/2024
+                # backup_jvfolder = self.fstructure_backup.get_jv_folder(
+                #     d["start_date"], d["name"], module
+                # )
+
                 fpath = os.path.join(jvfolder, jvfile) 
+                # backup_fpath = os.path.join(backup_jvfolder, jvfile) 
+
+                
 
                 # Open relay, scan device foward + reverse, turn off relay
                 self.logger.debug(f"Opening relay for string {id}")
@@ -676,7 +881,7 @@ class Controller:
                 self.logger.debug(f"Opened relay for string {id}")
                 self.logger.debug(f"Scanning string {id}")
 
-                # wait set time and scan
+                # Wait set time and scan
                 time.sleep(self.measurement_delay)
                 v, fwd_vm, fwd_i, rev_vm, rev_i = self.characterization.scan_jv(d, self.scanner)
 
@@ -718,8 +923,9 @@ class Controller:
                     )
                     for line in zip(v, fwd_vm, fwd_i, fwd_j, fwd_p, rev_vm, rev_i, rev_j, rev_p):
                         writer.writerow(line)
-
+                # shutil.copy(fpath, backup_fpath)# ZJD 01/29/2024
                 self.logger.debug(f"Writing JV file for {id} at {fpath}")
+                # self.logger.debug(f"Backup'ed JV file for {id} at {backup_fpath}")# ZJD 01/29/2024
 
                 # Save any useful raw data to the string dictionary
                 d["jv"]["v"][index] = v
@@ -733,11 +939,12 @@ class Controller:
             time.sleep(self.measurement_delay)
 
             # Turn on load output at old vmpp if we have one
-            vmp = self.characterization.calc_last_vmp(d)
-            if vmp is not None:
-                self.logger.debug(f"Turning on load output for string {id}")
-                self.load.load_on(ch,vmp)
-                self.logger.debug(f"Turned on load output for string {id}")
+            if self.load:
+                vmp = self.characterization.calc_last_vmp(d)
+                if vmp is not None:
+                    self.logger.debug(f"Turning on load output for string {id}")
+                    self.load.load_on(ch,vmp)
+                    self.logger.debug(f"Turned on load output for string {id}")
 
             self.logger.info(f"Scanned {id}")
 
@@ -794,13 +1001,26 @@ class Controller:
 
             # Get MPP file path, if it doesnt exist, create it, iterate for each JV curve taken
             fpath = self.make_mpp_file(id)
+            backup_fpath = self.make_mpp_file(id, backup_mpp=True) # just a path, no file written
+
+            # if self.savedMPP is None: #ZJD 10/29/2024
+            #     self.savedMPP = fpath
+            # if self.backup_savedMPP is None:
+            #     self.backup_savedMPP = backup_fpath
+
+            # if self.savedMPP != fpath: #ZJD 10/29/2024
+            #     shutil(self.savedMPP, self.backup_savedMPP)
+            #     self.savedMPP = fpath
+            #     self.backup_savedMPP = backup_fpath
 
             # Open file, append values to columns
             with open(fpath, "a", newline="") as f:
                 writer = csv.writer(f, delimiter=",")
                 writer.writerow([t, v, vm, i, j, pm])
+            # shutil.copy(fpath, backup_fpath) # ZJD 01/29/2024
 
             self.logger.debug(f"Writing MPP file for {id} at {fpath}")
+            # self.logger.debug(f"Backup'ed MPP file for {id} at {backup_fpath}")# ZJD 01/29/2024
 
             self.logger.info(f"Tracked {id}")
             
@@ -812,24 +1032,44 @@ class Controller:
         Args:
             dummyid (int): passes int 1 to the monitor class
         """
-
+        
         self.logger.debug(f"Monitoring environment")
 
-        # Get Temperature, Humidity, Relative Humidity, and Temperature
-        if self.monitor:
-            self.t, self.temp, self.rh, self.intensity = self.characterization.monitor_environment(self.monitor)
-        else:
-            self.t, self.temp, self.rh, self.intensity = time.time(), 1,1,1
+        
+        #cycle through monitor stations active
+        for monitor_station in self.monitor_list:
+        
+            # Set time and -1 for temp, rh, and humidity 
+            t, temp_dark, temp_light, rh, intensity = time.time(), -1, -1, -1, -1
+            
+            # If we are monittoring: get Time, Temperature, Relative Humidity, and Temperature
+            if self.monitor:
+                t, temp_dark, temp_light, rh, intensity = self.environment.monitor_environment(monitor_station)
 
-        # Make env file if needed (done 1x per experiment)
-        fpath = self.make_env_file()
+            # Save monitor information for each channel
+            for id in self.station_to_id[monitor_station]:
+                # Make env file if needed and append to file
+                fpath = self.make_env_file(id)
+                # backup_fpath = self.make_env_file(id, backup_env=True) #ZJD 01/29/2024
 
-        # Append to file
-        with open(fpath, "a", newline="") as f:
-            writer = csv.writer(f, delimiter=",")
-            writer.writerow([self.t, self.temp, self.rh, self.intensity])
+                # # If savedEnv and backup_savedEnv are not initialized: ZJD 01/29/2024
+                # if self.savedEnv is None:
+                #     self.savedEnv = fpath
+                # if self.backup_savedEnv is None:
+                #     self.backup_savedEnv = backup_fpath
+                
+                # # Check if the file has been updated, ZJD 01/29/2024
+                # if self.savedEnv != fpath:
+                #     shutil(self.savedEnv, self.backup_savedEnv)
+                #     self.savedEnv = fpath
+                #     self.backup_fpath = backup_fpath
+                    
+                with open(fpath, "a", newline="") as f:
+                    writer = csv.writer(f, delimiter=",")
+                    writer.writerow([t, temp_dark, temp_light, rh, intensity])
+                self.logger.debug(f"Writing Monitoring file at {fpath}")
 
-        self.logger.debug(f"Writing Monitoring file at {fpath}")
+
         self.logger.debug(f"Monitored environment")
 
     def check_orientation(self, modules: list) -> None:
@@ -838,6 +1078,7 @@ class Controller:
         Args:
             modules (list[int]): list of modules
         """
+        # x = 10/0
 
         self.logger.debug(f"Checking orientation")
 
@@ -883,6 +1124,31 @@ class Controller:
         else:
             self.message = "No modules were checked."
 
+    # def send_error_email(self, error_message) -> None:
+    #     """
+    #     Send user an alert email when an error is raised
+    #     """
+    #     sender_email = "frgrooftopalert@gmail.com"
+    #     receiver_email = "z8deng@ucsd.edu"
+    #     password = "FrgRooftopAlertZJD"  # Use an app-specific password for security
+
+    #     message = MIMEMultipart()
+    #     message['From'] = sender_email
+    #     message['To'] = receiver_email
+    #     message['Subject'] = "Error Occurred in Python Script"
+
+    #     body = f"An error occurred:\n\n{error_message}"
+    #     message.attach(MIMEText(body, 'plain'))
+
+    #     try:
+    #         with smtplib.SMTP('smtp.gmail.com', 587) as server:
+    #             server.starttls()
+    #             server.login(sender_email, password)
+    #             server.send_message(message)
+    #         print("Error email sent successfully!")
+    #     except Exception as e:
+    #         print(f"Failed to send email: {e}")
+
     def __del__(self) -> None:
         """Stops queue and program on exit"""
         self.stop()
@@ -896,3 +1162,5 @@ def future_callback(future):
             future.result()
     except CancelledError:
         pass
+
+

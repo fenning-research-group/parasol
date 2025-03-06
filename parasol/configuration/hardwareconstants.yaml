@@ -1,8 +1,7 @@
 filestructure:
   root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" # Root directory
+  backup_dir: "C:\\Users\\FRG-LAPTOP\\SynologyDrive\\LabData\\OutdoorDeg\\PARASOL\\" # Back up directory, added by ZJD 01/29/2024
   analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" # Analysis directory
-  # cell characteriation in root_dir\\Characterization\\
-  # environment characteriation in root_dir\\Environment\\
   num_modules: 24 # Number of modules
 
 relay:
@@ -31,26 +30,76 @@ chroma:
   current_range: 2 # 2 A is max current (A) of low range, 20 A for high range
 
 labjack:
-  voltage_port: None # 11 AIN port for +5V in
-  ground_port: 3 # 9 AIN port for ground
-  thermocouple2_port: None # 7 AIN port for between thermocouple1 and thermocouple2
-  thermocouple1_port: 2 # 5  AIN Port pre thermocouple1
-  hygrometer_port: 1 # 3 AIN Port for post hygrometer
-  photodiode_port: 0 # 1 AIN Port for post photodoide
+  voltage_port: 11 # AIN port for +5V in
+  ground_port: 9 # AIN port for ground
+  thermocouple2_port: 7 # AIN port for between thermocouple1 and thermocouple2
+  thermocouple1_port: 5 # AIN Port pre thermocouple1
+  hygrometer_port: 3 # AIN Port for post hygrometer
+  photodiode_port: 1 # AIN Port for post photodoide
   average_num: 5 # Number of readings to average
   delay_time: 0.05 # Seconds to wait between readings
   # Thermocouple, photodiode, hygrometer have constants pertaining to hardware thats kept in labjack.py
 
+hotplate:
+  hp1:
+    port: 'COM3'
+    device_identifiers:
+      vid: 1027 # VID always 1027
+      pid: 24577 # PID always 24577
+      serial_number: "AB0OYUYZA" # Unique
+    address: 1 #rs485 address
+  hp2:
+    port: 'COM3'
+    device_identifiers:
+      vid: 1027
+      pid: 24577
+      serial_number: "AB0OYQKDA"
+    address: 1
+  hp3:
+    port: 'COM3'
+    device_identifiers:
+      vid: 1027
+      pid: 24577
+      serial_number: "AB0OYQKPA"
+    address: 1
+  
+environmental: 
+  nda: None #TODO: Remove
+
+
+
 characterization:
   mppt_voltage_step: 0.2 # MPPT voltage iteration (V). note that 0.02 is the floor resolution of the Chroma (Error approx 0.01)
+  nightmode_starthour: 20 # start time to consider 'night' for characterization (24 hour clock)
+  nightmode_endhour: 6 # end time to consider 'night' for characterization (24 hour clock)
 
 analysis:
-  derivative_v_step : 0.5 # Voltage step for derivative (Rs, Rsh, Rch) in JV post-analysis (V)
+  derivative_v_percent : 0.05 # Voltage step for derivative (Rs, Rsh, Rch) in JV post-analysis (V)
 
 controller:
   monitor_delay: 15 # Time between environmental monitoring (s)
   measurement_delay: 1 # Time to wait between switching relay and measuring
   mpp_points: 20 # Number of MPP points to keep in reccord 
+  num_modules: 24 # Number of modules
+  num_strings: 6 # Number of strings
+  outdoor_config:
+    relay : True
+    scanner : True
+    load : True
+    monitor : True
+    env_control : False
+  indoor_config:
+    relay : True
+    scanner : True
+    load : True
+    monitor : False
+    env_control : False
+
+LAUNCH_UI:
+  function: 1 # default function for UI (runner = 0, grapher = 1)
+  mode: 0 # default mode for UI (indoor = 0, outdoor =1)
+  bypass: False # option to automatically launch default function & mode
+  hide_after_launch: False # option to hide this GUI after another has been launched
 
 RUN_UI:
   area : 100 # Area of the module (cm^2)
@@ -61,14 +110,15 @@ RUN_UI:
   v_min: -1 # Default minimum voltage for JV/MPP scan (V)
   v_max: 25 # Default maximum voltage for JV/MPP scan (V)
   v_steps: 100 # Default number of voltage steps for JV scan
+  temp: 1 # Default setpoint temperature
+  rh: 1 # Default relative humidity 
+  intensity: 1 # Default light intensity
 
 GRAPH_UI:
-
   font_size: 14
   marker_size: 3
   n_rows: 4
   n_cols: 3
-
   # These hold column names from the Scalars file in Analyzed.
   x1: "Time Elapsed (s)" # Graph1 x data
   x2: "Time Elapsed (s)" # Graph2 x data
@@ -82,7 +132,6 @@ GRAPH_UI:
   x10: "Time Elapsed (s)" # Graph10 x data
   x11: "Time Elapsed (s)" # Graph11 x data
   x12: "Time Elapsed (s)" # Graph12 x data
-
   y1: "FWD Jsc (mA/cm2)" # Graph1 y data
   y2: "FWD Voc (V)" # Graph2 y data
   y3: "FWD FF (%)" # Graph3 y data

@@ -10,10 +10,7 @@ constants = config.get_config()['yokogawa']
 mpl.rcParams.update(mpl.rcParamsDefault)
 
 class Yokogawa:
-    """Yokowaga package for PARASOL
-    
-    Note:Chroma default status is off
-    """
+    """Yokowaga package for PARASOL"""
 
     def __init__(self) -> None:
         """Initliazes the class for Yokogawa GS610"""
@@ -333,6 +330,8 @@ class Yokogawa:
             i_fwd = np.zeros(v.shape)
             vm_rev = np.zeros(v.shape)
             i_rev = np.zeros(v.shape)
+            vm_fwd[:] = np.nan
+            vm_rev[:] = np.nan
             i_fwd[:] = np.nan
             i_rev[:] = np.nan
 
@@ -389,6 +388,8 @@ class Yokogawa:
             i_fwd = np.zeros(v.shape)
             vm_rev = np.zeros(v.shape)
             i_rev = np.zeros(v.shape)
+            vm_fwd[:] = np.nan
+            vm_rev[:] = np.nan
             i_fwd[:] = np.nan
             i_rev[:] = np.nan
 

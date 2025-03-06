@@ -48,6 +48,7 @@ class Relay():
 
         self.create_relay_tables() # create useful relay tables  
         self.relay_open = [False] * (self.NUM_RELAYS*self.NUM_BOARDS+1)  # create list[relay #] = Open boolean
+
         
         self.modbus = self.connect_modbus() # open modbus get object
         self.relayboards = self.connect_R421B16() # open relay board and get dict[id] = object
@@ -180,13 +181,13 @@ class Relay():
         """
         relayboard_no = (id // self.NUM_RELAYS) + 1 # relayboard 1 to number of relayboards
         relay_no = id % self.NUM_RELAYS # relay number cycles to max number and back up again, starts at 1
+
         
         # handle that relays will start at 1 and go to 16, boards start at 1 as well
         if relay_no == 0:
             relay_no += 16
             relayboard_no -= 1
         board = self.relayboards[relayboard_no]
-        
         return board, relay_no
     
     @relay_lock
@@ -258,5 +259,9 @@ class Relay():
     
     def reset_relays(self):
         """Closes all relays regarldess of status -- useful for reset"""
+        # i = 0
         for relay in range(1,len(self.relay_open)):
-            self._hard_close(relay)
+            try:
+                self._hard_close(relay)
+            except:
+                print(f'{relay} not working, relay board {relay/16 + 1} not working')

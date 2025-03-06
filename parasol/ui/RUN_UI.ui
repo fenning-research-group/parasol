@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1175</width>
-    <height>789</height>
+    <width>1395</width>
+    <height>779</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,8 +28,8 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>-349</y>
-         <width>1138</width>
+         <y>0</y>
+         <width>1358</width>
          <height>1098</height>
         </rect>
        </property>
@@ -252,7 +252,7 @@
                   <string/>
                  </property>
                 </widget>
-                <widget class="QLabel" name="Vstepsabel_1">
+                <widget class="QLabel" name="VstepsLabel_1">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -448,7 +448,7 @@
                <widget class="QGroupBox" name="ActionBox_1">
                 <property name="geometry">
                  <rect>
-                  <x>845</x>
+                  <x>1080</x>
                   <y>10</y>
                   <width>225</width>
                   <height>165</height>
@@ -673,6 +673,169 @@
                  </property>
                 </widget>
                </widget>
+               <widget class="QGroupBox" name="SetPointBox_1">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Set Points</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="RhLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>RH</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="RhInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="RhUnits_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>%</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="IntensityInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityUnits_1">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>suns</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempLabel_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Temp</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="TempInput_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempUnits_1">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>°C</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
               </widget>
              </item>
              <item>
@@ -876,7 +1039,7 @@
                   <string/>
                  </property>
                 </widget>
-                <widget class="QLabel" name="Vstepsabel_2">
+                <widget class="QLabel" name="VstepsLabel_2">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -1072,7 +1235,7 @@
                <widget class="QGroupBox" name="ActionBox_2">
                 <property name="geometry">
                  <rect>
-                  <x>845</x>
+                  <x>1080</x>
                   <y>10</y>
                   <width>225</width>
                   <height>165</height>
@@ -1297,6 +1460,169 @@
                  </property>
                 </widget>
                </widget>
+               <widget class="QGroupBox" name="SetPointBox_2">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Set Points</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="RhLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>RH</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="RhInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="RhUnits_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>%</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="IntensityInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityUnits_2">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>suns</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempLabel_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Temp</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="TempInput_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempUnits_2">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>°C</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
               </widget>
              </item>
              <item>
@@ -1500,7 +1826,7 @@
                   <string/>
                  </property>
                 </widget>
-                <widget class="QLabel" name="Vstepsabel_3">
+                <widget class="QLabel" name="VstepsLabel_3">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -1696,7 +2022,7 @@
                <widget class="QGroupBox" name="ActionBox_3">
                 <property name="geometry">
                  <rect>
-                  <x>845</x>
+                  <x>1080</x>
                   <y>10</y>
                   <width>225</width>
                   <height>165</height>
@@ -1924,6 +2250,169 @@
                  </property>
                 </widget>
                </widget>
+               <widget class="QGroupBox" name="SetPointBox_3">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Set Points</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="RhLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>RH</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="RhInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="RhUnits_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>%</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="IntensityInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityUnits_3">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>suns</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempLabel_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Temp</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="TempInput_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempUnits_3">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>°C</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
               </widget>
              </item>
              <item>
@@ -2127,7 +2616,7 @@
                   <string/>
                  </property>
                 </widget>
-                <widget class="QLabel" name="Vstepsabel_4">
+                <widget class="QLabel" name="VstepsLabel_4">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -2323,7 +2812,7 @@
                <widget class="QGroupBox" name="ActionBox_4">
                 <property name="geometry">
                  <rect>
-                  <x>845</x>
+                  <x>1080</x>
                   <y>10</y>
                   <width>225</width>
                   <height>165</height>
@@ -2551,6 +3040,169 @@
                  </property>
                 </widget>
                </widget>
+               <widget class="QGroupBox" name="SetPointBox_4">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Set Points</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="RhLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>RH</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="RhInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="RhUnits_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>%</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="IntensityInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityUnits_4">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>suns</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempLabel_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Temp</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="TempInput_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempUnits_4">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>°C</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
               </widget>
              </item>
              <item>
@@ -2754,7 +3406,7 @@
                   <string/>
                  </property>
                 </widget>
-                <widget class="QLabel" name="Vstepsabel_5">
+                <widget class="QLabel" name="VstepsLabel_5">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -2950,7 +3602,7 @@
                <widget class="QGroupBox" name="ActionBox_5">
                 <property name="geometry">
                  <rect>
-                  <x>845</x>
+                  <x>1080</x>
                   <y>10</y>
                   <width>225</width>
                   <height>165</height>
@@ -3178,6 +3830,169 @@
                  </property>
                 </widget>
                </widget>
+               <widget class="QGroupBox" name="SetPointBox_5">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Set Points</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="RhLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>RH</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="RhInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="RhUnits_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>%</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="IntensityInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityUnits_5">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>suns</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempLabel_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Temp</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="TempInput_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempUnits_5">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>°C</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
               </widget>
              </item>
              <item>
@@ -3381,7 +4196,7 @@
                   <string/>
                  </property>
                 </widget>
-                <widget class="QLabel" name="Vstepsabel_6">
+                <widget class="QLabel" name="VstepsLabel_6">
                  <property name="geometry">
                   <rect>
                    <x>10</x>
@@ -3577,7 +4392,7 @@
                <widget class="QGroupBox" name="ActionBox_6">
                 <property name="geometry">
                  <rect>
-                  <x>845</x>
+                  <x>1080</x>
                   <y>10</y>
                   <width>225</width>
                   <height>165</height>
@@ -3796,6 +4611,169 @@
                  </property>
                  <property name="text">
                   <string>JV Mode:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </widget>
+               <widget class="QGroupBox" name="SetPointBox_6">
+                <property name="geometry">
+                 <rect>
+                  <x>845</x>
+                  <y>10</y>
+                  <width>225</width>
+                  <height>115</height>
+                 </rect>
+                </property>
+                <property name="title">
+                 <string>Set Points</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                </property>
+                <widget class="QLabel" name="RhLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>51</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>RH</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="RhInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>51</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="RhUnits_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>51</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>%</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="IntensityInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>81</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>81</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Intensity</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="IntensityUnits_6">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>81</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>suns</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempLabel_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>10</x>
+                   <y>21</y>
+                   <width>50</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>Temp</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+                <widget class="QLineEdit" name="TempInput_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>60</x>
+                   <y>21</y>
+                   <width>100</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="inputMask">
+                  <string/>
+                 </property>
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+                <widget class="QLabel" name="TempUnits_6">
+                 <property name="geometry">
+                  <rect>
+                   <x>165</x>
+                   <y>21</y>
+                   <width>35</width>
+                   <height>24</height>
+                  </rect>
+                 </property>
+                 <property name="text">
+                  <string>°C</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>

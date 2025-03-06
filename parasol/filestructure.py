@@ -9,23 +9,35 @@ constants = config.get_config()['filestructure']
 class FileStructure:
     """FileStructure package for PARASOL"""
 
-    def __init__(self) -> None:
+    def __init__(self, backup = False) -> None:
         """Initializes the FileStructure class"""
 
         # Load constants
-        self.root_folder = constants["root_dir"]
+        if backup:
+            self.root_folder = constants["backup_dir"]# added by ZJD 01/29/2024
+        else:
+            self.root_folder = constants["root_dir"]
         self.analysis_folder = constants["analysis_dir"]
         self.NUM_MODULES = constants["num_modules"]
 
         if not os.path.exists(self.root_folder):
             os.mkdir(self.root_folder)
 
-        # Create paths to cell characterization, environment monitoring, and logging folders
+        # Create paths to cell characterization and logging folders
         self.characterization_folder = os.path.join(
             self.root_folder, "Characterization"
         )
-        self.environment_folder = os.path.join(self.root_folder, "Environment")
         self.log_folder = os.path.join(self.root_folder, "Logs")
+
+        # # Added by ZJD 01/29/2024
+        # # Create paths to backup folder, which stores backup cell chara. and logging folder
+        # if not os.path.exists(self.backup_folder):
+        #     os.mkdir(self.backup_folder)
+
+        # self.backup_characterization_folder = os.path.join(
+        #     self.backup_folder, "Characterization"
+        # )
+        # self.backup_log_folder = os.path.join(self.backup_folder, "Logs")
 
     # Get base folder directories given inputs, make paths
 
@@ -38,6 +50,15 @@ class FileStructure:
 
         return self.root_folder
 
+    # def get_backup_dir(self) -> str:# added by ZJD 01/29/2024
+    #     """Returns the backup directory
+
+    #     Returns:
+    #         str: path to backup directory
+    #     """
+
+    #     return self.backup_folder
+
     def get_characterization_dir(self) -> str:
         """Returns the path to the characterization directory
 
@@ -46,15 +67,6 @@ class FileStructure:
         """
 
         return self.characterization_folder
-
-    def get_environment_dir(self) -> str:
-        """Returns the path to the monitor directory
-
-        Returns:
-            str: path to monitor directory
-        """
-
-        return self.environment_folder
 
     def get_log_dir(self) -> str:
         """Returns the path to the log directory
@@ -78,7 +90,7 @@ class FileStructure:
     # ROOT:DATE:TEST:MPP:
     #               :JV:
     #               :Analyzed:
-    # ROOT:ENVIRONMENT:xYYYY:
+    #               :Environment:
 
     def get_date_folder(self, startdate: str) -> str:
         """Returns the path to the date folder
@@ -137,12 +149,12 @@ class FileStructure:
         Returns:
             str: path to JV folder
         """
-
         jv_folder = os.path.join(
             self.get_test_folder(startdate, name), "JV_" + str(module_channel)
         )
 
         return jv_folder
+
 
     def get_analyzed_folder(self, startdate: str, name: str) -> str:
         """Returns the path to the Analyzed folder
@@ -160,23 +172,24 @@ class FileStructure:
         )
 
         return analyzed_folder
-
-    def get_environment_folder(self, cdate: str) -> str:
-        """Returns the path to the environment date folder
+    
+    def get_environment_folder(self, startdate: str, name: str) -> str:
+        """Returns the path to the enviornment folder
 
         Args:
-            sdate (str): date in xYYYYMMDD format
+            startdate (str): startdate in xYYYYMMDD format
+            name (str): name of test
 
         Returns:
-            str: path to date folder
+            str: path to JV folder
         """
 
-        env_dir = self.get_environment_dir()
-        env_folder = cdate[0:5]
+        env_folder = os.path.join(
+            self.get_test_folder(startdate, name), "Environment"
+        )
 
-        folder_path = os.path.join(env_dir, env_folder)
+        return env_folder
 
-        return folder_path
 
     # Make MPP, JV, and Analyed folders given inputs
 
@@ -217,6 +230,10 @@ class FileStructure:
         for module in module_channels:
             jvpath = self.get_jv_folder(startdate, name, module)
             os.mkdir(jvpath)
+
+        # Make subdirectory for env monitoring
+        envfpath = self.get_environment_folder(startdate,name)
+        os.mkdir(envfpath)
 
         return basefpath, name
 
@@ -428,9 +445,10 @@ class FileStructure:
             stringpath (str): path to test folder
 
         Returns:
-            list[str]: path to MPP folder
+            list[str]: path to MPP folders
             list[str]: paths to JV folders
             list[str]: path to analyzed folder
+            list[str]: path to environmental folders
         """
 
         # Get path to MPP folder
@@ -446,28 +464,9 @@ class FileStructure:
         # Get path to analyzed folder
         analyzed_folder = [os.path.join(stringpath, "Analyzed")]
 
-        return mpp_folder, jv_folders, analyzed_folder
+        environment_folder = [os.path.join(stringpath,"Environment")]
 
-    def get_env_folders(self, envdir=None) -> list:
-        """Returns a list of all test paths in root directory
-
-        Args:
-            envdir[str]: path to root directory
-
-        Returns:
-            list[str]: paths to all test folders
-        """
-
-        # Get path to enviornment root directory
-        if envdir is None:
-            env_folder = self.environment_folder
-        else:
-            env_folder = envdir
-
-        # Get path to enviroment folders inside it
-        folders = self.get_subfolders(env_folder)
-
-        return folders
+        return mpp_folder, jv_folders, analyzed_folder, environment_folder
 
     # Map folders and files in test subdirectory and files in env subdirectory
 
@@ -484,13 +483,14 @@ class FileStructure:
         # Create dictionary mapping MPP, JV, and Anlayzed folders to test folder
         test_dict = {}
         for test_path in test_paths:
-            mpp_folder, jv_folders, analyzed_folder = self.get_test_subfolders(
+            mpp_folder, jv_folders, analyzed_folder, env_folder = self.get_test_subfolders(
                 test_path
             )
             test_dict[test_path] = {
                 "MPP": mpp_folder,
                 "JV": jv_folders,
                 "Analyzed": analyzed_folder,
+                "Environment": env_folder,
             } 
 
         return test_dict
@@ -532,50 +532,6 @@ class FileStructure:
 
         return file_dict
 
-    def map_env_files(self, env_folders: list, startdate: str, enddate: str) -> dict:
-        """Creates a dictionary maping test folders to their subfolders
-
-        Args:
-            env_folders (list[str]): paths to env folders
-            startdate (str): start date in xYYYYMMDD format
-            enddate (str): end date in xYYYYMMDD format
-        Returns:
-            dict: file_dict[folder] = [file_paths]
-        """
-
-        # Create dictionary
-        env_dict = {}
-
-        # Grab start and end date
-        start_date = float(startdate[1:9])
-        end_date = float(enddate[1:9])
-
-        # Cycle through enviroment folders (dates)
-        for env_folder in env_folders:
-
-            # Initialize lists
-            dates = []
-            paths_chronological = []
-
-            # Grab list of files in folder
-            files = self.get_subfiles(env_folder)
-
-            # Sort files by date, create paths to files
-            for file in files:
-                filename = os.path.basename(file)
-                dates.append(int(filename[1:9]))
-            files_chronological = [x for _, x in sorted(zip(dates, files))]
-
-            # Check if its between dates
-            for idx, file in enumerate(files_chronological):
-                if start_date <= dates[idx] <= end_date:
-                    paths_chronological.append(os.path.join(env_folder, file))
-
-            # Set entry in dictionary where key is folder and value is list of files
-            env_dict[env_folder] = paths_chronological
-
-        return env_dict
-
     # Use previous commands to get files for given test
 
     def get_files(self, test_folders: list, filetype="Analyzed") -> str:
@@ -607,37 +563,3 @@ class FileStructure:
             analyzed_files.append(file_map[select_analyzed_folder])
 
         return analyzed_files
-
-    def get_env_files(self, startdate: str, enddate: str) -> str:
-        """Returns a list of all files in test folders
-
-        Args:
-            startdate (str): start date of test in xYYYYMMDD format
-            enddate (str): end date of test in xYYYYMMDD format
-
-        Returns:
-            list[list[str]]: list of file paths seperated by env folder
-        """
-
-        # Get start year and end year from dates
-        start_year = int(startdate[1:5])
-        end_year = int(enddate[1:5])
-
-        # Create list of env folders in directory
-        all_env_folders = self.get_env_folders()
-
-        # Get list of folders in date range
-        used_env_folders = []
-        for folder in all_env_folders:
-            foldername = os.path.basename(folder)
-
-            if start_year <= float(foldername[1:5]) <= end_year:
-                used_env_folders.append(folder)
-
-        # Create map of folders (gets all files in a folder (max 365 per folder))
-        folder_map = self.map_env_files(used_env_folders, startdate, enddate)
-        env_files = []
-        for folder in used_env_folders:
-            env_files.append(folder_map[folder])
-
-        return env_files

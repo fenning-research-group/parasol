@@ -28,7 +28,7 @@ class Analysis:
         self.filestructure = FileStructure()
 
         # Load constants
-        self.derivative_v_step = constants["derivative_v_step"]
+        self.derivative_v_percent = constants["derivative_v_percent"]
 
     # Main analysis --> check_test runs from RUN_UI and analyze_from_savepath on string unload
 
@@ -70,18 +70,20 @@ class Analysis:
             mpp_folder,
             jv_folders,
             analyzed_folder,
+            env_folders,
         ) = self.filestructure.get_test_subfolders(stringpath)
 
         if not os.path.exists(analyzed_folder[0]):
             os.mkdir(analyzed_folder[0])
 
-        # Get JV & MPP file paths: create dictionary: dict[folderpath] = file_paths
+        # Get JV, MPP, ENV file paths: create dictionary: dict[folderpath] = file_paths
         jv_dict = self.filestructure.map_test_files(jv_folders)
         mpp_dict = self.filestructure.map_test_files(mpp_folder)
+        env_dict = self.filestructure.map_test_files(env_folders)
 
         # Analyze JV files: for each module export scalars_{module}.csv
         analyzed_waves = self.analyze_files(
-            jv_folders, jv_dict, mpp_folder, mpp_dict, analyzed_folder[0]
+            jv_folders, jv_dict, mpp_folder, mpp_dict, env_folders, env_dict, analyzed_folder[0],
         )
 
         return analyzed_waves
@@ -150,6 +152,8 @@ class Analysis:
         jv_dict: dict,
         mpp_folder: list,
         mpp_dict: dict,
+        env_folder:list,
+        env_dict: dict,
         analyzed_folder: str,
     ) -> list:
 
@@ -161,7 +165,8 @@ class Analysis:
             mpp_folders (list[str]): list of mpp folders
             mpp_dict (dict): dictionary mapping mpp folders to file paths
             analyzed_folder (str): analyzed folder path
-
+            env_dict (dict): dictionary mapping env folders to file paths
+            env_folder (str): env folder path
         Returns:
             list[str]: path to analyzed files
         """
@@ -213,9 +218,13 @@ class Analysis:
 
             # Interpolate environmental data for each set of JV curves
             t = np.asarray([t_epoch for t_epoch in all_t])
-            env_headers, env_data = self.interp_env_data(t)
+            env_headers, env_data = self.interp_env_data(t, env_dict[env_folder[0]])
             for idx in range(1, len(env_headers)):
                 scalardict[env_headers[idx]] = env_data[idx]
+            
+            # TODO: Check verify off Photodiode reading
+            scalardict["REV PCE Norm (%)"] = np.asarray(scalardict["REV PCE (%)"])*np.asarray(scalardict["Intensity (# Suns)"])
+            scalardict["FWD PCE Norm (%)"] = np.asarray(scalardict["FWD PCE (%)"])*np.asarray(scalardict["Intensity (# Suns)"])
 
             # Create dataframe from dictionary
             scalar_df = pd.DataFrame(scalardict)
@@ -266,9 +275,11 @@ class Analysis:
             # Try to calculate scalars
             try:
                 
+                v_iter = np.ceil(len(all_v[0])*self.derivative_v_percent)
+                
                 # Calculate Jsc and Rsh using J(v=0) to J(v = v_dir)
                 wherevis0 = np.nanargmin(np.abs(v))
-                wherevis0_1 = np.nanargmin(np.abs(v - self.derivative_v_step))
+                wherevis0_1 = int(wherevis0 + v_iter)                
 
                 j1 = j[wherevis0]
                 j2 = j[wherevis0_1]
@@ -284,9 +295,8 @@ class Analysis:
                     jsc = float(b)
 
                 # Calculate Voc and Rs from J(J=0) to derivative_v_step V before
-                v_iter = max(math.ceil(self.derivative_v_step / (v[2] - v[1])), 1)
                 wherejis0 = np.nanargmin(np.abs(j))
-                wherejis0_1 = wherejis0 - int(v_iter)
+                wherejis0_1 = int(wherejis0 - v_iter)
                 j1 = j[wherejis0]
                 j2 = j[wherejis0_1]
                 v1 = v[wherejis0]
@@ -371,52 +381,22 @@ class Analysis:
         
         return returndict
 
-    def get_env_data(self, startdate: str, enddate: str) -> list:
-        """Creates a dataframe of all the env monitor data from the database
-
-        Args:
-            startdate (str): start date for the dataframe
-            enddate (str): end date for the dataframe
-
-        Returns:
-            list(str): headers for interpolated dataframe
-            list(float): data for interpolated dataframe
-
-        """
-
-        # Get file paths seperated by date (list of lists), make 1D
-        filepaths = self.filestructure.get_env_files(startdate, enddate)
-        one_d = []
-        for subfolder in filepaths:
-            for path in subfolder:
-                one_d.append(path)
-
-        # Pass list, get numpy arrays of all the data
-        t, temp, rh, intensity = self.load_env_files(one_d)
-
-        # Zip and make dataframe
-        df_data = [t, temp, rh, intensity]
-        df_headers = ["Time (Epoch)", "Temperature (C)", "RH (%)", "Intensity (mW/m2)"]
-
-        return df_headers, df_data
-
-    def interp_env_data(self, epochstamps: np.ndarray) -> list:
+    def interp_env_data(self, epochstamps: np.ndarray, files:list) -> list:
         """Interpolates the env matrix to the timestamps
 
         Args:
             epochstamps (np.ndarray): list of timestamps to interpolate to
+            files (list(str)): list of filepaths to env data
 
         Returns:
             list(str): headers for interpolated dataframe
             list(float): data for interpolated dataframe
         """
-
-        # Get first and last timestamps
-        first_t = datetime.fromtimestamp(float(epochstamps[0])).strftime("x%Y%m%d")
-        last_t = datetime.fromtimestamp(float(epochstamps[-1])).strftime("x%Y%m%d")
-
-        # Get enviornmental monitoring header and data from first time to last time
-        df_headers, df_data = self.get_env_data(first_t, last_t)
+        
+        # NEWNEW Pass list, get numpy arrays of all the data
+        t, temp, rh, intensity = self.load_env_files(files)
+        df_data = [t, temp, rh, intensity]
+        df_headers = ["Time (Epoch)", "Temperature (C)", "RH (%)", "Intensity (# Suns)"]
 
         # Create seccond list to start interpolating data. Start data with start time
         df2_data = [epochstamps]
@@ -539,15 +519,26 @@ class Analysis:
         # Load rest of dataframe, split into paramters, and return
         all_data = np.loadtxt(jv_file_path, delimiter=",", skiprows=8)
         all_data = np.transpose(all_data)
-        v = all_data[0]
-        vm_fwd = all_data[1]
-        i_fwd = all_data[2]
-        j_fwd = all_data[3]
-        p_fwd = all_data[4]
-        vm_rev = all_data[5]
-        i_rev = all_data[6]
-        j_rev = all_data[7]
-        p_rev = all_data[8]
+        if len(all_data)>0:
+            v = all_data[0]
+            vm_fwd = all_data[1]
+            i_fwd = all_data[2]
+            j_fwd = all_data[3]
+            p_fwd = all_data[4]
+            vm_rev = all_data[5]
+            i_rev = all_data[6]
+            j_rev = all_data[7]
+            p_rev = all_data[8]
+        else:
+            v = []
+            vm_fwd = []
+            i_fwd = []
+            j_fwd = []
+            p_fwd = []
+            vm_rev = []
+            i_rev = []
+            j_rev = []
+            p_rev = []
 
         return t, v, vm_fwd, i_fwd, j_fwd, p_fwd, vm_rev, i_rev, j_rev, p_rev
 
@@ -768,7 +759,3 @@ class Analysis:
                 os.rmdir(folder)
             os.rmdir(test)
         
-
-
-
-#TODO: Grab photodiode reading and calc new powers, etc.

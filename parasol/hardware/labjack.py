@@ -27,18 +27,18 @@ class LabJack:
         self.d.getCalibrationData() #
 
         # AIN ports for measurements
-        self.tc_port = constants["thermocouple1_port"]
+        self.tc_port1 = constants["thermocouple1_port"]
         self.pd_port = constants["photodiode_port"]
         self.hg_port = constants["hygrometer_port"]
         self.ground_port = constants["ground_port"]
 
         # change
-        # self.voltage_port= 11 # AIN port for +5V in
-        # self.ground_port= 9 # AIN port for ground
-        # self.thermocouple2_port= 7 # AIN port for between thermocouple1 and thermocouple2
-        # self.thermocouple1_port= 5 # AIN Port pre thermocouple1
-        # self.hygrometer_port= 3 # AIN Port for post hygrometer
-        # self.photodiode_port= 1 # AIN Port for post photodoide
+        self.voltage_port= 11 # AIN port for +5V in
+        self.ground_port= 9 # AIN port for ground
+        self.thermocouple2_port= 7 # AIN port for between thermocouple1 and thermocouple2
+        self.thermocouple1_port= 5 # AIN Port pre thermocouple1
+        self.hygrometer_port= 3 # AIN Port for post hygrometer
+        self.photodiode_port= 1 # AIN Port for post photodoide
 
 
         # Set # to average in measurement, and delay between readings
@@ -96,22 +96,22 @@ class LabJack:
         self.d.writeRegister(DAC_REGISTER, v)
 
     # Monitor Env and supporting Functions
-
+    # TODO: delete
     def monitor_env(self) -> float:
         """Monitors the environment and returns the temperature, relative humidity, and intensity"""
 
         # change
-        # temp_dark = self.get_temp_rtd(1)
-        # temp_light = self.get_temp_rtd(2)
-        # rh = self.get_rh(temp_light)
-        # intensity = self.get_intensity(temp_dark)
-        # return temp_light, rh, intensity
+        temp_dark = self.get_temp_rtd(1)
+        temp_light = self.get_temp_rtd(2)
+        rh = self.get_rh(temp_dark)
+        intensity = self.get_intensity(temp_light)
+        return temp_dark, temp_light, rh, intensity
 
-        temp = self.get_temp_rtd(0)
-        rh = self.get_rh(temp)
-        intensity = self.get_intensity(temp)
+        # temp = self.get_temp_rtd(0)
+        # rh = self.get_rh(temp)
+        # intensity = self.get_intensity(temp)
 
-        return temp, rh, intensity
+        # return temp, rh, intensity
 
 
     def get_temp_rtd(self, port)-> float:
@@ -123,7 +123,7 @@ class LabJack:
         
         # change
         # Get calibrated current output in amps
-        RTD_A = 4.75 # self.d.calInfo.currentOutput1 
+        RTD_A = 2e-4# 4.75 # self.d.calInfo.currentOutput1 
 
         # average over n readings
         temp = 0
@@ -132,10 +132,10 @@ class LabJack:
             # change
             # Read voltage before RTD
             if port == 0:
-                RTD_V = self.read_AIN(idx = self.tc_port) - self.read_AIN(idx = self.ground_port)
+                RTD_V = self.read_AIN(idx = self.tc_port1) - self.read_AIN(idx = self.ground_port)
 
             if port == 1:
-                RTD_V = self.read_AIN(idx = self.thermocouple1_port) - self.read_AIN(idx = self.thermocouple2_port)
+                RTD_V = self.read_AIN(idx = self.thermocouple1_port) - self.read_AIN(idx = self.thermocouple2_port) #AIN5, 7, note by ZJD 1027/2023
             if port == 2:
                 RTD_V = self.read_AIN(idx = self.thermocouple2_port) - self.read_AIN(idx = self.ground_port)
 
@@ -150,7 +150,9 @@ class LabJack:
             time.sleep(self.delay)
             
         temp /= self.avgnum 
-        return temp
+
+        # print("temp", temp, "TH1 port:",self.read_AIN(idx = self.thermocouple1_port), "TH2 port", self.read_AIN(idx = self.thermocouple2_port),"GND port", self.read_AIN(idx = self.ground_port) )
+        return temp#, self.read_AIN(idx = self.thermocouple1_port), self.read_AIN(idx = self.thermocouple2_port), self.read_AIN(idx = self.ground_port), RTD_Ohm, RTD_T, RTD_V#added by ZJD 10/12/2023 to troubleshoot new monitor
 
 
     def get_temp_tc(self) -> float:
@@ -168,7 +170,7 @@ class LabJack:
             CJTEMPinC = self.read_CJT()
 
             # Read thermocouple's analog voltage (mV)
-            TCmVolts = self.read_AIN(idx=self.tc_port, gainindex=1) - self.read_AIN(idx=self.ground_port, gainindex=1)
+            TCmVolts = self.read_AIN(idx=self.tc_port1, gainindex=1) - self.read_AIN(idx=self.ground_port, gainindex=1)
             TCmVolts *= 1000
             
             # Get total mV, convert to C
@@ -198,8 +200,8 @@ class LabJack:
             
             # change
             # Read  analog voltage (mV)
-            PDmVolts = self.read_AIN(idx=self.pd_port, gainindex = 1) - self.read_AIN(idx=self.ground_port, gainindex=1)
-            # PDmVolts = self.read_AIN(idx=self.photodiode_port, gainindex = 1) - self.read_AIN(idx=self.ground_port, gainindex=1)
+            # PDmVolts = self.read_AIN(idx=self.pd_port, gainindex = 1) - self.read_AIN(idx=self.ground_port, gainindex=1)
+            PDmVolts = self.read_AIN(idx=self.photodiode_port, gainindex = 1) - self.read_AIN(idx=self.ground_port, gainindex=1)
             PDmVolts *= 1000
             
             # V drop is across resistor due to current, calc using Ohms Law
@@ -227,8 +229,8 @@ class LabJack:
         """
         # change
         # Get applied voltage
-        vapplied = 4.75 #estimate at end of cable. self.hm.get_hg_vapplied()  # 5V 
-        # vapplied = self.read_AIN(self.voltage_port)
+        # vapplied = 4.75 #estimate at end of cable. self.hm.get_hg_vapplied()  # 5V 
+        vapplied = self.read_AIN(self.voltage_port)
 
 
         # iterate over n readinds
@@ -236,8 +238,8 @@ class LabJack:
         for i in range(self.avgnum):
             # change
             # Read hygrometers analogue voltage (mv)
-            HMVolts = self.read_AIN(idx=self.hg_port) - self.read_AIN(idx=self.ground_port)
-            # HMVolts = self.read_AIN(idx=self.hygrometer_port) - self.read_AIN(idx=self.ground_port)
+            # HMVolts = self.read_AIN(idx=self.hg_port) - self.read_AIN(idx=self.ground_port)
+            HMVolts = self.read_AIN(idx=self.hygrometer_port) - self.read_AIN(idx=self.ground_port)
 
 
             # Convert input and output voltages to relative humidity
@@ -268,8 +270,8 @@ class LabJack:
 
             # dont change --> left same
             # grab constants
-            self.vmult = 0.028 #0.030 # RH/V, provided for each sensor
-            self.voffset = 0.919 #0.804 # V, provided for each sensor
+            self.vmult = 0.030 #0.030 # RH/V, provided for each sensor
+            self.voffset = 0.803 #0.804 # V, provided for each sensor
             self.rhmult = 0.00216 # provided for HIH series
             self.rhoffset = 1.0546 # provided for HIH series
             # self.vapplied = 4.75 #5  # Voltage applied by DAC port --> read in initial function
@@ -320,10 +322,10 @@ class LabJack:
         def __init__(self) -> None:
             """Initializes the Photodiode class and neccisary constants"""
 
-            # change
+            # change TODO: THE PHOTODIODE 1 SUN SHOULD BE 2.14 NOT 0.672
             # grab constants
-            self.resistor = 1500 # 680 # 1500  # ohms, resistor on board
-            self.onesun_isc = 0.672 # mA, measure under solar simulator
+            self.resistor = 220 #680 # 1500  # ohms, resistor on board
+            self.onesun_isc = 2.42 # mA, measure under solar simulator
             self.tempmult = 0.1  # %/C off 25 C, +C inc Isc
             self.tempoffset = 25  # C
 

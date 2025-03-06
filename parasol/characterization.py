@@ -13,6 +13,9 @@ class Characterization:
 
         # Get constants
         self.et_voltage_step = constants["mppt_voltage_step"]
+        self.nightmode_starthour = constants["nightmode_starthour"]
+        self.nightmode_endhour = constants["nightmode_endhour"]
+
 
         # Set up JV mode: # should match the if statment below and "" should be the desired name
         self.jv_options = {
@@ -20,6 +23,8 @@ class Characterization:
             1: "FWD then REV",
             2: "REV then FWD, Voc to Jsc",
             3: "FWD then REV, Jsc to Voc",
+            4: "REV then FWD, Voc to Jsc, No scans at night",
+            5: "FWD then REV, Jsc to Voc, No scans at night",
         }
 
         # Set up MPP mode: # shoud match the if statment below and "" should be the desired name
@@ -83,8 +88,42 @@ class Characterization:
             v, fwd_vm, fwd_i, rev_vm, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
                 vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
             )
-
+        
+        # Mode = 4, scan rev then fwd (quadrant 4 only, no night scans)
+        elif jv_mode == 4:
+            yr,month,day,hr,minute = map(int,time.strftime("%Y %m %d %H %M").split())
+            if hr < self.nightmode_endhour or hr >= self.nightmode_starthour:
+                v, fwd_vm, fwd_i, rev_vm, rev_i = [
+                    np.array([np.nan,np.nan]),
+                    np.array([np.nan,np.nan]),
+                    np.array([np.nan,np.nan]),
+                    np.array([np.nan,np.nan]),
+                    np.array([np.nan,np.nan])
+                    ]
+            else:
+                v, fwd_vm, fwd_i, rev_vm, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
+                    vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
+                )
+        
+        # Mode = ,5 scan fwd then rev (quadrant 4 only, no night scans)
+        elif jv_mode == 5:
+            
+            yr,month,day,hr,minute = map(int,time.strftime("%Y %m %d %H %M").split())
+            if hr < self.nightmode_endhour or hr >= self.nightmode_starthour:
+                v, fwd_vm, fwd_i, rev_vm, rev_i = [
+                    np.array([np.nan,np.nan]),
+                    np.array([np.nan,np.nan]),
+                    np.array([np.nan,np.nan]),
+                    np.array([np.nan,np.nan]),
+                    np.array([np.nan,np.nan])
+                    ]
+            else:
+                v, fwd_vm, fwd_i, rev_vm, rev_i = scanner.iv_sweep_quadrant_fwd_rev(
+                    vstart=d["jv"]["vmin"], vend=d["jv"]["vmax"], steps=d["jv"]["steps"]
+                )
+            
         return v, fwd_vm, fwd_i, rev_vm, rev_i
+    
     
 
     def track_mpp(
@@ -261,19 +300,3 @@ class Characterization:
 
         return orientation_correct
 
-    def monitor_environment(self, labjack: object) -> float:
-        """Monitors the labjack for temperature
-
-        Args:
-            labjack (object): pointer to the dontoller for the labjack
-
-        Returns:
-            float: time (epoch)
-            float: temperature (C)
-            float: humidity (%)
-            flaot: intensity (# suns)
-        """
-
-        t = time.time()
-        temp, rh, intensity = labjack.monitor_env()
-        return t, temp, rh, intensity
