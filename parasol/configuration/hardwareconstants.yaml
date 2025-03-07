@@ -1,7 +1,7 @@
 filestructure:
-  root_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\" # Root directory
-  backup_dir: "C:\\Users\\FRG-LAPTOP\\SynologyDrive\\LabData\\OutdoorDeg\\PARASOL\\" # Back up directory, added by ZJD 01/29/2024
-  analysis_dir: "C:\\Users\\FRG-LAPTOP\\Documents\\PARASOL\\Analysis\\" # Analysis directory
+  root_dir: "C:\\Users\\zhewe\\OneDrive\\Documents\\PARASOL\\" # Root directory
+  # backup_dir: "C:\\Users\\zhewe\\OneDrive\\SynologyDrive\\LabData\\OutdoorDeg\\PARASOL\\" # Back up directory, added by ZJD 01/29/2024
+  analysis_dir: "C:\\Users\\zhewe\\OneDrive\\Documents\\PARASOL\\Analysis\\" # Analysis directory
   num_modules: 24 # Number of modules
 
 relay:

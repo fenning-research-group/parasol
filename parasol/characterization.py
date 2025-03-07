@@ -30,7 +30,7 @@ class Characterization:
         # Set up MPP mode: # shoud match the if statment below and "" should be the desired name
         self.mpp_options = {
             0: "Perturb and Observe (constant V step)",
-            1: "75% of Voc --> Untested",
+            1: "75% of Voc",
         }
 
     def scan_jv(self, d: dict, scanner: object) -> np.ndarray:
